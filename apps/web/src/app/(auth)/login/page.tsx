@@ -37,7 +37,7 @@ export default function LoginPage() {
           <h1 style={{ fontSize:"48px", fontWeight:500, lineHeight:1.2, marginBottom:"24px" }}>Gestao inteligente para o seu negocio.</h1>
           <p style={{ color:"#9FE1CB", fontSize:"18px", opacity:0.8 }}>Controle vendas, estoque, equipe e financeiro em um so lugar.</p>
         </div>
-        <p style={{ color:"#9FE1CB", opacity:0.4, fontSize:"13px" }}>© 2026 VendaPro</p>
+        <p style={{ color:"#9FE1CB", opacity:0.4, fontSize:"13px" }}>ï¿½ 2026 VendaPro</p>
       </div>
 
       <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", background:"#f5f4f0", padding:"32px" }}>
@@ -63,7 +63,7 @@ export default function LoginPage() {
               <label style={{ fontSize:"13px", fontWeight:500, color:"#444", display:"block", marginBottom:"6px" }}>Senha</label>
               <div style={{ position:"relative" }}>
                 <input type={show ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required
-                  placeholder="••••••••"
+                  placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                   style={{ width:"100%", padding:"12px 16px", paddingRight:"44px", borderRadius:"10px", border:"1px solid #e0e0e0", fontSize:"14px", background:"white", outline:"none" }} />
                 <button type="button" onClick={() => setShow(!show)}
                   style={{ position:"absolute", right:"12px", top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:"#888", fontSize:"16px" }}>

@@ -130,7 +130,7 @@ export default function DashboardPage() {
         <div style={{ background:"white", border:"0.5px solid #e5e7eb", borderRadius:"12px", padding:"16px", marginBottom:"14px" }}>
           <div style={{ display:"flex", justifyContent:"space-between", fontSize:"12px", marginBottom:"8px" }}>
             <span style={{ fontWeight:500 }}>Meta mensal</span>
-            <span style={{ color:"#1D9E75", fontWeight:500 }}>{data.monthGoalPct}% — {fmt(data.monthSales)} de {fmt(data.monthGoal)}</span>
+            <span style={{ color:"#1D9E75", fontWeight:500 }}>{data.monthGoalPct}% ï¿½ {fmt(data.monthSales)} de {fmt(data.monthGoal)}</span>
           </div>
           <div style={{ height:"8px", background:"#E1F5EE", borderRadius:"4px" }}>
             <div style={{ height:"100%", background:"#1D9E75", borderRadius:"4px", width:`${data.monthGoalPct}%` }} />
@@ -138,7 +138,7 @@ export default function DashboardPage() {
         </div>
 
         <div style={{ background:"white", border:"0.5px solid #e5e7eb", borderRadius:"12px", padding:"16px", marginBottom:"14px" }}>
-          <div style={{ fontSize:"12.5px", fontWeight:500, marginBottom:"12px" }}>Faturamento — ultimos 7 dias</div>
+          <div style={{ fontSize:"12.5px", fontWeight:500, marginBottom:"12px" }}>Faturamento ï¿½ ultimos 7 dias</div>
           <div style={{ display:"flex", alignItems:"flex-end", gap:"6px", height:"120px" }}>
             {data.weeklyChart?.map((d: any) => {
               const max = Math.max(...data.weeklyChart.map((x: any) => x.value));
