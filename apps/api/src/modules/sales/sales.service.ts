@@ -35,14 +35,15 @@ export class SalesService {
     const total = subtotal - discount;
     const commission = total * ((saleData.commissionRate || 15) / 100);
 
-    const sale = this.saleRepo.create({
+    const saleEntity = this.saleRepo.create({
       ...saleData, storeId, sellerId, subtotal, total, commission,
       status: SaleStatus.COMPLETED,
     });
-    const savedSale: Sale = await this.saleRepo.save(sale);
+    const savedSale = await this.saleRepo.save(saleEntity) as Sale;
+    const savedId: string = (savedSale as any).id;
 
     for (const item of items) {
-      await this.itemRepo.save(this.itemRepo.create({ ...item, saleId: savedSale.id }));
+      await this.itemRepo.save(this.itemRepo.create({ ...item, saleId: savedId }));
       if (item.productId && !item.isManual) {
         await this.productRepo.decrement({ id: item.productId }, 'stock', item.quantity);
       }
@@ -51,16 +52,16 @@ export class SalesService {
     await this.financialRepo.save(this.financialRepo.create({
       type: EntryType.INCOME,
       category: EntryCategory.SALE,
-      description: `Venda #${savedSale.id.slice(0,8)}`,
+      description: `Venda #${savedId.slice(0,8)}`,
       amount: total,
       date: new Date(),
       isPaid: true,
-      referenceId: savedSale.id,
+      referenceId: savedId,
       storeId,
       createdById: sellerId,
     }));
 
-    return this.findOne(savedSale.id);
+    return this.findOne(savedId);
   }
 
   async cancel(id: string) {
