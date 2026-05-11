@@ -39,10 +39,10 @@ export class SalesService {
       ...saleData, storeId, sellerId, subtotal, total, commission,
       status: SaleStatus.COMPLETED,
     });
-    const saved = await this.saleRepo.save(sale);
+    const savedSale: Sale = await this.saleRepo.save(sale);
 
     for (const item of items) {
-      await this.itemRepo.save(this.itemRepo.create({ ...item, saleId: saved.id }));
+      await this.itemRepo.save(this.itemRepo.create({ ...item, saleId: savedSale.id }));
       if (item.productId && !item.isManual) {
         await this.productRepo.decrement({ id: item.productId }, 'stock', item.quantity);
       }
@@ -51,20 +51,19 @@ export class SalesService {
     await this.financialRepo.save(this.financialRepo.create({
       type: EntryType.INCOME,
       category: EntryCategory.SALE,
-      description: `Venda #${saved.id.slice(0,8)}`,
+      description: `Venda #${savedSale.id.slice(0,8)}`,
       amount: total,
       date: new Date(),
       isPaid: true,
-      referenceId: saved.id,
+      referenceId: savedSale.id,
       storeId,
       createdById: sellerId,
     }));
 
-    return this.findOne(saved.id);
+    return this.findOne(savedSale.id);
   }
 
   async cancel(id: string) {
-    const sale = await this.findOne(id);
     await this.saleRepo.update(id, { status: SaleStatus.CANCELLED });
     const items = await this.itemRepo.find({ where: { saleId: id } });
     for (const item of items) {
