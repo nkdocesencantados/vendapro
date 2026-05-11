@@ -34,10 +34,7 @@ export class SalesService {
     const discount = saleData.discount || 0;
     const total = subtotal - discount;
     const commission = total * ((saleData.commissionRate || 15) / 100);
-    const saleEntity = this.saleRepo.create({
-      ...saleData, storeId, sellerId, subtotal, total, commission,
-      status: SaleStatus.COMPLETED,
-    });
+    const saleEntity = this.saleRepo.create({ ...saleData, storeId, sellerId, subtotal, total, commission, status: SaleStatus.COMPLETED });
     const savedAny: any = await this.saleRepo.save(saleEntity);
     const savedId: string = savedAny.id;
     for (const item of items) {
@@ -47,15 +44,10 @@ export class SalesService {
       }
     }
     await this.financialRepo.save(this.financialRepo.create({
-      type: EntryType.INCOME,
-      category: EntryCategory.SALE,
+      type: EntryType.INCOME, category: EntryCategory.SALE,
       description: "Venda #" + savedId.slice(0,8),
-      amount: total,
-      date: new Date(),
-      isPaid: true,
-      referenceId: savedId,
-      storeId,
-      createdById: sellerId,
+      amount: total, date: new Date(), isPaid: true,
+      referenceId: savedId, storeId, createdById: sellerId,
     }));
     return this.findOne(savedId);
   }
@@ -76,9 +68,7 @@ export class SalesService {
     today.setHours(0,0,0,0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const sales = await this.saleRepo.find({
-      where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) },
-    });
+    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) } });
     const total = sales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = sales.length ? total / sales.length : 0;
     return { total, count: sales.length, avgTicket };
