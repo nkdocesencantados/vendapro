@@ -18,13 +18,16 @@ export class FinancialService {
     return this.repo.save(entry);
   }
 
-  async summary(storeId: string, month: number, year: number) {
-    const from = new Date(year, month - 1, 1);
-    const to = new Date(year, month, 0);
+  async summary(storeId: string, month?: number, year?: number) {
+    const now = new Date();
+    const m = month || now.getMonth() + 1;
+    const y = year || now.getFullYear();
+    const from = new Date(y, m - 1, 1);
+    const to = new Date(y, m, 0, 23, 59, 59);
     const entries = await this.repo.find({
       where: { storeId, date: Between(from, to) },
     });
-    const income  = entries.filter(e => e.type === EntryType.INCOME).reduce((a, e) => a + Number(e.amount), 0);
+    const income = entries.filter(e => e.type === EntryType.INCOME).reduce((a, e) => a + Number(e.amount), 0);
     const expense = entries.filter(e => e.type === EntryType.EXPENSE).reduce((a, e) => a + Number(e.amount), 0);
     return { income, expense, profit: income - expense, entries };
   }
