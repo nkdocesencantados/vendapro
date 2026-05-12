@@ -1,6 +1,4 @@
 ﻿"use client" // v2
-export const dynamic = 'force-dynamic'
-
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
@@ -216,5 +214,6 @@ export default function SalesPage() {
     </div>
   )
 }
+
 
 
