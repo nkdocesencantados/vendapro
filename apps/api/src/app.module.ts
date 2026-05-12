@@ -29,6 +29,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
     SalesModule,
     StockModule,
     FinancialModule,
+    ReportsModule,    
     CompaniesModule,
   ],
 })
