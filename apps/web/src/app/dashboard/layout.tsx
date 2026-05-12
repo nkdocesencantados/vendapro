@@ -7,7 +7,6 @@ const nav = [
   { label:"Dashboard", href:"/dashboard" },
   { label:"Vendas", href:"/dashboard/sales" },
   { label:"Estoque", href:"/dashboard/inventory" },
-  { label:"Equipe", href:"/dashboard/team" },
   { label:"Caixa", href:"/dashboard/cash" },
   { label:"Config", href:"/dashboard/settings" },
 ]

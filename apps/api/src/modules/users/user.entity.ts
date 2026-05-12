@@ -1,18 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
   STORE_OWNER = 'store_owner',
-  MANAGER = 'manager',
-  SELLER = 'seller',
-  EMPLOYEE = 'employee',
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  PENDING = 'pending',
   BLOCKED = 'blocked',
 }
 
@@ -31,35 +27,20 @@ export class User {
   @Column({ select: false })
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.SELLER })
-  role: UserRole;
+  @Column({ type: 'varchar', default: 'store_owner' })
+  role: string;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING })
-  status: UserStatus;
+  @Column({ type: 'varchar', default: 'active' })
+  status: string;
 
   @Column({ nullable: true })
   phone: string;
 
   @Column({ nullable: true })
-  avatarUrl: string;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 15.00 })
-  commissionRate: number;
-
-  @Column({ nullable: true })
-  resetPasswordToken: string;
-
-  @Column({ nullable: true, type: 'timestamp' })
-  resetPasswordExpires: Date;
+  storeId: string;
 
   @Column({ nullable: true, type: 'timestamp' })
   lastLoginAt: Date;
-
-  @Column({ type: 'jsonb', nullable: true })
-  permissions: Record<string, boolean>;
-
-  @Column({ nullable: true })
-  storeId: string;
 
   @CreateDateColumn()
   createdAt: Date;
