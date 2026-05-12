@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
@@ -139,17 +139,17 @@ export default function SalesPage() {
                           onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem(), quantity: it[i].quantity }; setForm({ ...form, items: it }) }}
                           title="Voltar para selecao"
                           style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "14px", color: "#666" }}
-                        >↩</button>
+                        >â†©</button>
                       </div>
                     ) : (
                       <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
                         <option value="">Selecione um produto</option>
                         {products.map((p: any) => (
                           <option key={p.id} value={p.id}>
-                            {p.name} — R$ {Number(p.price).toFixed(2)} ({p.stock} un)
+                            {p.name} â€” R$ {Number(p.price).toFixed(2)} ({p.stock} un)
                           </option>
                         ))}
-                        <option value="__manual__">✏ Digitar manualmente</option>
+                        <option value="__manual__">Digitar manualmente</option>
                       </select>
                     )}
                     <input
@@ -165,7 +165,7 @@ export default function SalesPage() {
                       placeholder="0,00"
                       style={inputStyle}
                     />
-                    <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>×</button>
+                    <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>x</button>
                   </div>
                 ))}
               </div>
@@ -194,7 +194,7 @@ export default function SalesPage() {
                 <div>
                   <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
                   <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>
-                    {fmtDate(s.createdAt)} — {s.paymentMethod === "cash" ? "Dinheiro" : s.paymentMethod === "pix" ? "PIX" : s.paymentMethod === "credit_card" ? "Credito" : "Debito"}
+                    {fmtDate(s.createdAt)} â€” {s.paymentMethod === "cash" ? "Dinheiro" : s.paymentMethod === "pix" ? "PIX" : s.paymentMethod === "credit_card" ? "Credito" : "Debito"}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
