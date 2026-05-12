@@ -1,7 +1,9 @@
-/** @type {import(chr(34)+next+chr(34)).NextConfig} */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
-  trailingSlash: false,
-  images: { domains: [chr(34)+localhost+chr(34)] },
+  images: { domains: ["localhost"] },
   env: { NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL },
+  experimental: {
+    appDir: true,
+  },
 };
 module.exports = nextConfig;
