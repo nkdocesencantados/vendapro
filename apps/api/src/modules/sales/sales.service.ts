@@ -49,8 +49,7 @@ export class SalesService {
       amount: total, date: new Date(), isPaid: true,
       referenceId: savedId, storeId, createdById: sellerId,
     }));
-    return this.findOne(savedId);
-  }
+return { id: savedId, message: 'Venda criada com sucesso' };  }
 
   async cancel(id: string) {
     await this.saleRepo.update(id, { status: SaleStatus.CANCELLED });

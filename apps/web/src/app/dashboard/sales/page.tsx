@@ -7,7 +7,7 @@ export default function SalesPage() {
   const [sales, setSales] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ customerName:"", paymentMethod:"cash", discount:0, items:[{name:"", quantity:1, unitPrice:0, isManual:true}] })
+  const [form, setForm] = useState({ customerName:"", paymentMethod:"cash", discount:0, items:[{name:"", quantity:"", unitPrice:"", isManual:true}] })
 
   useEffect(() => { loadSales() }, [])
 
@@ -19,7 +19,7 @@ export default function SalesPage() {
     try {
       await api.post("/sales", form)
       setShowForm(false)
-      setForm({ customerName:"", paymentMethod:"cash", discount:0, items:[{name:"", quantity:1, unitPrice:0, isManual:true}] })
+      setForm({ customerName:"", paymentMethod:"cash", discount:0, items:[{name:"", quantity:"", unitPrice:"", isManual:true}] })
       loadSales()
       alert("Venda registrada com sucesso!")
     } catch(e) { alert("Erro ao salvar venda") }
@@ -42,7 +42,7 @@ export default function SalesPage() {
               <div><label style={{fontSize:"12px",color:"#666"}}>Pagamento</label><select value={form.paymentMethod} onChange={e=>setForm({...form,paymentMethod:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}}><option value="cash">Dinheiro</option><option value="credit">Credito</option><option value="debit">Debito</option><option value="pix">PIX</option></select></div>
             </div>
             <div style={{marginBottom:"12px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}><label style={{fontSize:"12px",color:"#666"}}>Itens</label><button onClick={()=>setForm({...form,items:[...form.items,{name:"",quantity:1,unitPrice:0,isManual:true}]})} style={{background:"none",border:"1px solid #1D9E75",color:"#1D9E75",borderRadius:"6px",padding:"3px 10px",fontSize:"12px",cursor:"pointer"}}>+ Item</button></div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}><label style={{fontSize:"12px",color:"#666"}}>Itens</label><button onClick={()=>setForm({...form,items:[...form.items,{name:"",quantity:"",unitPrice:"",isManual:true}]})} style={{background:"none",border:"1px solid #1D9E75",color:"#1D9E75",borderRadius:"6px",padding:"3px 10px",fontSize:"12px",cursor:"pointer"}}>+ Item</button></div>
               {form.items.map((item,i) => (
                 <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr auto",gap:"8px",marginBottom:"8px"}}>
                   <input value={item.name} onChange={e=>{const it=[...form.items];it[i]={...it[i],name:e.target.value};setForm({...form,items:it})}} placeholder="Produto" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
