@@ -7,7 +7,7 @@ export default function InventoryPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name:"", description:"", price:0, cost:0, stock:0, minStock:5, category:"" })
+  const [form, setForm] = useState({ name:"", description:"", price:"", cost:"", stock:"", minStock:"", category:"" })
 
   useEffect(() => { loadProducts() }, [])
 
@@ -16,7 +16,7 @@ export default function InventoryPage() {
   }
 
   async function saveProduct() {
-    try { await api.post("/products", form); setShowForm(false); setForm({ name:"", description:"", price:0, cost:0, stock:0, minStock:5, category:"" }); loadProducts(); alert("Produto salvo!") } catch { alert("Erro ao salvar") }
+    try { await api.post("/products", form); setShowForm(false); setForm({ name:"", description:"", price:"", cost:"", stock:"", minStock:"", category:"" }); loadProducts(); alert("Produto salvo!") } catch { alert("Erro ao salvar") }
   }
 
   return (

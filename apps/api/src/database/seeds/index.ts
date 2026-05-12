@@ -1,17 +1,20 @@
 import { DataSource } from "typeorm";
-import * as bcrypt from "bcryptjs";
 
 async function seed() {
   const ds = new DataSource({ type: "postgres", url: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, entities: [], synchronize: false } as any);
   await ds.initialize();
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS \"avatarUrl\" VARCHAR");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS \"storeId\" UUID");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS \"lastLoginAt\" TIMESTAMP");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS \"resetPasswordToken\" VARCHAR");
-  await ds.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS \"resetPasswordExpires\" TIMESTAMP");
-  console.log("Colunas adicionadas!");
+  const stores = await ds.query(`SELECT id FROM stores LIMIT 1`);
+  let storeId;
+  if (!stores.length) {
+    const r = await ds.query(`INSERT INTO stores (name, description) VALUES ('Loja Principal', 'Loja padrao') RETURNING id`);
+    storeId = r[0].id;
+    console.log('Loja criada:', storeId);
+  } else {
+    storeId = stores[0].id;
+    console.log('Loja existente:', storeId);
+  }
+  await ds.query(`UPDATE users SET "storeId" = $1 WHERE "storeId" IS NULL`, [storeId]);
+  console.log('Usuarios atualizados!');
   await ds.destroy();
 }
 seed().catch(console.error);
