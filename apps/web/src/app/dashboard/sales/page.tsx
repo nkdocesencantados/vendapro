@@ -46,8 +46,8 @@ export default function SalesPage() {
               {form.items.map((item,i) => (
                 <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr auto",gap:"8px",marginBottom:"8px"}}>
                   <input value={item.name} onChange={e=>{const it=[...form.items];it[i]={...it[i],name:e.target.value};setForm({...form,items:it})}} placeholder="Produto" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
-                  <input type="number" value={item.quantity} onChange={e=>{const it=[...form.items];it[i]={...it[i],quantity:+e.target.value};setForm({...form,items:it})}} placeholder="Qtd" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
-                  <input type="number" value={item.unitPrice} onChange={e=>{const it=[...form.items];it[i]={...it[i],unitPrice:+e.target.value};setForm({...form,items:it})}} placeholder="Preco" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
+                  <input type="text" value={item.quantity} onChange={e=>{const it=[...form.items];it[i]={...it[i],quantity:+e.target.value};setForm({...form,items:it})}} placeholder="Qtd" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
+                  <input type="text" value={item.unitPrice} onChange={e=>{const it=[...form.items];it[i]={...it[i],unitPrice:+e.target.value};setForm({...form,items:it})}} placeholder="Preco" style={{padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px"}} />
                   <button onClick={()=>{const it=form.items.filter((_,j)=>j!==i);setForm({...form,items:it})}} style={{background:"#fee2e2",border:"none",borderRadius:"6px",color:"#ef4444",cursor:"pointer",padding:"0 10px"}}>x</button>
                 </div>
               ))}
