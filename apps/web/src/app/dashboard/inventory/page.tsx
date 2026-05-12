@@ -1,43 +1,54 @@
 "use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { fmt } from "@/lib/utils"
+import { fmt, fmtDate } from "@/lib/utils"
 
-export default function InventoryPage() {
-  const [products, setProducts] = useState([])
+const emptyItem = () => ({ productId: "", name: "", quantity: "1", unitPrice: "", isManual: false })
+const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, items: [emptyItem()] })
+
+export default function SalesPage() {
+  const [sales, setSales] = useState<any[]>([])
+  const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({
-    name: "", description: "", price: "", costPrice: "", stock: "", minStock: "", category: ""
-  })
+  const [form, setForm] = useState<any>(emptyForm())
 
-  useEffect(() => { loadProducts() }, [])
+  useEffect(() => { loadSales(); loadProducts() }, [])
 
-  async function loadProducts() {
-    try { const r = await api.get("/products"); setProducts(r.data) }
+  async function loadSales() {
+    try { const r = await api.get("/sales"); setSales(r.data) }
     catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
 
-  async function saveProduct() {
-    if (!form.name || !form.price) return alert("Nome e preço são obrigatórios")
+  async function loadProducts() {
+    try { const r = await api.get("/products"); setProducts(r.data) }
+    catch (e) { console.error(e) }
+  }
+
+  async function saveSale() {
+    const validItems = form.items.filter((i: any) => i.name && +i.unitPrice > 0)
+    if (!validItems.length) return alert("Adicione ao menos um produto com preço")
     setSaving(true)
     try {
-      await api.post("/products", {
-        name: form.name,
-        description: form.description,
-        category: form.category,
-        price: Number(form.price),
-        costPrice: form.costPrice ? Number(form.costPrice) : null,
-        stock: Number(form.stock) || 0,
-        minStock: Number(form.minStock) || 5,
-      })
+      const payload = {
+        ...form,
+        items: validItems.map((i: any) => ({
+          productId: i.productId || null,
+          name: i.name,
+          quantity: +i.quantity || 1,
+          unitPrice: +i.unitPrice || 0,
+          isManual: !i.productId,
+        }))
+      }
+      await api.post("/sales", payload)
       setShowForm(false)
-      setForm({ name: "", description: "", price: "", costPrice: "", stock: "", minStock: "", category: "" })
+      setForm(emptyForm())
+      loadSales()
       loadProducts()
     } catch (e: any) {
-      const msg = e?.response?.data?.message || "Erro ao salvar produto"
+      const msg = e?.response?.data?.message || "Erro ao salvar venda"
       alert(typeof msg === "string" ? msg : JSON.stringify(msg))
       console.error(e)
     } finally {
@@ -45,72 +56,165 @@ export default function InventoryPage() {
     }
   }
 
+  async function cancelSale(id: string) {
+    if (!confirm("Cancelar esta venda?")) return
+    try { await api.patch(`/sales/${id}/cancel`); loadSales(); loadProducts() }
+    catch { loadSales() }
+  }
+
+  const addItem = () => setForm({ ...form, items: [...form.items, emptyItem()] })
+  const removeItem = (i: number) => setForm({ ...form, items: form.items.filter((_: any, j: number) => j !== i) })
+
+  function selectProduct(i: number, productId: string) {
+    const it = [...form.items]
+    if (productId === "__manual__") {
+      it[i] = { ...it[i], productId: "", name: "", unitPrice: "", isManual: true }
+    } else {
+      const p = products.find((p: any) => p.id === productId)
+      if (p) it[i] = { ...it[i], productId: p.id, name: p.name, unitPrice: String(p.price), isManual: false }
+    }
+    setForm({ ...form, items: it })
+  }
+
+  function updateItem(i: number, field: string, val: string) {
+    const it = [...form.items]
+    it[i] = { ...it[i], [field]: val }
+    setForm({ ...form, items: it })
+  }
+
+  const total = form.items.reduce((a: number, i: any) => a + (+i.quantity || 0) * (+i.unitPrice || 0), 0) - form.discount
+
+  const inputStyle: any = { padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", background: "white", width: "100%", boxSizing: "border-box" }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 500 }}>Estoque</div>
-        <button onClick={() => setShowForm(true)} style={{ background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Novo Produto</button>
+        <div style={{ fontSize: "14px", fontWeight: 500 }}>Vendas</div>
+        <button onClick={() => setShowForm(!showForm)} style={{ background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Nova Venda</button>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
         {showForm && (
           <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
-            <h3 style={{ marginBottom: "16px", fontWeight: 500 }}>Novo Produto</h3>
+            <h3 style={{ marginBottom: "16px", fontWeight: 500, fontSize: "15px" }}>Nova Venda</h3>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-              {([
-                ["Nome *", "name", "text"],
-                ["Categoria", "category", "text"],
-                ["Preço de venda *", "price", "number"],
-                ["Custo", "costPrice", "number"],
-                ["Estoque inicial", "stock", "number"],
-                ["Estoque mínimo", "minStock", "number"],
-              ] as [string, string, string][]).map(([label, field, type]) => (
-                <div key={field}>
-                  <label style={{ fontSize: "12px", color: "#666" }}>{label}</label>
-                  <input
-                    type={type}
-                    value={(form as any)[field]}
-                    onChange={e => setForm({ ...form, [field]: e.target.value })}
-                    style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", marginTop: "4px", boxSizing: "border-box" }}
-                  />
-                </div>
-              ))}
+              <div>
+                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Cliente</label>
+                <input value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} placeholder="Nome do cliente" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Pagamento</label>
+                <select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })} style={inputStyle}>
+                  <option value="cash">Dinheiro</option>
+                  <option value="pix">PIX</option>
+                  <option value="credit_card">Cartão Crédito</option>
+                  <option value="debit_card">Cartão Débito</option>
+                </select>
+              </div>
             </div>
+
             <div style={{ marginBottom: "12px" }}>
-              <label style={{ fontSize: "12px", color: "#666" }}>Descrição</label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                rows={2}
-                style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", marginTop: "4px", resize: "vertical", boxSizing: "border-box" }}
-              />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Itens da venda</label>
+                <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
+              </div>
+
+              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
+                  {["Produto", "Qtd", "Preço (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
+                </div>
+
+                {form.items.map((item: any, i: number) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
+                    {item.isManual ? (
+                      <div style={{ display: "flex", gap: "4px" }}>
+                        <input
+                          value={item.name}
+                          onChange={e => updateItem(i, "name", e.target.value)}
+                          placeholder="Nome do produto"
+                          style={{ ...inputStyle, flex: 1 }}
+                        />
+                        <button
+                          onClick={() => selectProduct(i, "")}
+                          title="Buscar do estoque"
+                          onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem() }; setForm({ ...form, items: it }) }}
+                          style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "12px", color: "#666", whiteSpace: "nowrap" }}
+                        >↩</button>
+                      </div>
+                    ) : (
+                      <select
+                        value={item.productId}
+                        onChange={e => selectProduct(i, e.target.value)}
+                        style={inputStyle}
+                      >
+                        <option value="">Selecione um produto</option>
+                        {products.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} — {fmt(p.price)} ({p.stock} un)
+                          </option>
+                        ))}
+                        <option value="__manual__">✏ Digitar manualmente</option>
+                      </select>
+                    )}
+                    <input
+                      value={item.quantity}
+                      onChange={e => updateItem(i, "quantity", e.target.value)}
+                      placeholder="1"
+                      type="number"
+                      min="1"
+                      style={{ ...inputStyle, textAlign: "center" }}
+                    />
+                    <input
+                      value={item.unitPrice}
+                      onChange={e => updateItem(i, "unitPrice", e.target.value)}
+                      placeholder="0,00"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      style={inputStyle}
+                    />
+                    <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>×</button>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-              <button onClick={() => setShowForm(false)} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-              <button onClick={saveProduct} disabled={saving} style={{ padding: "8px 16px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px" }}>
-                {saving ? "Salvando..." : "Salvar"}
-              </button>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "#1D9E75" }}>Total: {fmt(total)}</div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onClick={() => { setShowForm(false); setForm(emptyForm()) }} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
+                <button onClick={saveSale} disabled={saving} style={{ padding: "8px 20px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: 500 }}>
+                  {saving ? "Salvando..." : "Salvar Venda"}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", color: "#888", padding: "40px" }}>Carregando...</div>
-        ) : products.length === 0 ? (
-          <div style={{ textAlign: "center", color: "#888", padding: "60px" }}>Nenhum produto cadastrado.</div>
+          <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Carregando...</div>
+        ) : sales.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#888", padding: "60px" }}>Nenhuma venda registrada ainda.</div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px" }}>
-            {(products as any[]).map((p: any) => (
-              <div key={p.id} style={{ background: "white", border: p.stock <= p.minStock ? "1px solid #f59e0b" : "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px" }}>
-                <div style={{ fontWeight: 500, marginBottom: "4px" }}>{p.name}</div>
-                <div style={{ fontSize: "12px", color: "#888", marginBottom: "8px" }}>{p.category}</div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <div><div style={{ fontSize: "11px", color: "#888" }}>Preço</div><div style={{ fontWeight: 600, color: "#1D9E75" }}>{fmt(p.price)}</div></div>
-                  <div><div style={{ fontSize: "11px", color: "#888" }}>Estoque</div><div style={{ fontWeight: 600, color: p.stock <= p.minStock ? "#ef4444" : "#111" }}>{p.stock} un</div></div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {sales.map((s: any) => (
+              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente não informado"}</div>
+                  <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>
+                    {fmtDate(s.createdAt)} — {s.paymentMethod === "cash" ? "Dinheiro" : s.paymentMethod === "pix" ? "PIX" : s.paymentMethod === "credit_card" ? "Crédito" : "Débito"}
+                  </div>
                 </div>
-                {p.stock <= p.minStock && (
-                  <div style={{ marginTop: "8px", fontSize: "11px", color: "#d97706", background: "#fffbeb", padding: "3px 8px", borderRadius: "4px" }}>⚠ Estoque baixo</div>
-                )}
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : "#1D9E75", fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
+                    <div style={{ fontSize: "11px", color: s.status === "completed" ? "#1D9E75" : "#ef4444" }}>{s.status === "completed" ? "Concluída" : "Cancelada"}</div>
+                  </div>
+                  {s.status !== "cancelled" && (
+                    <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
