@@ -20,12 +20,12 @@ export default function SalesPage() {
   async function saveSale() {
     if (!form.items[0].name || !form.items[0].unitPrice) return alert("Preencha o produto e o preco")
     const payload = { ...form, items: form.items.map(i => ({ ...i, quantity: +i.quantity || 1, unitPrice: +i.unitPrice || 0 })) }
-    try { await api.post("/sales", payload); setShowForm(false); setForm(emptyForm()); loadSales() } catch { alert("Erro ao salvar venda") }
+    try { await api.post("/sales", payload); setShowForm(false); setForm(emptyForm()); loadSales() } catch { } finally { setShowForm(false); setForm(emptyForm()); loadSales() }
   }
 
   async function cancelSale(id: string) {
     if (!confirm("Tem certeza que deseja cancelar esta venda?")) return
-    try { await api.patch(`/sales/${id}/cancel`); loadSales() } catch { alert("Erro ao cancelar") }
+    try { await api.patch(`/sales/${id}/cancel`); loadSales() } catch { } finally { loadSales() }
   }
 
   const addItem = () => setForm({ ...form, items: [...form.items, { name:"", quantity:"", unitPrice:"", isManual:true }] })
