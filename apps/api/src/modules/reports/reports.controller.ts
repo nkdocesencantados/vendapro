@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards/local-auth.guard';
@@ -13,5 +13,13 @@ export class ReportsController {
   @Get('dashboard')
   dashboard(@Request() req) {
     return this.service.dashboard(req.user.storeId);
+  }
+
+  @Get('advanced')
+  advanced(@Request() req, @Query('from') from: string, @Query('to') to: string) {
+    const now = new Date();
+    const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const defaultTo = now.toISOString().split('T')[0];
+    return this.service.advanced(req.user.storeId, from || defaultFrom, to || defaultTo);
   }
 }

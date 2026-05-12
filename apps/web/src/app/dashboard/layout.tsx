@@ -8,6 +8,8 @@ const nav = [
   { label:"Vendas", href:"/dashboard/sales" },
   { label:"Estoque", href:"/dashboard/inventory" },
   { label:"Caixa", href:"/dashboard/cash" },
+  { label:"Relatorios", href:"/dashboard/reports" },
+  { label:"Recibos", href:"/dashboard/receipts" },
   { label:"Config", href:"/dashboard/settings" },
 ]
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
