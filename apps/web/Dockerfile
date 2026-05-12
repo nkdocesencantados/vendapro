@@ -1,5 +1,4 @@
-FROM node:20-alpine
-WORKDIR /app
+FROM node:20.11-alpineWORKDIR /app
 COPY package*.json ./
 RUN npm install
 ARG CACHEBUST=1
