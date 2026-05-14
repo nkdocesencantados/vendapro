@@ -23,11 +23,12 @@ export default function SettingsPage() {
 
   async function loadStore() {
     try {
-      const r = await api.get("/stores")
-      const s = Array.isArray(r.data) ? r.data[0] : r.data
-      const sid = s?.id || (user as any)?.storeId
-      if (s || sid) {
-        setStoreId(s?.id || sid)
+      const sid = (user as any)?.storeId
+      if (!sid) { setLoading(false); return }
+      setStoreId(sid)
+      const r = await api.get(`/stores/${sid}`)
+      const s = r.data
+      if (s) {
         setStore({ name: s?.name || "", primaryColor: s?.primaryColor || "#1D9E75" })
       }
     } catch (e) { console.error(e) }
