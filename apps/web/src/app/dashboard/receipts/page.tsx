@@ -25,26 +25,35 @@ export default function ReceiptsPage() {
   async function exportPdf() {
     if (!selected) return
     const { jsPDF: JP } = await import("jspdf")
-    const doc = new JP()
-    doc.setFontSize(16); doc.setFont("helvetica","bold")
-    doc.text("VendaPro", 105, 20, { align: "center" })
-    doc.setFontSize(10); doc.setFont("helvetica","normal")
-    doc.text("Comprovante de Venda", 105, 27, { align: "center" })
-    doc.line(20, 32, 190, 32)
-    let y = 40
-    const row = (label: string, value: string) => { doc.setFont("helvetica","bold"); doc.text(label, 20, y); doc.setFont("helvetica","normal"); doc.text(value, 190, y, { align: "right" }); y += 7 }
-    row("N. Pedido:", "#" + selected.id.slice(0,8).toUpperCase())
-    row("Data:", fmtDate(selected.createdAt))
-    row("Cliente:", selected.customerName || "Nao informado")
-    row("Pagamento:", payLabel[selected.paymentMethod] || selected.paymentMethod)
-    doc.line(20, y, 190, y); y += 7
-    doc.setFont("helvetica","bold"); doc.text("Itens", 20, y); y += 7
+    const W = 80; const M = 6
+    const doc = new JP({ unit: "mm", format: [W, 200] })
+    const mid = W / 2
+    let y = 8
+    doc.setFontSize(13); doc.setFont("helvetica","bold")
+    doc.text("VendaPro", mid, y, { align: "center" }); y += 6
+    doc.setFontSize(8); doc.setFont("helvetica","normal")
+    doc.text("Comprovante de Venda", mid, y, { align: "center" }); y += 5
+    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
+    const row2 = (label: string, value: string) => {
+      doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.text(label, M, y)
+      doc.setFont("helvetica","normal"); doc.text(value, W-M, y, { align: "right" }); y += 5
+    }
+    row2("N. Pedido:", "#" + selected.id.slice(0,8).toUpperCase())
+    row2("Data:", fmtDate(selected.createdAt))
+    row2("Cliente:", selected.customerName || "Nao informado")
+    row2("Pagamento:", payLabel[selected.paymentMethod] || selected.paymentMethod)
+    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
+    doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.text("ITENS", M, y); y += 5
     doc.setFont("helvetica","normal")
-    ;(selected.items || []).forEach((item: any) => { doc.text(`${item.quantity}x ${item.productName || item.name}`, 20, y); doc.text(fmt(item.total), 190, y, { align: "right" }); y += 7 })
-    doc.line(20, y, 190, y); y += 7
-    doc.setFont("helvetica","bold"); doc.text("TOTAL", 20, y); doc.text(fmt(selected.total), 190, y, { align: "right" })
-    y += 10; doc.setFont("helvetica","normal"); doc.setFontSize(9)
-    doc.text("Obrigado pela preferencia!", 105, y, { align: "center" })
+    ;(selected.items || []).forEach((item: any) => {
+      doc.text(`${item.quantity}x ${item.productName || item.name}`, M, y)
+      doc.text(fmt(item.total), W-M, y, { align: "right" }); y += 5
+    })
+    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
+    doc.setFont("helvetica","bold"); doc.setFontSize(9)
+    doc.text("TOTAL", M, y); doc.text(fmt(selected.total), W-M, y, { align: "right" }); y += 8
+    doc.setFont("helvetica","normal"); doc.setFontSize(7)
+    doc.text("Obrigado pela preferencia!", mid, y, { align: "center" })
     doc.save(`recibo-${selected.id.slice(0,8).toUpperCase()}.pdf`)
   }
 
