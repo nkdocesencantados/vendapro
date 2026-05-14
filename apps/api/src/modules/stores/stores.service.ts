@@ -22,9 +22,8 @@ export class StoresService {
     return this.repo.save(store);
   }
 
-  async update(id: string, data: Partial<Store>) {
-    await this.findOne(id);
-    await this.repo.update(id, data);
+  async update(id: string, data: any) {
+    await this.repo.query(`UPDATE stores SET name = $1, "primaryColor" = $2 WHERE id = $3`, [data.name, data.primaryColor, id]);
     return this.findOne(id);
   }
 }
