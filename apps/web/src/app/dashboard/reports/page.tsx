@@ -40,6 +40,30 @@ export default function ReportsPage() {
     else if (preset === "lastmonth") { setFrom(new Date(n.getFullYear(), n.getMonth()-1, 1).toISOString().split("T")[0]); setTo(new Date(n.getFullYear(), n.getMonth(), 0).toISOString().split("T")[0]) }
   }
 
+  async function exportPdf() {
+    if (!data) return
+    const { jsPDF } = await import("jspdf" as any).catch(() => ({ jsPDF: (window as any).jspdf?.jsPDF }))
+    const JP = jsPDF || (window as any).jspdf?.jsPDF
+    const doc = new JP()
+    doc.setFontSize(16); doc.setFont("helvetica","bold")
+    doc.text("VendaPro - Relatorio", 105, 20, { align: "center" })
+    doc.setFontSize(10); doc.setFont("helvetica","normal")
+    doc.text(`Periodo: ${from} a ${to}`, 105, 28, { align: "center" })
+    doc.line(20, 32, 190, 32)
+    let y = 40
+    const row = (label: string, value: string) => { doc.setFont("helvetica","bold"); doc.text(label, 20, y); doc.setFont("helvetica","normal"); doc.text(value, 190, y, { align: "right" }); y += 8 }
+    doc.setFont("helvetica","bold"); doc.text("RESUMO", 20, y); y += 8
+    row("Faturamento:", fmt(d.totalRevenue || 0))
+    row("Qtd Vendas:", String(d.totalSales || 0))
+    row("Ticket Medio:", fmt(d.avgTicket || 0))
+    row("Lucro Estimado:", fmt(d.estimatedProfit || 0))
+    doc.line(20, y, 190, y); y += 8
+    doc.setFont("helvetica","bold"); doc.text("TOP PRODUTOS", 20, y); y += 8
+    doc.setFont("helvetica","normal")
+    ;(d.topProducts || []).slice(0,10).forEach((p: any) => { doc.text(p.name, 20, y); doc.text(fmt(p.revenue), 190, y, { align: "right" }); y += 7 })
+    doc.save(`relatorio-${from}-${to}.pdf`)
+  }
+
   async function exportCsv() {
     if (!data) return
     const rows = [
@@ -84,6 +108,7 @@ export default function ReportsPage() {
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ fontSize: "14px", fontWeight: 500 }}>Relatorios</div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button onClick={exportPdf} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #1D9E75", borderRadius: "6px", cursor: "pointer", background: "white", color: "#1D9E75" }}>Exportar PDF</button>
           <button onClick={exportCsv} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Exportar CSV</button>
           <button onClick={() => window.print()} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Imprimir</button>
         </div>

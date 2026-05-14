@@ -22,6 +22,33 @@ export default function ReceiptsPage() {
     catch { setSelected(sale) }
   }
 
+  async function exportPdf() {
+    if (!selected) return
+    const jsPDF = (await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" as any)).default || (window as any).jspdf?.jsPDF
+    const { jsPDF: JP } = await import("jspdf" as any).catch(() => ({ jsPDF: null }))
+    const doc = new (JP || (window as any).jspdf.jsPDF)()
+    doc.setFontSize(16); doc.setFont("helvetica","bold")
+    doc.text("VendaPro", 105, 20, { align: "center" })
+    doc.setFontSize(10); doc.setFont("helvetica","normal")
+    doc.text("Comprovante de Venda", 105, 27, { align: "center" })
+    doc.line(20, 32, 190, 32)
+    let y = 40
+    const row = (label: string, value: string) => { doc.setFont("helvetica","bold"); doc.text(label, 20, y); doc.setFont("helvetica","normal"); doc.text(value, 190, y, { align: "right" }); y += 7 }
+    row("N. Pedido:", "#" + selected.id.slice(0,8).toUpperCase())
+    row("Data:", fmtDate(selected.createdAt))
+    row("Cliente:", selected.customerName || "Nao informado")
+    row("Pagamento:", payLabel[selected.paymentMethod] || selected.paymentMethod)
+    doc.line(20, y, 190, y); y += 7
+    doc.setFont("helvetica","bold"); doc.text("Itens", 20, y); y += 7
+    doc.setFont("helvetica","normal")
+    ;(selected.items || []).forEach((item: any) => { doc.text(`${item.quantity}x ${item.productName || item.name}`, 20, y); doc.text(fmt(item.total), 190, y, { align: "right" }); y += 7 })
+    doc.line(20, y, 190, y); y += 7
+    doc.setFont("helvetica","bold"); doc.text("TOTAL", 20, y); doc.text(fmt(selected.total), 190, y, { align: "right" })
+    y += 10; doc.setFont("helvetica","normal"); doc.setFontSize(9)
+    doc.text("Obrigado pela preferencia!", 105, y, { align: "center" })
+    doc.save(`recibo-${selected.id.slice(0,8).toUpperCase()}.pdf`)
+  }
+
   function printReceipt() {
     const content = document.getElementById("receipt-content")
     if (!content) return
@@ -64,6 +91,7 @@ export default function ReceiptsPage() {
         ) : (
           <div style={{ maxWidth: "480px", margin: "0 auto" }}>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginBottom: "16px" }}>
+              <button onClick={exportPdf} style={{ padding: "8px 16px", background: "white", color: "#1D9E75", border: "1px solid #1D9E75", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>Exportar PDF</button>
               <button onClick={printReceipt} style={{ padding: "8px 16px", background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>Imprimir Recibo</button>
             </div>
             <div id="receipt-content" style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "24px" }}>
