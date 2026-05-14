@@ -114,6 +114,10 @@ export default function SalesPage() {
                   <option value="debit_card">Cartao Debito</option>
                 </select>
               </div>
+              <div>
+                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Data da venda</label>
+                <input type="date" value={form.saleDate} onChange={e => setForm({ ...form, saleDate: e.target.value })} style={inputStyle} />
+              </div>
             </div>
             <div style={{ marginBottom: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>

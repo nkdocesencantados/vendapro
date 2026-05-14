@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <nav style={{flex:1,padding:"8px"}}>
           {nav.map(item => {
-            const active = pathname === item.href || pathname.startsWith(item.href+"/")
+            const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname === item.href || pathname.startsWith(item.href+"/")
             return (<Link key={item.href} href={item.href} style={{display:"block",padding:"7px 9px",borderRadius:"7px",marginBottom:"2px",textDecoration:"none",background:active?"#1D9E75":"transparent",color:active?"white":"rgba(255,255,255,0.45)",fontSize:"13px"}}>{item.label}</Link>)
           })}
         </nav>
