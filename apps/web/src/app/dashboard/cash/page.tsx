@@ -61,7 +61,7 @@ export default function CashPage() {
               <div key={e.id} style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"10px",padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
                   <div style={{fontWeight:500,fontSize:"14px"}}>{e.description}</div>
-                  <div style={{fontSize:"12px",color:"#888"}}>{e.category} - {new Date(e.date).toLocaleDateString("pt-BR")}</div>
+                  <div style={{fontSize:"12px",color:"#888"}}>{e.category === "sale" ? "Venda" : e.category} - {new Date(e.date).toLocaleDateString("pt-BR")}</div>
                 </div>
                 <div style={{fontWeight:600,color:e.type==="income"?"#1D9E75":"#ef4444",fontSize:"15px"}}>{e.type==="income"?"+":"-"}{fmt(e.amount)}</div>
               </div>
