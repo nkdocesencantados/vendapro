@@ -84,6 +84,7 @@ export class SalesService {
     for (const item of items) {
       if (item.productId && !item.isManual) await this.productRepo.increment({ id: item.productId }, "stock", item.quantity);
     }
+    await this.financialRepo.delete({ referenceId: id });
     return { message: "Venda cancelada e estoque restaurado" };
   }
 
