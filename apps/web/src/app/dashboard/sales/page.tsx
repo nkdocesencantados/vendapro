@@ -4,7 +4,7 @@ import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
 
 const emptyItem = () => ({ productId: "", name: "", quantity: "1", unitPrice: "", isManual: false })
-const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, items: [emptyItem()] })
+const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, saleDate: new Date().toISOString().split("T")[0], items: [emptyItem()] })
 
 export default function SalesPage() {
   const [sales, setSales] = useState<any[]>([])
@@ -43,7 +43,7 @@ export default function SalesPage() {
           isManual: !i.productId,
         }))
       }
-      await api.post("/sales", payload)
+      await api.post("/sales", { ...payload, createdAt: form.saleDate ? new Date(form.saleDate).toISOString() : undefined })
       setShowForm(false)
       setForm(emptyForm())
       loadSales()
