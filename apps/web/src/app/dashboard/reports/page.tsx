@@ -90,11 +90,7 @@ export default function ReportsPage() {
       </div>
 
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "10px 20px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: "4px" }}>
-          {[["today","Hoje"],["week","7 dias"],["month","Este mes"],["lastmonth","Mes passado"],["year","Este ano"]].map(([v,l]) => (
-            <button key={v} onClick={() => setPreset(v)} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>{l}</button>
-          ))}
-        </div>
+        <button onClick={() => setPreset("year")} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Este ano</button>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <span style={{ fontSize: "12px", color: "#888" }}>De</span>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }} />
