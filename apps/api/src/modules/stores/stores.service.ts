@@ -7,17 +7,17 @@ import { Store } from './store.entity';
 export class StoresService {
   constructor(@InjectRepository(Store) private repo: Repository<Store>) {}
 
-  findAll() {
-    return this.repo.find({ order: { createdAt: 'DESC' } });
+  async findAll() {
+    return this.repo.query(`SELECT id, name, "primaryColor", phone, email, segment, "monthlyGoal" FROM stores ORDER BY "createdAt" DESC`);
   }
 
   async findOne(id: string) {
-    const store = await this.repo.findOne({ where: { id } });
-    if (!store) throw new NotFoundException('Loja nao encontrada');
-    return store;
+    const r = await this.repo.query(`SELECT id, name, "primaryColor", phone, email, segment, "monthlyGoal" FROM stores WHERE id = $1`, [id]);
+    if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
+    return r[0];
   }
 
-  create(data: Partial<Store>) {
+  async create(data: Partial<Store>) {
     const store = this.repo.create(data);
     return this.repo.save(store);
   }
