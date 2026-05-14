@@ -13,6 +13,7 @@ export class StoresController {
   @Get()
   findAll(@Request() req) {
     if (req.user.role === 'super_admin') return this.service.findAll();
+    if (!req.user.storeId) return null;
     return this.service.findOne(req.user.storeId);
   }
 
