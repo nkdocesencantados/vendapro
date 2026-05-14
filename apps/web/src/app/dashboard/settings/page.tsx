@@ -1,4 +1,4 @@
-"use client"
+"use client" // v2
 import { useEffect, useRef, useState } from "react"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
