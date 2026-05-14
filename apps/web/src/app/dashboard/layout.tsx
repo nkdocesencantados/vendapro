@@ -15,6 +15,14 @@ const MENU = [
   { label: "Config", href: "/dashboard/settings" },
 ]
 
+function darken(hex: string, amount = 0.5): string {
+  const num = parseInt(hex.replace("#",""), 16)
+  const r = Math.floor((num >> 16) * amount)
+  const g = Math.floor(((num >> 8) & 0xff) * amount)
+  const b = Math.floor((num & 0xff) * amount)
+  return "#" + [r,g,b].map(v => v.toString(16).padStart(2,"0")).join("")
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -53,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "#f5f4f0" }}>
-      <div style={{ width: "220px", background: "#1a2e2a", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      <div style={{ width: "220px", background: darken(primary), display: "flex", flexDirection: "column", flexShrink: 0 }}>
         {/* LOGO */}
         <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <div style={{ width: "36px", height: "36px", background: primary, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "14px", flexShrink: 0 }}>
