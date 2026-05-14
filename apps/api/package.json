@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "nest start --watch",
-    "build": "nest build",
+    "build": "npx tsc -p tsconfig.json",
     "start": "node dist/main",
     "seed": "ts-node src/database/seeds/index.ts"
   },
