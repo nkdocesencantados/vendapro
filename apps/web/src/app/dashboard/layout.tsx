@@ -12,6 +12,7 @@ const MENU = [
   { label: "Caixa", href: "/dashboard/cash" },
   { label: "Relatorios", href: "/dashboard/reports" },
   { label: "Recibos", href: "/dashboard/receipts" },
+  { label: "Equipe", href: "/dashboard/team" },
   { label: "Config", href: "/dashboard/settings" },
 ]
 
