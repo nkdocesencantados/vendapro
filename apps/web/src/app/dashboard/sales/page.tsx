@@ -4,7 +4,7 @@ import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
 
 const emptyItem = () => ({ productId: "", name: "", quantity: "1", unitPrice: "", isManual: false })
-const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, saleDate: new Date().toISOString().split("T")[0], items: [emptyItem()] })
+const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, installments: 1, saleDate: new Date().toISOString().split("T")[0], items: [emptyItem()] })
 
 export default function SalesPage() {
   const [sales, setSales] = useState<any[]>([])
@@ -114,6 +114,16 @@ export default function SalesPage() {
                   <option value="debit_card">Cartao Debito</option>
                 </select>
               </div>
+              {form.paymentMethod === "credit_card" && (
+                <div>
+                  <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Parcelas</label>
+                  <select value={form.installments} onChange={e => setForm({ ...form, installments: +e.target.value })} style={inputStyle}>
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => (
+                      <option key={n} value={n}>{n}x de {fmt(total > 0 ? total / n : 0)}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Data da venda</label>
                 <input type="date" value={form.saleDate} onChange={e => setForm({ ...form, saleDate: e.target.value })} style={inputStyle} />
