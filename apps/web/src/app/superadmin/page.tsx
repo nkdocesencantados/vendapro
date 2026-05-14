@@ -10,7 +10,7 @@ export default function SuperAdminPage() {
   const [companies, setCompanies] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name:"", email:"", phone:"", document:"", plan:"trial" })
+  const [form, setForm] = useState({ name:"", email:"", phone:"", document:"", plan:"trial", password:"" })
   const [stats, setStats] = useState({ total:0, active:0, blocked:0, trial:0 })
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function SuperAdminPage() {
     try {
       await api.post("/companies", form)
       setShowForm(false)
-      setForm({ name:"", email:"", phone:"", document:"", plan:"trial" })
+      setForm({ name:"", email:"", phone:"", document:"", plan:"trial", password:"" })
       loadCompanies()
       alert("Empresa criada com sucesso!")
     } catch { alert("Erro ao criar empresa") }
@@ -112,7 +112,7 @@ export default function SuperAdminPage() {
                 <button onClick={()=>setShowForm(false)} style={{background:"none",border:"none",cursor:"pointer",color:"#888",fontSize:"20px"}}>x</button>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}}>
-                {[["Nome da Empresa *","name"],["Email *","email"],["Telefone","phone"],["CNPJ/CPF","document"]].map(([label,field]) => (
+                {[["Nome da Empresa *","name"],["Email *","email"],["Senha *","password"],["Telefone","phone"],["CNPJ/CPF","document"]].map(([label,field]) => (
                   <div key={field}><label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>{label}</label><input value={(form as any)[field]} onChange={e=>setForm({...form,[field]:e.target.value})} style={{width:"100%",padding:"9px",border:"1px solid #e5e7eb",borderRadius:"7px",fontSize:"13px"}} /></div>
                 ))}
                 <div><label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>Plano</label><select value={form.plan} onChange={e=>setForm({...form,plan:e.target.value})} style={{width:"100%",padding:"9px",border:"1px solid #e5e7eb",borderRadius:"7px",fontSize:"13px"}}><option value="trial">Trial (15 dias)</option><option value="basic">Basic</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
