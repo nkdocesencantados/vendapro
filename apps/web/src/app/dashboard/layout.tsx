@@ -1,42 +1,100 @@
 "use client"
-import { useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useAuthStore } from "@/contexts/auth.store"
-const nav = [
-  { label:"Dashboard", href:"/dashboard" },
-  { label:"Vendas", href:"/dashboard/sales" },
-  { label:"Estoque", href:"/dashboard/inventory" },
-  { label:"Caixa", href:"/dashboard/cash" },
-  { label:"Relatorios", href:"/dashboard/reports" },
-  { label:"Recibos", href:"/dashboard/receipts" },
-  { label:"Config", href:"/dashboard/settings" },
+import { api } from "@/lib/api"
+
+const MENU = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Vendas", href: "/dashboard/sales" },
+  { label: "Estoque", href: "/dashboard/inventory" },
+  { label: "Caixa", href: "/dashboard/cash" },
+  { label: "Relatorios", href: "/dashboard/reports" },
+  { label: "Recibos", href: "/dashboard/receipts" },
+  { label: "Config", href: "/dashboard/settings" },
 ]
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
   const pathname = usePathname()
-  const { user, isAuthenticated, loadUser, logout } = useAuthStore()
-  useEffect(() => { if (!isAuthenticated) loadUser() }, [])
+  const router = useRouter()
+  const { user, logout } = useAuthStore()
+  const [primary, setPrimary] = useState("#1D9E75")
+  const [storeName, setStoreName] = useState("VendaPro")
+  const [initials, setInitials] = useState("VP")
+
+  useEffect(() => {
+    // Carrega config salva localmente primeiro (resposta imediata)
+    const cached = localStorage.getItem("storeConfig")
+    if (cached) {
+      try {
+        const c = JSON.parse(cached)
+        if (c.primaryColor) setPrimary(c.primaryColor)
+        if (c.name) { setStoreName(c.name); setInitials(c.name.slice(0, 2).toUpperCase()) }
+      } catch {}
+    }
+    // Depois busca da API para garantir atualizado
+    loadStore()
+  }, [])
+
+  async function loadStore() {
+    try {
+      const r = await api.get("/stores")
+      const s = Array.isArray(r.data) ? r.data[0] : r.data
+      if (s) {
+        if (s.primaryColor) setPrimary(s.primaryColor)
+        if (s.name) { setStoreName(s.name); setInitials(s.name.slice(0, 2).toUpperCase()) }
+        localStorage.setItem("storeConfig", JSON.stringify({ name: s.name, primaryColor: s.primaryColor }))
+      }
+    } catch {}
+  }
+
+  function handleLogout() { logout(); router.push("/login") }
+
   return (
-    <div style={{display:"flex",height:"100vh"}}>
-      <aside style={{width:"215px",background:"#04342C",display:"flex",flexDirection:"column"}}>
-        <div style={{padding:"16px",display:"flex",alignItems:"center",gap:"9px",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{width:"32px",height:"32px",background:"#1D9E75",borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:700}}>VP</div>
-          <div style={{fontSize:"15px",fontWeight:500,color:"white"}}>VendaPro</div>
+    <div style={{ display: "flex", height: "100vh", background: "#f5f4f0" }}>
+      <div style={{ width: "220px", background: "#1a2e2a", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        {/* LOGO */}
+        <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ width: "36px", height: "36px", background: primary, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "14px", flexShrink: 0 }}>
+            {initials}
+          </div>
+          <span style={{ color: "white", fontWeight: 600, fontSize: "14px", lineHeight: 1.2 }}>{storeName}</span>
         </div>
-        <nav style={{flex:1,padding:"8px"}}>
-          {nav.map(item => {
-            const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname === item.href || pathname.startsWith(item.href+"/")
-            return (<Link key={item.href} href={item.href} style={{display:"block",padding:"7px 9px",borderRadius:"7px",marginBottom:"2px",textDecoration:"none",background:active?"#1D9E75":"transparent",color:active?"white":"rgba(255,255,255,0.45)",fontSize:"13px"}}>{item.label}</Link>)
+
+        {/* MENU */}
+        <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
+          {MENU.map(item => {
+            const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname === item.href || pathname.startsWith(item.href + "/")
+            return (
+              <Link key={item.href} href={item.href} style={{
+                display: "block", padding: "9px 12px", borderRadius: "8px", textDecoration: "none",
+                background: active ? primary : "transparent",
+                color: active ? "white" : "rgba(255,255,255,0.6)",
+                fontSize: "13px", fontWeight: active ? 500 : 400,
+                transition: "all 0.15s",
+              }}>
+                {item.label}
+              </Link>
+            )
           })}
         </nav>
-        <div style={{padding:"12px",borderTop:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:"8px"}}>
-          <div style={{width:"28px",height:"28px",background:"#1D9E75",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"12px"}}>{user?.name?.charAt(0)||"U"}</div>
-          <div style={{flex:1,color:"white",fontSize:"12px"}}>{user?.name}</div>
-          <button onClick={()=>{logout();router.push("/login")}} style={{background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:"12px"}}>sair</button>
+
+        {/* USER */}
+        <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ width: "28px", height: "28px", background: primary, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "11px", fontWeight: 700 }}>
+              {user?.name?.slice(0, 1).toUpperCase()}
+            </div>
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "12px" }}>{user?.name?.split(" ")[0]}</span>
+          </div>
+          <button onClick={handleLogout} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "12px" }}>sair</button>
         </div>
-      </aside>
-      <main style={{flex:1,overflow:"hidden",background:"#f5f4f0"}}>{children}</main>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {children}
+      </div>
     </div>
   )
 }

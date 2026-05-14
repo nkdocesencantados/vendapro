@@ -1,51 +1,161 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
 
+const PRESET_COLORS = [
+  { name: "Verde", value: "#1D9E75" },
+  { name: "Azul", value: "#3b82f6" },
+  { name: "Roxo", value: "#8b5cf6" },
+  { name: "Rosa", value: "#ec4899" },
+  { name: "Laranja", value: "#f97316" },
+  { name: "Vermelho", value: "#ef4444" },
+  { name: "Ciano", value: "#06b6d4" },
+  { name: "Amarelo", value: "#eab308" },
+  { name: "Indigo", value: "#6366f1" },
+  { name: "Marrom", value: "#92400e" },
+]
+
 export default function SettingsPage() {
   const { user } = useAuthStore()
-  const [form, setForm] = useState({ name:user?.name||"", email:user?.email||"", currentPassword:"", newPassword:"" })
+  const [tab, setTab] = useState("store")
   const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const [store, setStore] = useState({ name: "", primaryColor: "#1D9E75" })
+  const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" })
+  const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" })
+
+  useEffect(() => { loadStore() }, [])
+
+  async function loadStore() {
+    try {
+      const r = await api.get("/stores")
+      const s = Array.isArray(r.data) ? r.data[0] : r.data
+      if (s) setStore({ name: s.name || "", primaryColor: s.primaryColor || "#1D9E75" })
+    } catch (e) { console.error(e) }
+    finally { setLoading(false) }
+  }
+
+  async function saveStore() {
+    try {
+      await api.patch(`/stores/${user?.storeId}`, store)
+      // Aplica a cor imediatamente
+      document.documentElement.style.setProperty("--primary", store.primaryColor)
+      document.documentElement.style.setProperty("--primary-dark", store.primaryColor + "dd")
+      localStorage.setItem("storeConfig", JSON.stringify(store))
+      showSaved()
+    } catch { alert("Erro ao salvar") }
+  }
 
   async function saveProfile() {
-    try { await api.patch("/users/profile", { name:form.name }); setSaved(true); setTimeout(()=>setSaved(false),3000) } catch { alert("Erro ao salvar") }
+    try {
+      await api.patch("/users/profile", { name: profile.name })
+      showSaved()
+    } catch { alert("Erro ao salvar") }
   }
 
   async function changePassword() {
-    if (!form.currentPassword || !form.newPassword) return alert("Preencha as senhas")
-    try { await api.patch("/users/password", { currentPassword:form.currentPassword, newPassword:form.newPassword }); setForm({...form,currentPassword:"",newPassword:""}); alert("Senha alterada!") } catch { alert("Senha atual incorreta") }
+    if (!passwords.currentPassword || !passwords.newPassword) return alert("Preencha as senhas")
+    try {
+      await api.patch("/users/password", passwords)
+      setPasswords({ currentPassword: "", newPassword: "" })
+      alert("Senha alterada!")
+    } catch { alert("Senha atual incorreta") }
   }
 
+  function showSaved() { setSaved(true); setTimeout(() => setSaved(false), 3000) }
+
+  const primary = store.primaryColor || "#1D9E75"
+  const inputStyle: any = { width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", marginTop: "4px", boxSizing: "border-box" }
+  const tabStyle = (t: string) => ({ padding: "8px 16px", fontSize: "13px", border: "none", borderRadius: "8px", cursor: "pointer", background: tab === t ? primary : "transparent", color: tab === t ? "white" : "#666", fontWeight: tab === t ? 500 : 400 })
+
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-      <div style={{background:"white",borderBottom:"0.5px solid #e5e7eb",padding:"0 20px",height:"50px",display:"flex",alignItems:"center",flexShrink:0}}>
-        <div style={{fontSize:"14px",fontWeight:500}}>Configuracoes</div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <div style={{ fontSize: "14px", fontWeight: 500 }}>Configuracoes</div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px",maxWidth:"600px"}}>
-        <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"20px",marginBottom:"16px"}}>
-          <h3 style={{fontWeight:500,marginBottom:"16px"}}>Meu Perfil</h3>
-          {saved && <div style={{background:"#E1F5EE",color:"#0F6E56",padding:"10px",borderRadius:"8px",marginBottom:"12px",fontSize:"13px"}}>Perfil salvo com sucesso!</div>}
-          <div style={{marginBottom:"12px"}}>
-            <label style={{fontSize:"12px",color:"#666"}}>Nome</label>
-            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}} />
-          </div>
-          <div style={{marginBottom:"16px"}}>
-            <label style={{fontSize:"12px",color:"#666"}}>Email</label>
-            <input value={form.email} disabled style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px",background:"#f9f9f9",color:"#888"}} />
-          </div>
-          <button onClick={saveProfile} style={{padding:"8px 16px",background:"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px"}}>Salvar Perfil</button>
-        </div>
-        <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"20px"}}>
-          <h3 style={{fontWeight:500,marginBottom:"16px"}}>Alterar Senha</h3>
-          {[["Senha atual","currentPassword"],["Nova senha","newPassword"]].map(([label,field])=>(
-            <div key={field} style={{marginBottom:"12px"}}>
-              <label style={{fontSize:"12px",color:"#666"}}>{label}</label>
-              <input type="password" value={(form as any)[field]} onChange={e=>setForm({...form,[field]:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}} />
+
+      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", display: "flex", gap: "4px" }}>
+        <button style={tabStyle("store")} onClick={() => setTab("store")}>Minha Loja</button>
+        <button style={tabStyle("profile")} onClick={() => setTab("profile")}>Meu Perfil</button>
+      </div>
+
+      <div style={{ flex: 1, overflowY: "auto", padding: "24px", maxWidth: "640px" }}>
+        {saved && <div style={{ background: "#E1F5EE", color: "#0F6E56", padding: "10px 14px", borderRadius: "8px", marginBottom: "16px", fontSize: "13px" }}>Salvo com sucesso!</div>}
+
+        {tab === "store" && !loading && (
+          <>
+            <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "16px" }}>
+              <h3 style={{ fontWeight: 500, marginBottom: "16px", fontSize: "15px" }}>Identidade da Loja</h3>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Nome da loja</label>
+                <input value={store.name} onChange={e => setStore({ ...store, name: e.target.value })} placeholder="Ex: Boutique Ana" style={inputStyle} />
+                <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>Aparece no topo do menu lateral</div>
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "8px" }}>Cor principal</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+                  {PRESET_COLORS.map(c => (
+                    <div key={c.value} onClick={() => setStore({ ...store, primaryColor: c.value })} title={c.name} style={{ width: "32px", height: "32px", borderRadius: "8px", background: c.value, cursor: "pointer", border: store.primaryColor === c.value ? "3px solid #111" : "3px solid transparent", transition: "border 0.2s", flexShrink: 0 }} />
+                  ))}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <input type="color" value={store.primaryColor} onChange={e => setStore({ ...store, primaryColor: e.target.value })} style={{ width: "40px", height: "36px", padding: "2px", border: "1px solid #e5e7eb", borderRadius: "6px", cursor: "pointer" }} />
+                  <span style={{ fontSize: "12px", color: "#888" }}>Ou escolha uma cor personalizada</span>
+                  <span style={{ fontSize: "13px", fontWeight: 500, color: store.primaryColor }}>{store.primaryColor}</span>
+                </div>
+              </div>
+
+              {/* PREVIEW */}
+              <div style={{ background: "#f9fafb", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "16px", marginBottom: "20px" }}>
+                <div style={{ fontSize: "12px", color: "#888", marginBottom: "12px" }}>Preview</div>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "12px" }}>
+                  <div style={{ width: "36px", height: "36px", background: primary, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "14px" }}>
+                    {store.name ? store.name.slice(0, 2).toUpperCase() : "VP"}
+                  </div>
+                  <span style={{ fontWeight: 600, fontSize: "14px" }}>{store.name || "VendaPro"}</span>
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button style={{ padding: "7px 14px", background: primary, color: "white", border: "none", borderRadius: "8px", fontSize: "12px", cursor: "pointer" }}>Botao principal</button>
+                  <div style={{ padding: "7px 14px", border: `1px solid ${primary}`, color: primary, borderRadius: "8px", fontSize: "12px" }}>Secundario</div>
+                  <span style={{ color: primary, fontWeight: 600, fontSize: "14px" }}>R$ 1.200,00</span>
+                </div>
+              </div>
+
+              <button onClick={saveStore} style={{ padding: "9px 20px", background: primary, color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: 500 }}>Salvar e Aplicar</button>
             </div>
-          ))}
-          <button onClick={changePassword} style={{padding:"8px 16px",background:"#04342C",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px"}}>Alterar Senha</button>
-        </div>
+          </>
+        )}
+
+        {tab === "profile" && (
+          <>
+            <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "16px" }}>
+              <h3 style={{ fontWeight: 500, marginBottom: "16px" }}>Meu Perfil</h3>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Nome</label>
+                <input value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} style={inputStyle} />
+              </div>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Email</label>
+                <input value={profile.email} disabled style={{ ...inputStyle, background: "#f9f9f9", color: "#888" }} />
+              </div>
+              <button onClick={saveProfile} style={{ padding: "8px 16px", background: primary, color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>Salvar Perfil</button>
+            </div>
+            <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px" }}>
+              <h3 style={{ fontWeight: 500, marginBottom: "16px" }}>Alterar Senha</h3>
+              {[["Senha atual", "currentPassword"], ["Nova senha", "newPassword"]].map(([label, field]) => (
+                <div key={field} style={{ marginBottom: "12px" }}>
+                  <label style={{ fontSize: "12px", color: "#666" }}>{label}</label>
+                  <input type="password" value={(passwords as any)[field]} onChange={e => setPasswords({ ...passwords, [field]: e.target.value })} style={inputStyle} />
+                </div>
+              ))}
+              <button onClick={changePassword} style={{ padding: "8px 16px", background: "#04342C", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>Alterar Senha</button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
