@@ -24,9 +24,8 @@ export default function ReceiptsPage() {
 
   async function exportPdf() {
     if (!selected) return
-    const jsPDF = (await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" as any)).default || (window as any).jspdf?.jsPDF
-    const { jsPDF: JP } = await import("jspdf" as any).catch(() => ({ jsPDF: null }))
-    const doc = new (JP || (window as any).jspdf.jsPDF)()
+    const { jsPDF: JP } = await import("jspdf")
+    const doc = new JP()
     doc.setFontSize(16); doc.setFont("helvetica","bold")
     doc.text("VendaPro", 105, 20, { align: "center" })
     doc.setFontSize(10); doc.setFont("helvetica","normal")
