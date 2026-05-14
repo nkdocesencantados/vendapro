@@ -51,6 +51,6 @@ export const useAuthStore = create<AuthState>()(
         }
       },
     }),
-    { name: "vendapro-auth", partialize: (s) => ({ token: s.token }) }
+    { name: "auth-storage", partialize: (s) => ({ token: s.token, user: s.user }) }
   )
 );
