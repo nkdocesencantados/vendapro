@@ -32,7 +32,7 @@ export default function ReceiptsPage() {
     win.print()
   }
 
-  const filtered = sales.filter(s => !search || s.customerName?.toLowerCase().includes(search.toLowerCase()) || s.id?.includes(search))
+  const filtered = sales.filter(s => !search || s.customerName?.toLowerCase().includes(search.toLowerCase()) || s.id?.includes(search)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Cartao Credito", debit_card: "Cartao Debito" }
 
   return (
