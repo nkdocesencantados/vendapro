@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "./sale.entity";
@@ -30,22 +30,13 @@ export class SalesService {
 
   async create(data: any, storeId: string, sellerId: string) {
     const { items, ...saleData } = data;
-
-    if (!items || items.length === 0) {
-      throw new BadRequestException("A venda precisa ter ao menos um item");
-    }
+    if (!items || items.length === 0) throw new BadRequestException("A venda precisa ter ao menos um item");
 
     for (const item of items) {
       if (item.productId) {
         const product = await this.productRepo.findOne({ where: { id: item.productId, storeId } });
-        if (!product) {
-          throw new BadRequestException(`Produto nao encontrado: ${item.productId}`);
-        }
-        if (product.stock < item.quantity) {
-          throw new BadRequestException(
-            `Estoque insuficiente para "${product.name}". Disponivel: ${product.stock}, solicitado: ${item.quantity}`
-          );
-        }
+        if (!product) throw new BadRequestException(`Produto nao encontrado: ${item.productId}`);
+        if (product.stock < item.quantity) throw new BadRequestException(`Estoque insuficiente para "${product.name}". Disponivel: ${product.stock}`);
       }
     }
 
@@ -63,49 +54,23 @@ export class SalesService {
     const total = subtotal - discount;
     const commission = total * ((Number(saleData.commissionRate) || 15) / 100);
 
-    const saleEntity = this.saleRepo.create({
-      ...saleData,
-      storeId,
-      sellerId,
-      subtotal,
-      total,
-      commission,
-      status: SaleStatus.COMPLETED,
-    });
+    const saleEntity = this.saleRepo.create({ ...saleData, storeId, sellerId, subtotal, total, commission, status: SaleStatus.COMPLETED });
     const savedSale: any = await this.saleRepo.save(saleEntity);
     const saleId: string = savedSale.id;
 
     for (const item of processedItems) {
-      await this.itemRepo.save(
-        this.itemRepo.create({
-          saleId,
-          productId: item.productId || null,
-          productName: item.productName,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          total: item.total,
-          isManual: item.isManual,
-        })
-      );
-
-      if (item.productId) {
-        await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
-      }
+      await this.itemRepo.save(this.itemRepo.create({
+        saleId, productId: item.productId || null, productName: item.productName,
+        quantity: item.quantity, unitPrice: item.unitPrice, total: item.total, isManual: item.isManual,
+      }));
+      if (item.productId) await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
     }
 
-    await this.financialRepo.save(
-      this.financialRepo.create({
-        type: EntryType.INCOME,
-        category: EntryCategory.SALE,
-        description: `Venda #${saleId.slice(0, 8)}`,
-        amount: total,
-        date: new Date(),
-        isPaid: true,
-        referenceId: saleId,
-        storeId,
-        createdById: sellerId,
-      })
-    );
+    await this.financialRepo.save(this.financialRepo.create({
+      type: EntryType.INCOME, category: EntryCategory.SALE,
+      description: `Venda #${saleId.slice(0, 8)}`, amount: total,
+      date: new Date(), isPaid: true, referenceId: saleId, storeId, createdById: sellerId,
+    }));
 
     return { id: saleId, message: "Venda criada com sucesso" };
   }
@@ -113,30 +78,19 @@ export class SalesService {
   async cancel(id: string) {
     const sale = await this.saleRepo.findOne({ where: { id } });
     if (!sale) throw new NotFoundException("Venda nao encontrada");
-    if (sale.status === SaleStatus.CANCELLED) {
-      throw new BadRequestException("Venda ja cancelada");
-    }
-
+    if (sale.status === SaleStatus.CANCELLED) throw new BadRequestException("Venda ja cancelada");
     await this.saleRepo.update(id, { status: SaleStatus.CANCELLED });
-
     const items = await this.itemRepo.find({ where: { saleId: id } });
     for (const item of items) {
-      if (item.productId && !item.isManual) {
-        await this.productRepo.increment({ id: item.productId }, "stock", item.quantity);
-      }
+      if (item.productId && !item.isManual) await this.productRepo.increment({ id: item.productId }, "stock", item.quantity);
     }
-
     return { message: "Venda cancelada e estoque restaurado" };
   }
 
   async todaySummary(storeId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const sales = await this.saleRepo.find({
-      where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) },
-    });
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) } });
     const total = sales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = sales.length ? total / sales.length : 0;
     return { total, count: sales.length, avgTicket };

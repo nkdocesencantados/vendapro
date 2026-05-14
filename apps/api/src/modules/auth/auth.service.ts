@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User, UserStatus } from '../users/user.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +15,11 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersRepo.findOne({
       where: { email: email.toLowerCase() },
-      select: ['id','name','email','password','role','status','storeId'],
+      select: ['id', 'name', 'email', 'password', 'role', 'status', 'storeId'],
     });
     if (!user) throw new UnauthorizedException('Credenciais invalidas');
-    if (user.status === UserStatus.BLOCKED) throw new UnauthorizedException('Usuario bloqueado.');
-    if (user.status === UserStatus.INACTIVE) throw new UnauthorizedException('Usuario inativo.');
+    if (user.status === 'blocked') throw new UnauthorizedException('Usuario bloqueado.');
+    if (user.status === 'inactive') throw new UnauthorizedException('Usuario inativo.');
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciais invalidas');
     return user;
