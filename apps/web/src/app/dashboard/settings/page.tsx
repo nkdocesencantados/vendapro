@@ -25,9 +25,10 @@ export default function SettingsPage() {
     try {
       const r = await api.get("/stores")
       const s = Array.isArray(r.data) ? r.data[0] : r.data
-      if (s) {
-        setStoreId(s.id)
-        setStore({ name: s.name || "", primaryColor: s.primaryColor || "#1D9E75" })
+      const sid = s?.id || (user as any)?.storeId
+      if (s || sid) {
+        setStoreId(s?.id || sid)
+        setStore({ name: s?.name || "", primaryColor: s?.primaryColor || "#1D9E75" })
       }
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
