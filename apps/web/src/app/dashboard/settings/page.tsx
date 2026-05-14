@@ -128,7 +128,7 @@ export default function SettingsPage() {
               <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                 <button style={{ padding: "7px 14px", background: primary, color: "white", border: "none", borderRadius: "8px", fontSize: "12px", cursor: "default" }}>Botao principal</button>
                 <div style={{ padding: "7px 14px", border: `1.5px solid ${primary}`, color: primary, borderRadius: "8px", fontSize: "12px" }}>Secundario</div>
-                <span style={{ color: primary, fontWeight: 700, fontSize: "15px" }}>R$ 1.200,00</span>
+                
               </div>
             </div>
 
