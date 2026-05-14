@@ -33,7 +33,7 @@ export default function DashboardPage() {
     <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden"}}>
       <div style={{background:"white",borderBottom:"0.5px solid #e5e7eb",padding:"0 20px",height:"50px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div style={{fontSize:"14px",fontWeight:500,color:"#111"}}>Dashboard</div>
-        <div style={{fontSize:"12px",color:"#666"}}>Ola, {user?.name?.split(" ")[0]} — {new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}</div>
+        <div style={{fontSize:"12px",color:"#666"}}>Ola, {user?.name?.split(" ")[0]} - {new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}</div>
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px",marginBottom:"16px"}}>
@@ -63,7 +63,7 @@ export default function DashboardPage() {
 
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:"16px",marginBottom:"16px"}}>
           <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px"}}>
-            <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Faturamento — ultimos 7 dias</div>
+            <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Faturamento - ultimos 7 dias</div>
             {data.weeklyChart?.length > 0 ? (
               <div style={{display:"flex",alignItems:"flex-end",gap:"8px",height:"120px"}}>
                 {data.weeklyChart.map((d:any) => {
@@ -87,10 +87,10 @@ export default function DashboardPage() {
             <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Acesso rapido</div>
             <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
               {[
-                { label:"Nova Venda", href:"/dashboard/sales", color:"#1D9E75" },
-                { label:"Novo Produto", href:"/dashboard/inventory", color:"#3b82f6" },
-                { label:"Ver Equipe", href:"/dashboard/team", color:"#8b5cf6" },
-                { label:"Caixa", href:"/dashboard/cash", color:"#f59e0b" },
+                { label:"Nova Venda", href:"/dashboard/sales" },
+                { label:"Novo Produto", href:"/dashboard/inventory" },
+                { label:"Caixa", href:"/dashboard/cash" },
+                { label:"Relatorios", href:"/dashboard/reports" },
               ].map(item => (
                 <Link key={item.href} href={item.href} style={{display:"block",padding:"8px 12px",background:"#f9fafb",borderRadius:"8px",textDecoration:"none",color:"#111",fontSize:"13px",border:"0.5px solid #e5e7eb"}}>
                   {item.label}
@@ -102,7 +102,7 @@ export default function DashboardPage() {
 
         {data.lowStock?.length > 0 && (
           <div style={{background:"#FAEEDA",border:"1px solid #E8C97B",borderRadius:"12px",padding:"16px"}}>
-            <div style={{fontSize:"13px",fontWeight:500,color:"#633806",marginBottom:"10px"}}>Estoque baixo — {data.lowStock.length} produto(s)</div>
+            <div style={{fontSize:"13px",fontWeight:500,color:"#633806",marginBottom:"10px"}}>Estoque baixo - {data.lowStock.length} produto(s)</div>
             <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
               {data.lowStock.map((p:any) => (
                 <div key={p.id||p.name} style={{display:"flex",justifyContent:"space-between",padding:"8px 12px",background:"white",borderRadius:"8px",fontSize:"13px"}}>

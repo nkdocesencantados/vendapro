@@ -18,10 +18,8 @@ export default function ReceiptsPage() {
   }
 
   async function openReceipt(sale: any) {
-    try {
-      const r = await api.get(`/sales/${sale.id}`)
-      setSelected(r.data)
-    } catch { setSelected(sale) }
+    try { const r = await api.get(`/sales/${sale.id}`); setSelected(r.data) }
+    catch { setSelected(sale) }
   }
 
   function printReceipt() {
@@ -29,26 +27,12 @@ export default function ReceiptsPage() {
     if (!content) return
     const win = window.open("", "_blank")
     if (!win) return
-    win.document.write(`
-      <html><head><title>Recibo</title>
-      <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 20px auto; font-size: 13px; }
-        h2 { text-align: center; font-size: 16px; }
-        .line { border-top: 1px dashed #ccc; margin: 8px 0; }
-        .row { display: flex; justify-content: space-between; margin: 4px 0; }
-        .total { font-weight: bold; font-size: 15px; }
-        .center { text-align: center; }
-      </style></head>
-      <body>${content.innerHTML}</body></html>
-    `)
+    win.document.write(`<html><head><title>Recibo</title><style>body{font-family:Arial,sans-serif;max-width:400px;margin:20px auto;font-size:13px;}h2{text-align:center;font-size:16px;}.line{border-top:1px dashed #ccc;margin:8px 0;}.row{display:flex;justify-content:space-between;margin:4px 0;}.total{font-weight:bold;font-size:15px;}.center{text-align:center;}</style></head><body>${content.innerHTML}</body></html>`)
     win.document.close()
     win.print()
   }
 
-  const filtered = sales.filter(s =>
-    !search || s.customerName?.toLowerCase().includes(search.toLowerCase()) || s.id?.includes(search)
-  )
-
+  const filtered = sales.filter(s => !search || s.customerName?.toLowerCase().includes(search.toLowerCase()) || s.id?.includes(search))
   const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Cartao Credito", debit_card: "Cartao Debito" }
 
   return (
@@ -68,13 +52,12 @@ export default function ReceiptsPage() {
                   <div style={{ fontWeight: 500, fontSize: "13px" }}>{s.customerName || "Cliente nao informado"}</div>
                   <div style={{ fontWeight: 600, color: s.status === "cancelled" ? "#9ca3af" : "#1D9E75", fontSize: "13px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
                 </div>
-                <div style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>#{s.id.slice(0, 8).toUpperCase()} â€” {fmtDate(s.createdAt)}</div>
+                <div style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>#{s.id.slice(0, 8).toUpperCase()} - {fmtDate(s.createdAt)}</div>
               </div>
             ))
           }
         </div>
       </div>
-
       <div style={{ flex: 1, overflowY: "auto", padding: "24px", background: "#f5f4f0" }}>
         {!selected ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#888" }}>Selecione uma venda para ver o recibo</div>
