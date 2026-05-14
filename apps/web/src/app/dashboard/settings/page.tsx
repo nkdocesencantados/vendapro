@@ -23,7 +23,9 @@ export default function SettingsPage() {
 
   async function loadStore() {
     try {
-      const sid = (user as any)?.storeId
+      const authRaw = localStorage.getItem("auth-storage")
+      const auth = authRaw ? JSON.parse(authRaw) : null
+      const sid = auth?.state?.user?.storeId || (user as any)?.storeId
       if (!sid) { setLoading(false); return }
       setStoreId(sid)
       const r = await api.get(`/stores/${sid}`)
