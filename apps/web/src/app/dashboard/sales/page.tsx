@@ -12,6 +12,7 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [showCancelled, setShowCancelled] = useState(false)
   const [form, setForm] = useState<any>(emptyForm())
 
   useEffect(() => { loadSales(); loadProducts() }, [])
@@ -189,7 +190,13 @@ export default function SalesPage() {
           <div style={{ textAlign: "center", color: "#888", padding: "60px" }}>Nenhuma venda registrada ainda.</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {sales.map((s: any) => (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#666", cursor: "pointer" }}>
+                <input type="checkbox" checked={showCancelled} onChange={e => setShowCancelled(e.target.checked)} />
+                Mostrar canceladas
+              </label>
+            </div>
+            {sales.filter((s: any) => showCancelled || s.status !== "cancelled").map((s: any) => (
               <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
