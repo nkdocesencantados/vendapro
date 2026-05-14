@@ -1,6 +1,6 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "rm -rf dist && npm run build"
+buildCommand = "npm run build && ls -la dist/"
 
 [deploy]
 startCommand = "node dist/main"
