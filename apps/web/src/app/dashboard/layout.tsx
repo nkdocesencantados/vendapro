@@ -5,15 +5,15 @@ import { useEffect, useState } from "react"
 import { useAuthStore } from "@/contexts/auth.store"
 import { api } from "@/lib/api"
 
-const MENU = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Vendas", href: "/dashboard/sales" },
-  { label: "Estoque", href: "/dashboard/inventory" },
-  { label: "Caixa", href: "/dashboard/cash" },
-  { label: "Relatorios", href: "/dashboard/reports" },
-  { label: "Recibos", href: "/dashboard/receipts" },
-  { label: "Equipe", href: "/dashboard/team" },
-  { label: "Config", href: "/dashboard/settings" },
+const MENU_ALL = [
+  { label: "Dashboard", href: "/dashboard", roles: ["store_owner","admin","manager","seller"] },
+  { label: "Vendas", href: "/dashboard/sales", roles: ["store_owner","admin","manager","seller"] },
+  { label: "Estoque", href: "/dashboard/inventory", roles: ["store_owner","admin","manager"] },
+  { label: "Caixa", href: "/dashboard/cash", roles: ["store_owner","admin","manager"] },
+  { label: "Relatorios", href: "/dashboard/reports", roles: ["store_owner","admin","manager"] },
+  { label: "Recibos", href: "/dashboard/receipts", roles: ["store_owner","admin","manager","seller"] },
+  { label: "Equipe", href: "/dashboard/team", roles: ["store_owner","admin","manager"] },
+  { label: "Config", href: "/dashboard/settings", roles: ["store_owner","admin","manager"] },
 ]
 
 function darken(hex: string, amount = 0.5): string {
@@ -29,12 +29,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const { user, logout } = useAuthStore()
   const [primary, setPrimary] = useState("#1D9E75")
-  const role = (user as any)?.role || "store_owner"
-  const MENU = MENU_ALL.filter(item => item.roles.includes(role))
   const [storeName, setStoreName] = useState("VendaPro")
   const [initials, setInitials] = useState("VP")
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  const role = (user as any)?.role || "store_owner"
+  const MENU = MENU_ALL.filter(item => item.roles.includes(role))
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -60,12 +61,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const r = await api.get("/stores")
       const s = Array.isArray(r.data) ? r.data[0] : r.data
       if (s) {
-        if (s.primaryColor) { setPrimary(s.primaryColor) }
+        if (s.primaryColor) setPrimary(s.primaryColor)
         if (s.name) { setStoreName(s.name); setInitials(s.name.slice(0, 2).toUpperCase()) }
         localStorage.setItem("storeConfig", JSON.stringify({ name: s.name, primaryColor: s.primaryColor }))
       }
     } catch {
-      // fallback para cache local se API falhar
       const cached = localStorage.getItem("storeConfig")
       if (cached) {
         try {
@@ -121,7 +121,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isMobile) {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#f5f4f0" }}>
-        {/* TOPBAR MOBILE */}
         <div style={{ background: dark, padding: "0 16px", height: "52px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{ width: "32px", height: "32px", background: primary, borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "13px" }}>
@@ -135,8 +134,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div style={{ width: "22px", height: "2px", background: "white", borderRadius: "2px", transition: "all 0.2s", transform: menuOpen ? "rotate(-45deg) translate(5px, -5px)" : "none" }} />
           </button>
         </div>
-
-        {/* DRAWER MENU */}
         {menuOpen && (
           <div style={{ position: "fixed", top: "52px", left: 0, right: 0, bottom: 0, zIndex: 100 }}>
             <div onClick={() => setMenuOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />
@@ -163,7 +160,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         )}
-
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {children}
         </div>
