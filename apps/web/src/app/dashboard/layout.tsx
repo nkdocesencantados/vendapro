@@ -29,6 +29,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const { user, logout } = useAuthStore()
   const [primary, setPrimary] = useState("#1D9E75")
+  const role = (user as any)?.role || "store_owner"
+  const MENU = MENU_ALL.filter(item => item.roles.includes(role))
   const [storeName, setStoreName] = useState("VendaPro")
   const [initials, setInitials] = useState("VP")
   const [menuOpen, setMenuOpen] = useState(false)

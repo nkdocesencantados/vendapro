@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+﻿import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "./sale.entity";
@@ -15,9 +15,10 @@ export class SalesService {
     @InjectRepository(FinancialEntry) private financialRepo: Repository<FinancialEntry>,
   ) {}
 
-  findAll(storeId: string, from?: string, to?: string) {
+  findAll(storeId: string, from?: string, to?: string, sellerId?: string) {
     const where: any = { storeId };
     if (from && to) where.createdAt = Between(new Date(from), new Date(to));
+    if (sellerId) where.sellerId = sellerId;
     return this.saleRepo.find({ where, order: { createdAt: "DESC" } });
   }
 
