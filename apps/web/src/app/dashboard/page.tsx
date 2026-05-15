@@ -80,7 +80,7 @@ export default function DashboardPage() {
           <>
             <div className="dash-cards">
               {[
-                { label:"Faturamento", value:fmt(d.totalRevenue||0), sub:(d.totalSales||0)+" vendas", color:primary },
+                { label:"Faturamento", value:fmt(d.totalRevenue||0), sub:(d.totalSales||0)+" vendas", color:"#1D9E75" },
                 { label:"Lucro estimado", value:fmt(d.estimatedProfit||0), sub:"26% margem", color:"#8b5cf6" },
                 { label:"Ticket medio", value:fmt(d.avgTicket||0), sub:"Por venda", color:"#f59e0b" },
                 { label:"Total de vendas", value:String(d.totalSales||0), sub:"No periodo", color:"#3b82f6" },
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px",flexWrap:"wrap",gap:"4px"}}>
                 <span style={{fontSize:"13px",fontWeight:500}}>Meta mensal</span>
-                <span style={{fontSize:"12px",color:primary,fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(20000)} ({pct}%)</span>
+                <span style={{fontSize:"12px",color:"#1D9E75",fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(20000)} ({pct}%)</span>
               </div>
               <div style={{height:"8px",background:"#E1F5EE",borderRadius:"4px"}}>
                 <div style={{height:"100%",background:primary,borderRadius:"4px",width:pct+"%",transition:"width 0.5s"}} />
@@ -130,7 +130,7 @@ export default function DashboardPage() {
                       <div style={{fontSize:"13px",fontWeight:500}}>{s.name}</div>
                       <div style={{fontSize:"11px",color:"#888"}}>{s.count} venda{s.count!==1?"s":""}</div>
                     </div>
-                    <div style={{fontSize:"13px",color:primary,fontWeight:600}}>{fmt(s.total)}</div>
+                    <div style={{fontSize:"13px",color:"#1D9E75",fontWeight:600}}>{fmt(s.total)}</div>
                   </div>
                 ))}
               </div>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                     <div style={{width:"20px",height:"20px",background:primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"10px",flexShrink:0}}>{i+1}</div>
                     <div style={{flex:1,fontSize:"13px"}}>{p.name}</div>
                     <div style={{fontSize:"12px",color:"#888",marginRight:"8px"}}>{p.quantity} un</div>
-                    <div style={{fontSize:"13px",color:primary,fontWeight:600}}>{fmt(p.revenue)}</div>
+                    <div style={{fontSize:"13px",color:"#1D9E75",fontWeight:600}}>{fmt(p.revenue)}</div>
                   </div>
                 ))}
               </div>
