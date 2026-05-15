@@ -67,10 +67,11 @@ export class SalesService {
       if (item.productId) await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
     }
 
+    const saleDate = saleData.createdAt ? new Date(saleData.createdAt) : new Date();
     await this.financialRepo.save(this.financialRepo.create({
       type: EntryType.INCOME, category: EntryCategory.SALE,
       description: `Venda #${saleId.slice(0, 8)}`, amount: total,
-      date: new Date(), isPaid: true, referenceId: saleId, storeId, createdById: sellerId,
+      date: saleDate, isPaid: true, referenceId: saleId, storeId, createdById: sellerId,
     }));
 
     return { id: saleId, message: "Venda criada com sucesso" };
