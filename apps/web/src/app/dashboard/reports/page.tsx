@@ -105,17 +105,17 @@ export default function ReportsPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 500, minWidth: "100px" }}>Relatorios</div>
-        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <button onClick={exportPdf} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #1D9E75", borderRadius: "6px", cursor: "pointer", background: "white", color: "#1D9E75" }}>Exportar PDF</button>
-          <button onClick={exportCsv} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Exportar CSV</button>
-          <button onClick={() => window.print()} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Imprimir</button>
-        </div>
+      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <div style={{ fontSize: "14px", fontWeight: 500 }}>Relatorios</div>
       </div>
 
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "10px 20px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
         <button onClick={() => setPreset("year")} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Este ano</button>
+        <div style={{ marginLeft: "auto", display: "flex", gap: "6px" }}>
+          <button onClick={exportPdf} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #1D9E75", borderRadius: "6px", cursor: "pointer", background: "white", color: "#1D9E75" }}>PDF</button>
+          <button onClick={exportCsv} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>CSV</button>
+          <button onClick={() => window.print()} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Imprimir</button>
+        </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <span style={{ fontSize: "12px", color: "#888" }}>De</span>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }} />
