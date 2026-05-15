@@ -110,7 +110,7 @@ export default function DashboardPage() {
                 <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Vendas por dia</div>
                 {(d.dailyChart||[]).length > 0 ? (
                   <div style={{display:"flex",alignItems:"flex-end",gap:"4px",height:"120px",paddingBottom:"20px",position:"relative"}}>
-                    {(d.dailyChart||[]).map((x:any) => {
+                    {(d.dailyChart||[]).slice().reverse().map((x:any) => {
                       const max = Math.max(...(d.dailyChart||[]).map((v:any) => v.value), 1)
                       const h = Math.max((x.value/max)*100, 4)
                       return (
