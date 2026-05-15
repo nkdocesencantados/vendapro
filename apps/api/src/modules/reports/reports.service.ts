@@ -95,6 +95,25 @@ export class ReportsService {
     const soldNames = new Set(topProducts.map(p => p.name));
     const slowProducts = allProducts.filter(p => !soldNames.has(p.name)).length;
 
-    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts };
+    // Ranking de vendedores
+    const sellerMap = {};
+    for (const s of sales) {
+      if (!s.sellerId) continue;
+      if (!sellerMap[s.sellerId]) sellerMap[s.sellerId] = { name: s.sellerId, total: 0, count: 0 };
+      sellerMap[s.sellerId].total += Number(s.total);
+      sellerMap[s.sellerId].count += 1;
+    }
+    if (Object.keys(sellerMap).length > 0) {
+      const sellerIds = Object.keys(sellerMap);
+      const placeholders = sellerIds.map((_, i) => '
+  }
+} + (i + 1)).join(',');
+      const users = await this.saleRepo.query('SELECT id, name FROM users WHERE id IN (' + placeholders + ')', sellerIds);
+      for (const u of users) {
+        if (sellerMap[u.id]) sellerMap[u.id].name = u.name;
+      }
+    }
+    const sellerRanking = Object.values(sellerMap).sort((a, b) => b.total - a.total);
+    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking };
   }
 }
