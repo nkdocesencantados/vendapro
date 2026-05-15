@@ -135,12 +135,13 @@ export default function SalesPage() {
                 <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
               </div>
               <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } @media (max-width: 767px) { .item-grid { grid-template-columns: 1fr 48px 72px 32px; gap: 4px; } .item-headers { display: none !important; } }`}</style>
-                <div className="item-grid item-headers" style={{ marginBottom: "6px" }}>
+                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } .item-grid-mobile { display: none; } @media (max-width: 767px) { .item-grid { display: none; } .item-grid-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; } }`}</style>
+                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 60px 90px 32px", gap: "6px", marginBottom: "6px" }} className="item-grid">
                   {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
                 </div>
                 {form.items.map((item: any, i: number) => (
-                  <div key={i} className="item-grid">
+                  <>
+                  <div key={i + "d"} className="item-grid">
                     {item.isManual ? (
                       <div style={{ display: "flex", gap: "4px" }}>
                         <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle, flex: 1 }} />
@@ -159,6 +160,29 @@ export default function SalesPage() {
                     <input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} />
                     <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>x</button>
                   </div>
+                  <div key={i + "m"} className="item-grid-mobile">
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      <div style={{ flex: 1 }}>
+                        {item.isManual ? (
+                          <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle }} />
+                        ) : (
+                          <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
+                            <option value="">Selecione um produto</option>
+                            {products.map((p: any) => (
+                              <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)}</option>
+                            ))}
+                            <option value="__manual__">Digitar manualmente</option>
+                          </select>
+                        )}
+                      </div>
+                      <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700, padding: "8px 10px" }}>x</button>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                      <div><label style={{ fontSize: "11px", color: "#888" }}>Qtd</label><input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} /></div>
+                      <div><label style={{ fontSize: "11px", color: "#888" }}>Preco (R$)</label><input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} /></div>
+                    </div>
+                  </div>
+                  </>
                 ))}
               </div>
             </div>
