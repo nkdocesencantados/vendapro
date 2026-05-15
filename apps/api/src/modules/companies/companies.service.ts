@@ -51,4 +51,5 @@ export class CompaniesService {
   }
 
   findOne(id: string) { return this.repo.findOne({ where:{ id } }) }
+  async remove(id: string) { await this.repo.delete(id); return { message: "Empresa excluida" } }
 }
