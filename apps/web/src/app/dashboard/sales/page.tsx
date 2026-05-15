@@ -1,4 +1,4 @@
-"use client" // v2
+﻿"use client" // v2
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
@@ -135,11 +135,12 @@ export default function SalesPage() {
                 <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
               </div>
               <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
+                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } @media (max-width: 767px) { .item-grid { grid-template-columns: 1fr 50px 80px 32px; } .item-headers { display: none !important; } }`}</style>
+                <div className="item-grid item-headers" style={{ marginBottom: "6px" }}>
                   {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
                 </div>
                 {form.items.map((item: any, i: number) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
+                  <div key={i} className="item-grid">
                     {item.isManual ? (
                       <div style={{ display: "flex", gap: "4px" }}>
                         <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle, flex: 1 }} />
