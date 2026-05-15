@@ -16,7 +16,6 @@ export class CompaniesService {
   findAll() { return this.repo.find({ order:{ createdAt:"DESC" } }) }
 
   async create(data: any) {
-    // 1. Cria empresa
     const company = await this.repo.save(this.repo.create({
       name: data.name,
       email: data.email,
@@ -26,19 +25,18 @@ export class CompaniesService {
       status: "active",
     }))
 
-    // 2. Cria store vinculada
-    const store = await this.storeRepo.save(this.storeRepo.create({
-      name: data.name,
-      companyId: company.id,
-    }))
+    const storeData = await this.storeRepo.query(
+      `INSERT INTO stores (id, name, "companyId", "createdAt", "updatedAt") VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) RETURNING id`,
+      [data.name, company.id]
+    )
+    const storeId = storeData[0].id
 
-    // 3. Cria usuario admin com senha
     const user = this.userRepo.create({
       name: data.name,
       email: data.email,
       password: data.password || "VendaPro@2026!",
       role: "store_owner",
-      storeId: store.id,
+      storeId: storeId,
     })
     await this.userRepo.save(user)
 
@@ -51,12 +49,13 @@ export class CompaniesService {
   }
 
   findOne(id: string) { return this.repo.findOne({ where:{ id } }) }
+
   async remove(id: string) {
-    const stores = await this.storeRepo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
-    for (const store of stores) {
-      await this.userRepo.query(`DELETE FROM users WHERE "storeId" = $1`, [store.id])
+    const stores = await this.repo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
+    for (const s of stores) {
+      await this.repo.query(`DELETE FROM users WHERE "storeId" = $1`, [s.id])
     }
-    await this.storeRepo.query(`DELETE FROM stores WHERE "companyId" = $1`, [id])
+    await this.repo.query(`DELETE FROM stores WHERE "companyId" = $1`, [id])
     await this.repo.delete(id)
     return { message: "Empresa excluida" }
   }
