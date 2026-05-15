@@ -41,8 +41,9 @@ export default function SettingsPage() {
     if (!storeId) return alert("ID da loja nao encontrado")
     try {
       await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
+      localStorage.removeItem("storeConfig")
       localStorage.setItem("storeConfig", JSON.stringify({ name: store.name, primaryColor: store.primaryColor }))
-      window.location.replace(window.location.href.split("?")[0] + "?t=" + Date.now())
+      setTimeout(() => { window.location.reload() }, 100)
     } catch (e: any) {
       console.error(e)
       alert("Erro ao salvar: " + (e?.response?.data?.message || e.message || "verifique o console"))
