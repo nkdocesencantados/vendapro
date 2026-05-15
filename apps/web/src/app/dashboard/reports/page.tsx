@@ -95,7 +95,7 @@ export default function ReportsPage() {
 
   const tabStyle = (t: string) => ({
     padding: "8px 16px", fontSize: "13px", border: "none", borderRadius: "8px",
-    cursor: "pointer", background: tab === t ? "#1D9E75" : "transparent",
+    cursor: "pointer", background: tab === t ? primary : "transparent",
     color: tab === t ? "white" : "#666", fontWeight: tab === t ? 500 : 400,
   })
 
