@@ -105,9 +105,7 @@ export class ReportsService {
     }
     if (Object.keys(sellerMap).length > 0) {
       const sellerIds = Object.keys(sellerMap);
-      const placeholders = sellerIds.map((_, i) => '
-  }
-} + (i + 1)).join(',');
+      const placeholders = sellerIds.map((_, i) => `${i + 1}`).join(',');
       const users = await this.saleRepo.query('SELECT id, name FROM users WHERE id IN (' + placeholders + ')', sellerIds);
       for (const u of users) {
         if (sellerMap[u.id]) sellerMap[u.id].name = u.name;
