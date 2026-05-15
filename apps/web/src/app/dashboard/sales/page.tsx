@@ -14,8 +14,15 @@ export default function SalesPage() {
   const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState("active")
   const [form, setForm] = useState<any>(emptyForm())
+  const [primary, setPrimary] = useState("#1D9E75")
 
-  useEffect(() => { loadSales(); loadProducts() }, [])
+  useEffect(() => {
+    loadSales(); loadProducts()
+    try {
+      const c = localStorage.getItem("storeConfig")
+      if (c) { const p = JSON.parse(c); if (p.primaryColor) setPrimary(p.primaryColor) }
+    } catch {}
+  }, [])
 
   async function loadSales() {
     try { const r = await api.get("/sales"); setSales(r.data) }
@@ -51,10 +58,7 @@ export default function SalesPage() {
     } catch (e: any) {
       const msg = e?.response?.data?.message || "Erro ao salvar venda"
       alert(typeof msg === "string" ? msg : JSON.stringify(msg))
-      console.error(e)
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   async function cancelSale(id: string) {
@@ -86,17 +90,24 @@ export default function SalesPage() {
 
   const total = form.items.reduce((a: number, i: any) => a + (+i.quantity || 0) * (+i.unitPrice || 0), 0) - form.discount
   const inputStyle: any = { padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", background: "white", width: "100%", boxSizing: "border-box" }
-
   const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Credito", debit_card: "Debito" }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <style>{`
+        .sale-item-desktop { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; }
+        .sale-item-mobile { display: none; }
+        @media (max-width: 767px) {
+          .sale-item-desktop { display: none; }
+          .sale-item-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; }
+        }
+      `}</style>
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ fontSize: "14px", fontWeight: 500 }}>Vendas</div>
-        <button onClick={() => setShowForm(!showForm)} style={{ background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Nova Venda</button>
+        <button onClick={() => setShowForm(!showForm)} style={{ background: primary, color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Nova Venda</button>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
         {showForm && (
           <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
             <h3 style={{ marginBottom: "16px", fontWeight: 500, fontSize: "15px" }}>Nova Venda</h3>
@@ -132,64 +143,60 @@ export default function SalesPage() {
             <div style={{ marginBottom: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                 <label style={{ fontSize: "12px", color: "#666" }}>Itens da venda</label>
-                <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
+                <button onClick={addItem} style={{ background: "none", border: `1px solid ${primary}`, color: primary, borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
               </div>
               <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } .item-grid-mobile { display: none; } .item-headers-desktop { } @media (max-width: 767px) { .item-grid { display: none; } .item-grid-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; } .item-headers-desktop { display: none; } }`}</style>
-                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 60px 90px 32px", gap: "6px", marginBottom: "6px" }} className="item-grid item-headers-desktop">{["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
+                <div className="sale-item-desktop" style={{ marginBottom: "6px" }}>
+                  {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
                 </div>
                 {form.items.map((item: any, i: number) => (
-                  <>
-                  <div key={i + "d"} className="item-grid">
-                    {item.isManual ? (
-                      <div style={{ display: "flex", gap: "4px" }}>
-                        <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle, flex: 1 }} />
-                        <button onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem(), quantity: it[i].quantity }; setForm({ ...form, items: it }) }} title="Voltar para selecao" style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "14px", color: "#666" }}>&#8617;</button>
-                      </div>
-                    ) : (
-                      <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
-                        <option value="">Selecione um produto</option>
-                        {products.map((p: any) => (
-                          <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)} ({p.stock} un)</option>
-                        ))}
-                        <option value="__manual__">Digitar manualmente</option>
-                      </select>
-                    )}
-                    <input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} />
-                    <input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} />
-                    <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>x</button>
-                  </div>
-                  <div key={i + "m"} className="item-grid-mobile">
-                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                      <div style={{ flex: 1 }}>
-                        {item.isManual ? (
-                          <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle }} />
-                        ) : (
-                          <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
-                            <option value="">Selecione um produto</option>
-                            {products.map((p: any) => (
-                              <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)}</option>
-                            ))}
-                            <option value="__manual__">Digitar manualmente</option>
-                          </select>
-                        )}
-                      </div>
-                      <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700, padding: "8px 10px" }}>x</button>
+                  <div key={i}>
+                    <div className="sale-item-desktop">
+                      {item.isManual ? (
+                        <div style={{ display: "flex", gap: "4px" }}>
+                          <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle, flex: 1 }} />
+                          <button onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem(), quantity: it[i].quantity }; setForm({ ...form, items: it }) }} style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "14px", color: "#666" }}>&#8617;</button>
+                        </div>
+                      ) : (
+                        <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
+                          <option value="">Selecione um produto</option>
+                          {products.map((p: any) => <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)} ({p.stock} un)</option>)}
+                          <option value="__manual__">Digitar manualmente</option>
+                        </select>
+                      )}
+                      <input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} />
+                      <input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} />
+                      <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>x</button>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                      <div><label style={{ fontSize: "11px", color: "#888" }}>Qtd</label><input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} /></div>
-                      <div><label style={{ fontSize: "11px", color: "#888" }}>Preco (R$)</label><input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} /></div>
+                    <div className="sale-item-mobile">
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <div style={{ flex: 1 }}>
+                          {item.isManual ? (
+                            <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={inputStyle} />
+                          ) : (
+                            <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
+                              <option value="">Selecione um produto</option>
+                              {products.map((p: any) => <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)}</option>)}
+                              <option value="__manual__">Digitar manualmente</option>
+                            </select>
+                          )}
+                        </div>
+                        <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700, padding: "8px 10px" }}>x</button>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                        <div><label style={{ fontSize: "11px", color: "#888" }}>Qtd</label><input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} /></div>
+                        <div><label style={{ fontSize: "11px", color: "#888" }}>Preco (R$)</label><input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} /></div>
+                      </div>
                     </div>
                   </div>
-                  </>
                 ))}
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "#1D9E75" }}>Total: {fmt(total)}</div>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: primary }}>Total: {fmt(total)}</div>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button onClick={() => { setShowForm(false); setForm(emptyForm()) }} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-                <button onClick={saveSale} disabled={saving} style={{ padding: "8px 20px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: 500 }}>
+                <button onClick={saveSale} disabled={saving} style={{ padding: "8px 20px", background: saving ? "#9ca3af" : primary, color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: 500 }}>
                   {saving ? "Salvando..." : "Salvar Venda"}
                 </button>
               </div>
@@ -205,7 +212,7 @@ export default function SalesPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
               {[["active","Concluidas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l]) => (
-                <button key={v} onClick={() => setFilter(v)} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: filter === v ? "#1D9E75" : "white", color: filter === v ? "white" : "#666" }}>{l}</button>
+                <button key={v} onClick={() => setFilter(v)} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: filter === v ? primary : "white", color: filter === v ? "white" : "#666" }}>{l}</button>
               ))}
             </div>
             {sales.filter((s: any) => filter === "all" || s.status === filter || (filter === "active" && s.status === "completed")).map((s: any) => (
@@ -216,8 +223,8 @@ export default function SalesPage() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : "#1D9E75", fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
-                    <div style={{ fontSize: "11px", color: s.status === "completed" ? "#1D9E75" : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
+                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : primary, fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
+                    <div style={{ fontSize: "11px", color: s.status === "completed" ? primary : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
                   </div>
                   {s.status !== "cancelled" && (
                     <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
