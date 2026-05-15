@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
@@ -13,6 +13,9 @@ export default function SuperAdminPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name:"", email:"", phone:"", document:"", plan:"basic", password:"" })
   const [stats, setStats] = useState({ total:0, active:0, blocked:0, trial:0 })
+  const [resetModal, setResetModal] = useState<{companyId:string, name:string}|null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => { if (!isAuthenticated) loadUser(); loadCompanies() }, [])
 
@@ -38,6 +41,19 @@ export default function SuperAdminPage() {
       loadCompanies()
       alert("Empresa criada! O cliente ja pode fazer login.")
     } catch (e:any) { alert("Erro: " + (e?.response?.data?.message || "verifique o console")) }
+  }
+
+  async function resetPassword() {
+    if (!newPassword || newPassword.length < 6) return alert("Senha deve ter ao menos 6 caracteres")
+    if (!resetModal) return
+    setResetting(true)
+    try {
+      await api.patch(`/companies/${resetModal.companyId}/reset-password`, { password: newPassword })
+      alert("Senha redefinida com sucesso!")
+      setResetModal(null)
+      setNewPassword("")
+    } catch { alert("Erro ao redefinir senha") }
+    finally { setResetting(false) }
   }
 
   async function toggleStatus(id: string, status: string) {
@@ -158,6 +174,7 @@ export default function SuperAdminPage() {
                             {co.status==="active"?"Bloquear":"Reativar"}
                           </button>
                           <button onClick={()=>deleteCompany(co.id,co.name)} style={{padding:"6px 12px",border:"1px solid #ef4444",color:"white",background:"#ef4444",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Excluir</button>
+                          <button onClick={()=>{setResetModal({companyId:co.id,name:co.name});setNewPassword("")}} style={{padding:"6px 12px",border:"1px solid #f59e0b",color:"#f59e0b",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Senha</button>
                         </td>
                       </tr>
                     ))}
@@ -216,6 +233,21 @@ export default function SuperAdminPage() {
 
         </div>
       </main>
+
+      {resetModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"360px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
+            <h3 style={{fontWeight:500,marginBottom:"8px"}}>Redefinir Senha</h3>
+            <p style={{fontSize:"13px",color:"#888",marginBottom:"16px"}}>Empresa: <strong>{resetModal.name}</strong></p>
+            <label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>Nova senha</label>
+            <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Minimo 6 caracteres" style={{width:"100%",padding:"10px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",marginBottom:"16px",boxSizing:"border-box"}} />
+            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
+              <button onClick={()=>{setResetModal(null);setNewPassword("")}} style={{padding:"9px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
+              <button onClick={resetPassword} disabled={resetting} style={{padding:"9px 16px",background:resetting?"#9ca3af":"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>{resetting?"Salvando...":"Redefinir"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

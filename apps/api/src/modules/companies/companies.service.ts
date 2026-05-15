@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+﻿import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { Company } from "./company.entity"
@@ -49,6 +49,19 @@ export class CompaniesService {
   }
 
   findOne(id: string) { return this.repo.findOne({ where:{ id } }) }
+
+  async resetPassword(id: string, password: string) {
+    const stores = await this.repo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
+    for (const store of stores) {
+      const users = await this.userRepo.query(`SELECT id FROM users WHERE "storeId" = $1`, [store.id])
+      for (const u of users) {
+        const bcrypt = require("bcryptjs")
+        const hashed = await bcrypt.hash(password, 12)
+        await this.userRepo.query(`UPDATE users SET password = $1 WHERE id = $2`, [hashed, u.id])
+      }
+    }
+    return { message: "Senha redefinida com sucesso" }
+  }
 
   async remove(id: string) {
     const stores = await this.repo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
