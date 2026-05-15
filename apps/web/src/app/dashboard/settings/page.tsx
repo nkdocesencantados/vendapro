@@ -1,4 +1,4 @@
-"use client" // v2
+﻿"use client" // v2
 import { useEffect, useRef, useState } from "react"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
@@ -42,8 +42,8 @@ export default function SettingsPage() {
     try {
       await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
       localStorage.setItem("storeConfig", JSON.stringify({ name: store.name, primaryColor: store.primaryColor }))
-      // Forca reload para aplicar no layout
-      window.location.reload()
+      localStorage.setItem("storeConfig_ts", Date.now().toString())
+      window.location.href = "/dashboard"
     } catch (e: any) {
       console.error(e)
       alert("Erro ao salvar: " + (e?.response?.data?.message || e.message || "verifique o console"))
