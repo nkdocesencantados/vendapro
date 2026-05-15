@@ -109,16 +109,14 @@ export default function DashboardPage() {
               <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px"}}>
                 <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Vendas por dia</div>
                 {(d.dailyChart||[]).length > 0 ? (
-                  <div style={{display:"flex",alignItems:"flex-end",gap:"6px",height:"100px"}}>
+                  <div style={{display:"flex",alignItems:"flex-end",gap:"4px",height:"120px",paddingBottom:"20px",position:"relative"}}>
                     {(d.dailyChart||[]).map((x:any) => {
                       const max = Math.max(...(d.dailyChart||[]).map((v:any) => v.value), 1)
                       const h = Math.max((x.value/max)*100, 4)
                       return (
-                        <div key={x.day} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}>
-                          <div style={{flex:1,display:"flex",alignItems:"flex-end",width:"100%"}}>
-                            <div style={{width:"100%",background:primary,borderRadius:"4px 4px 0 0",height:h+"%"}} title={fmt(x.value)} />
-                          </div>
-                          <div style={{fontSize:"9px",color:"#888"}}>{x.day}</div>
+                        <div key={x.day} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",height:"100%"}}>
+                          <div style={{width:"100%",background:primary,borderRadius:"4px 4px 0 0",height:h+"%",minHeight:"4px"}} title={fmt(x.value)} />
+                          <div style={{fontSize:"9px",color:"#888",marginTop:"4px",whiteSpace:"nowrap"}}>{x.day}</div>
                         </div>
                       )
                     })}
