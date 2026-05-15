@@ -148,21 +148,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
-            {(d.sellerRanking||[]).length > 0 && (
-              <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
-                <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Ranking de Vendedores</div>
-                {(d.sellerRanking||[]).slice(0,5).map((s:any,i:number) => (
-                  <div key={s.name} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}}>
-                    <div style={{width:"24px",height:"24px",background:i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#b45309":primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"11px",fontWeight:700,flexShrink:0}}>{i+1}</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:"13px",fontWeight:500}}>{s.name}</div>
-                      <div style={{fontSize:"11px",color:"#888"}}>{s.count} venda{s.count!==1?"s":""}</div>
-                    </div>
-                    <div style={{fontSize:"13px",color:primary,fontWeight:600}}>{fmt(s.total)}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+            }
           </>
         )}
       </div>
