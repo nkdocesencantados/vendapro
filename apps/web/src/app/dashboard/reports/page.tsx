@@ -139,7 +139,7 @@ export default function ReportsPage() {
               <>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px", marginBottom: "20px" }}>
                   {[
-                    { label: "Faturamento", value: fmt(d.totalRevenue || 0), color: primary, sub: `${d.totalSales || 0} vendas` },
+                    { label: "Faturamento", value: fmt(d.totalRevenue || 0), color: "#1D9E75", sub: `${d.totalSales || 0} vendas` },
                     { label: "Ticket Medio", value: fmt(d.avgTicket || 0), color: "#3b82f6", sub: "por venda" },
                     { label: "Lucro Estimado", value: fmt(d.estimatedProfit || 0), color: "#8b5cf6", sub: "margem estimada" },
                     { label: "Produtos Parados", value: String(d.slowProducts || 0), color: "#f59e0b", sub: "sem movimento" },
@@ -191,7 +191,7 @@ export default function ReportsPage() {
                   <div key={p.name} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "8px", padding: "10px 0", borderTop: "0.5px solid #f3f4f6", alignItems: "center" }}>
                     <div><div style={{ fontSize: "13px", fontWeight: 500 }}>{p.name}</div><div style={{ fontSize: "11px", color: "#888" }}>{p.category || "Sem categoria"}</div></div>
                     <div style={{ textAlign: "center", fontSize: "13px" }}>{p.quantity} un</div>
-                    <div style={{ textAlign: "right", fontSize: "13px", color: primary, fontWeight: 600 }}>{fmt(p.revenue)}</div>
+                    <div style={{ textAlign: "right", fontSize: "13px", color: "#1D9E75", fontWeight: 600 }}>{fmt(p.revenue)}</div>
                     <div style={{ textAlign: "right" }}><div style={{ fontSize: "12px", color: "#666" }}>{d.totalRevenue > 0 ? Math.round((p.revenue / d.totalRevenue) * 100) : 0}%</div><Bar value={p.revenue} max={maxProduct} color="#3b82f6" /></div>
                   </div>
                 ))}
