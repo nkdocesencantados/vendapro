@@ -36,6 +36,9 @@ export default function SalesPage() {
   }
 
   async function saveSale() {
+    const saleDate = new Date(form.saleDate)
+    const today = new Date(); today.setHours(23,59,59,999)
+    if (saleDate > today) return alert("Nao e possivel registrar vendas em datas futuras")
     const validItems = form.items.filter((i: any) => i.name && +i.unitPrice > 0)
     if (!validItems.length) return alert("Adicione ao menos um produto com preco")
     setSaving(true)
