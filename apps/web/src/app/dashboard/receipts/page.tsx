@@ -9,6 +9,7 @@ export default function ReceiptsPage() {
   const [selected, setSelected] = useState<any>(null)
   const [search, setSearch] = useState("")
   const [showReceipt, setShowReceipt] = useState(false)
+  const [storeName, setStoreName] = useState(() => { try { const c = localStorage.getItem("storeConfig"); if (c) { const p = JSON.parse(c); if (p.name) return p.name } } catch {} return "VendaPro" })
 
   useEffect(() => { loadSales() }, [])
 
