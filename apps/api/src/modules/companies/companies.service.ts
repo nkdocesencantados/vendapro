@@ -52,15 +52,11 @@ export class CompaniesService {
 
   findOne(id: string) { return this.repo.findOne({ where:{ id } }) }
   async remove(id: string) {
-    // Busca stores da empresa
-    const stores = await this.storeRepo.find({ where: { companyId: id } } as any)
+    const stores = await this.storeRepo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
     for (const store of stores) {
-      // Remove usuarios da store
-      await this.userRepo.delete({ storeId: store.id } as any)
+      await this.userRepo.query(`DELETE FROM users WHERE "storeId" = $1`, [store.id])
     }
-    // Remove stores
-    await this.storeRepo.delete({ companyId: id } as any)
-    // Remove empresa
+    await this.storeRepo.query(`DELETE FROM stores WHERE "companyId" = $1`, [id])
     await this.repo.delete(id)
     return { message: "Empresa excluida" }
   }
