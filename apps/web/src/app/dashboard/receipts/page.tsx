@@ -32,7 +32,7 @@ export default function ReceiptsPage() {
     const mid = W / 2
     let y = 8
     doc.setFontSize(13); doc.setFont("helvetica","bold")
-    doc.text("VendaPro", mid, y, { align: "center" }); y += 6
+    doc.text(storeName, mid, y, { align: "center" }); y += 6
     doc.setFontSize(8); doc.setFont("helvetica","normal")
     doc.text("Comprovante de Venda", mid, y, { align: "center" }); y += 5
     doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
@@ -120,7 +120,7 @@ export default function ReceiptsPage() {
               </div>
               <div id="receipt-content" style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "24px" }}>
                 <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                  <div style={{ fontWeight: 700, fontSize: "18px" }}>VendaPro</div>
+                  <div style={{ fontWeight: 700, fontSize: "18px" }}>{storeName}</div>
                   <div style={{ fontSize: "12px", color: "#888" }}>Comprovante de Venda</div>
                 </div>
                 <div style={{ borderTop: "1px dashed #e5e7eb", borderBottom: "1px dashed #e5e7eb", padding: "12px 0", marginBottom: "12px" }}>
