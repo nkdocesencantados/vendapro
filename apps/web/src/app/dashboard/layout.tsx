@@ -6,14 +6,14 @@ import { useAuthStore } from "@/contexts/auth.store"
 import { api } from "@/lib/api"
 
 const MENU_ALL = [
-  { label: "Dashboard", href: "/dashboard", roles: ["store_owner","admin","manager","seller"] },
-  { label: "Vendas", href: "/dashboard/sales", roles: ["store_owner","admin","manager","seller"] },
-  { label: "Estoque", href: "/dashboard/inventory", roles: ["store_owner","admin","manager"] },
-  { label: "Caixa", href: "/dashboard/cash", roles: ["store_owner","admin","manager"] },
-  { label: "Relatorios", href: "/dashboard/reports", roles: ["store_owner","admin","manager"] },
-  { label: "Recibos", href: "/dashboard/receipts", roles: ["store_owner","admin","manager","seller"] },
-  { label: "Equipe", href: "/dashboard/team", roles: ["store_owner","admin","manager"] },
-  { label: "Config", href: "/dashboard/settings", roles: ["store_owner","admin","manager"] },
+  { label: "📊 Dashboard", href: "/dashboard", roles: ["store_owner","admin","manager","seller"] },
+  { label: "🛒 Vendas", href: "/dashboard/sales", roles: ["store_owner","admin","manager","seller"] },
+  { label: "📦 Estoque", href: "/dashboard/inventory", roles: ["store_owner","admin","manager"] },
+  { label: "💰 Caixa", href: "/dashboard/cash", roles: ["store_owner","admin","manager"] },
+  { label: "📈 Relatorios", href: "/dashboard/reports", roles: ["store_owner","admin","manager"] },
+  { label: "🧾 Recibos", href: "/dashboard/receipts", roles: ["store_owner","admin","manager","seller"] },
+  { label: "👥 Equipe", href: "/dashboard/team", roles: ["store_owner","admin","manager"] },
+  { label: "⚙️ Config", href: "/dashboard/settings", roles: ["store_owner","admin","manager"] },
 ]
 
 function darken(hex: string, amount = 0.5): string {
