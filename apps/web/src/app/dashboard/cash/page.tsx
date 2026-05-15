@@ -208,7 +208,7 @@ export default function CashPage() {
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <span style={{ fontSize: "10px", color: "#aaa", width: "60px" }}>{MONTHS[compareMonth - 1].slice(0, 3)}</span>
-                          <Bar value={item.prev} max={max} color="#d1d5db" height={10} />
+                          <Bar value={item.prev} max={max} color="#94a3b8" height={10} />
                           <span style={{ fontSize: "11px", color: "#aaa", width: "70px", textAlign: "right" }}>{fmt(item.prev)}</span>
                         </div>
                       </div>
