@@ -135,9 +135,8 @@ export default function SalesPage() {
                 <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
               </div>
               <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } .item-grid-mobile { display: none; } @media (max-width: 767px) { .item-grid { display: none; } .item-grid-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; } }`}</style>
-                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 60px 90px 32px", gap: "6px", marginBottom: "6px" }} className="item-grid">
-                  {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
+                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } .item-grid-mobile { display: none; } .item-headers-desktop { } @media (max-width: 767px) { .item-grid { display: none; } .item-grid-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; } .item-headers-desktop { display: none; } }`}</style>
+                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 60px 90px 32px", gap: "6px", marginBottom: "6px" }} className="item-grid item-headers-desktop">{["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
                 </div>
                 {form.items.map((item: any, i: number) => (
                   <>
