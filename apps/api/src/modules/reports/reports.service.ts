@@ -69,7 +69,7 @@ export class ReportsService {
       dailyMap[day].value += Number(s.total);
       dailyMap[day].count += 1;
     }
-    const dailyChart = Object.entries(dailyMap).map(([day, v]) => ({ day, ...v }));
+    const dailyChart = Object.entries(dailyMap).map(([day, v]) => ({ day, ...v })).sort((a, b) => { const [da, ma] = a.day.split('/').map(Number); const [db, mb] = b.day.split('/').map(Number); return new Date(2026, mb-1, db).getTime() - new Date(2026, ma-1, da).getTime(); });
 
     const paymentMap: Record<string, number> = {};
     for (const s of sales) {
