@@ -140,7 +140,7 @@ export default function DashboardPage() {
                 <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Top Produtos</div>
                 {(d.topProducts||[]).slice(0,5).map((p:any,i:number) => (
                   <div key={p.name} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}}>
-                    <div style={{width:"20px",height:"20px",background:"#1D9E75",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"10px",flexShrink:0}}>{i+1}</div>
+                    <div style={{fontSize:"18px",flexShrink:0,width:"24px",textAlign:"center"}}>{i===0?"🏆":i===1?"🥈":i===2?"🥉":"➕"}</div>
                     <div style={{flex:1,fontSize:"13px"}}>{p.name}</div>
                     <div style={{fontSize:"12px",color:"#888",marginRight:"8px"}}>{p.quantity} un</div>
                     <div style={{fontSize:"13px",color:"#1D9E75",fontWeight:600}}>{fmt(p.revenue)}</div>
