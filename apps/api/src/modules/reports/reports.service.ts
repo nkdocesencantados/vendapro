@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+﻿import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "../sales/sale.entity";
@@ -13,15 +13,19 @@ export class ReportsService {
     @InjectRepository(Product) private productRepo: Repository<Product>,
   ) {}
 
-  async dashboard(storeId: string) {
+  async dashboard(storeId: string, sellerId?: string) {
     const now = new Date();
     const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
     const todayEnd = new Date(now); todayEnd.setHours(23,59,59,999);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
-    const todaySales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(todayStart, todayEnd) } });
-    const monthSales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(monthStart, monthEnd) } });
+    const todayWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(todayStart, todayEnd) };
+    const monthWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(monthStart, monthEnd) };
+    if (sellerId) { todayWhere.sellerId = sellerId; monthWhere.sellerId = sellerId; }
+
+    const todaySales = await this.saleRepo.find({ where: todayWhere });
+    const monthSales = await this.saleRepo.find({ where: monthWhere });
 
     const todayTotal = todaySales.reduce((a, s) => a + Number(s.total), 0);
     const monthTotal = monthSales.reduce((a, s) => a + Number(s.total), 0);
@@ -33,7 +37,9 @@ export class ReportsService {
       const d = new Date(); d.setDate(d.getDate() - i);
       const start = new Date(d); start.setHours(0,0,0,0);
       const end = new Date(d); end.setHours(23,59,59,999);
-      const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) } });
+      const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) };
+      if (sellerId) weekWhere.sellerId = sellerId;
+      const sales = await this.saleRepo.find({ where: weekWhere });
       weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { weekday: "short" }), value: sales.reduce((a, s) => a + Number(s.total), 0) });
     }
 
@@ -42,11 +48,13 @@ export class ReportsService {
     return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * 0.263), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart };
   }
 
-  async advanced(storeId: string, from: string, to: string) {
+  async advanced(storeId: string, from: string, to: string, sellerId?: string) {
     const fromDate = new Date(from); fromDate.setHours(0,0,0,0);
     const toDate = new Date(to); toDate.setHours(23,59,59,999);
 
-    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(fromDate, toDate) } });
+    const advWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(fromDate, toDate) };
+    if (sellerId) advWhere.sellerId = sellerId;
+    const sales = await this.saleRepo.find({ where: advWhere });
     const totalRevenue = sales.reduce((a, s) => a + Number(s.total), 0);
     const totalSales = sales.length;
     const avgTicket = totalSales ? totalRevenue / totalSales : 0;
