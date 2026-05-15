@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -58,11 +58,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const r = await api.get("/stores")
       const s = Array.isArray(r.data) ? r.data[0] : r.data
       if (s) {
-        if (s.primaryColor) setPrimary(s.primaryColor)
+        if (s.primaryColor) { setPrimary(s.primaryColor) }
         if (s.name) { setStoreName(s.name); setInitials(s.name.slice(0, 2).toUpperCase()) }
         localStorage.setItem("storeConfig", JSON.stringify({ name: s.name, primaryColor: s.primaryColor }))
       }
-    } catch {}
+    } catch {
+      // fallback para cache local se API falhar
+      const cached = localStorage.getItem("storeConfig")
+      if (cached) {
+        try {
+          const c = JSON.parse(cached)
+          if (c.primaryColor) setPrimary(c.primaryColor)
+          if (c.name) { setStoreName(c.name); setInitials(c.name.slice(0, 2).toUpperCase()) }
+        } catch {}
+      }
+    }
   }
 
   function handleLogout() { logout(); router.push("/login") }

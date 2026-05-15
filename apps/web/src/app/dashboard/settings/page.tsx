@@ -40,10 +40,11 @@ export default function SettingsPage() {
   async function saveStore() {
     if (!storeId) return alert("ID da loja nao encontrado")
     try {
-      await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
+      const res = await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
+      const saved = res.data
       localStorage.removeItem("storeConfig")
-      localStorage.setItem("storeConfig", JSON.stringify({ name: store.name, primaryColor: store.primaryColor }))
-      setTimeout(() => { window.location.reload() }, 100)
+      localStorage.setItem("storeConfig", JSON.stringify({ name: saved.name || store.name, primaryColor: saved.primaryColor || store.primaryColor }))
+      setTimeout(() => { window.location.reload() }, 200)
     } catch (e: any) {
       console.error(e)
       alert("Erro ao salvar: " + (e?.response?.data?.message || e.message || "verifique o console"))
