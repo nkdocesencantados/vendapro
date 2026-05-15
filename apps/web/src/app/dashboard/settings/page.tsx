@@ -14,7 +14,7 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
   const [storeId, setStoreId] = useState("")
-  const [store, setStore] = useState({ name: "", primaryColor: "#1D9E75" })
+  const [store, setStore] = useState({ name: "", primaryColor: "#1D9E75", monthlyGoal: "" })
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" })
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "" })
   const colorRef = useRef<HTMLInputElement>(null)
@@ -27,7 +27,7 @@ export default function SettingsPage() {
       const s = Array.isArray(r.data) ? r.data[0] : r.data
       if (s) {
         setStoreId(s.id)
-        setStore({ name: s?.name || "", primaryColor: s?.primaryColor || "#1D9E75" })
+        setStore({ name: s?.name || "", primaryColor: s?.primaryColor || "#1D9E75", monthlyGoal: s?.monthlyGoal ? String(s.monthlyGoal) : "" })
       }
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -36,10 +36,10 @@ export default function SettingsPage() {
   async function saveStore() {
     if (!storeId) return alert("ID da loja nao encontrado")
     try {
-      const res = await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
+      const res = await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor, monthlyGoal: store.monthlyGoal ? Number(store.monthlyGoal) : 0 })
       const saved = res.data
       localStorage.removeItem("storeConfig")
-      localStorage.setItem("storeConfig", JSON.stringify({ name: saved.name || store.name, primaryColor: saved.primaryColor || store.primaryColor }))
+      localStorage.setItem("storeConfig", JSON.stringify({ name: saved.name || store.name, primaryColor: saved.primaryColor || store.primaryColor, monthlyGoal: saved.monthlyGoal || store.monthlyGoal }))
       setTimeout(() => { window.location.reload() }, 200)
     } catch (e: any) {
       console.error(e)
@@ -91,6 +91,11 @@ export default function SettingsPage() {
               <label style={{ fontSize: "12px", color: "#666" }}>Nome da loja</label>
               <input value={store.name} onChange={e => setStore({ ...store, name: e.target.value })} placeholder="Ex: Boutique Ana" style={inputStyle} />
               <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>Aparece no topo do menu lateral</div>
+            </div>
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ fontSize: "12px", color: "#666" }}>Meta mensal (R$)</label>
+              <input type="number" value={store.monthlyGoal} onChange={e => setStore({ ...store, monthlyGoal: e.target.value })} placeholder="Ex: 20000" style={inputStyle} />
+              <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>Aparece no dashboard como meta de faturamento</div>
             </div>
 
             <div style={{ marginBottom: "20px" }}>

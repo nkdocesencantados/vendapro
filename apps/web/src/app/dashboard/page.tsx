@@ -9,6 +9,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [primary, setPrimary] = useState("#1D9E75")
+  const [monthlyGoal, setMonthlyGoal] = useState(20000)
   const now = new Date()
   const [from, setFrom] = useState(new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0])
   const [to, setTo] = useState(now.toISOString().split("T")[0])
@@ -17,7 +18,7 @@ export default function DashboardPage() {
   useEffect(() => {
     try {
       const c = localStorage.getItem("storeConfig")
-      if (c) { const p = JSON.parse(c); if (p.primaryColor) setPrimary(p.primaryColor) }
+      if (c) { const p = JSON.parse(c); if (p.primaryColor) setPrimary(p.primaryColor); if (p.monthlyGoal) setMonthlyGoal(Number(p.monthlyGoal)) }
     } catch {}
   }, [])
 
@@ -43,7 +44,7 @@ export default function DashboardPage() {
   }
 
   const d = data || {}
-  const pct = Math.min(Math.round(((d.totalRevenue || 0) / 20000) * 100), 100)
+  const pct = Math.min(Math.round(((d.totalRevenue || 0) / monthlyGoal) * 100), 100)
   const dailyChart = d.dailyChart || []
   const maxVal = Math.max(...dailyChart.map((x: any) => x.value), 1)
 
@@ -95,7 +96,7 @@ export default function DashboardPage() {
             <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px",flexWrap:"wrap",gap:"4px"}}>
                 <span style={{fontSize:"13px",fontWeight:500}}>Meta mensal</span>
-                <span style={{fontSize:"12px",color:"#1D9E75",fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(20000)} ({pct}%)</span>
+                <span style={{fontSize:"12px",color:"#1D9E75",fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(monthlyGoal)} ({pct}%)</span>
               </div>
               <div style={{height:"8px",background:"#E1F5EE",borderRadius:"4px"}}>
                 <div style={{height:"100%",background:"#1D9E75",borderRadius:"4px",width:pct+"%",transition:"width 0.5s"}} />
