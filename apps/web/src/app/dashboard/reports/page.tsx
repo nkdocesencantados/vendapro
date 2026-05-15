@@ -67,7 +67,7 @@ export default function ReportsPage() {
   async function exportCsv() {
     if (!data) return
     const rows = [
-      ["Relatorio VendaPro â€” " + from + " a " + to],
+      ["Relatorio VendaPro - " + from + " a " + to],
       [],
       ["RESUMO"],
       ["Faturamento", fmt(data.totalRevenue)],
