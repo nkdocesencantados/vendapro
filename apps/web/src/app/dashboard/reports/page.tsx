@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt } from "@/lib/utils"
@@ -67,7 +67,7 @@ export default function ReportsPage() {
   async function exportCsv() {
     if (!data) return
     const rows = [
-      ["Relatorio VendaPro — " + from + " a " + to],
+      ["Relatorio VendaPro â€” " + from + " a " + to],
       [],
       ["RESUMO"],
       ["Faturamento", fmt(data.totalRevenue)],
@@ -135,7 +135,7 @@ export default function ReportsPage() {
           <>
             {tab === "overview" && (
               <>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "12px", marginBottom: "20px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px", marginBottom: "20px" }}>
                   {[
                     { label: "Faturamento", value: fmt(d.totalRevenue || 0), color: "#1D9E75", sub: `${d.totalSales || 0} vendas` },
                     { label: "Ticket Medio", value: fmt(d.avgTicket || 0), color: "#3b82f6", sub: "por venda" },
@@ -149,7 +149,7 @@ export default function ReportsPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
                   <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
                     <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>Vendas por dia</div>
                     {dailyChart.length === 0 && <div style={{ color: "#888", fontSize: "13px" }}>Sem dados no periodo</div>}
@@ -199,7 +199,7 @@ export default function ReportsPage() {
 
             {tab === "sales" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px" }}>
                   {[
                     { label: "Total de vendas", value: String(d.totalSales || 0), suffix: "vendas" },
                     { label: "Maior venda", value: fmt(d.maxSale || 0), suffix: "" },
@@ -229,7 +229,7 @@ export default function ReportsPage() {
 
             {tab === "finance" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px" }}>
                   {[
                     { label: "Receita total", value: fmt(d.totalRevenue || 0), color: "#1D9E75" },
                     { label: "Custo estimado", value: fmt((d.totalRevenue || 0) * 0.6), color: "#ef4444" },

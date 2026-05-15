@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt } from "@/lib/utils"
@@ -158,7 +158,7 @@ export default function CashPage() {
         {loading ? <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Carregando...</div> : (
           <>
             {/* CARDS PRINCIPAIS */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "12px", marginBottom: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "10px", marginBottom: "16px" }}>
               {[
                 { label: "Receitas", value: data.income, compare: compareData.income, color: "#1D9E75", change: incomeChange },
                 { label: "Despesas", value: data.expense, compare: compareData.expense, color: "#ef4444", change: expenseChange },
@@ -218,7 +218,7 @@ export default function CashPage() {
               </div>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", marginBottom: "16px" }}>
               {/* DESPESAS POR CATEGORIA */}
               <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
                 <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>Despesas por categoria</div>
