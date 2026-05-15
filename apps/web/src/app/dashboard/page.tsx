@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
 import { fmt } from "@/lib/utils"
 import { useAuthStore } from "@/contexts/auth.store"
-import Link from "next/link"
 
 export default function DashboardPage() {
   const { user } = useAuthStore()
@@ -28,7 +27,7 @@ export default function DashboardPage() {
       const r = await api.get(`/reports/advanced?from=${from}&to=${to}`)
       setData(r.data)
     } catch {
-      setData({ totalRevenue:0, totalSales:0, estimatedProfit:0, avgTicket:0, topProducts:[], dailyChart:[] })
+      setData({ totalRevenue:0, totalSales:0, estimatedProfit:0, avgTicket:0, topProducts:[], dailyChart:[], sellerRanking:[] })
     } finally { setLoading(false) }
   }, [from, to])
 
@@ -44,7 +43,9 @@ export default function DashboardPage() {
   }
 
   const d = data || {}
-  const pct = d.monthGoal > 0 ? Math.min(Math.round((d.totalRevenue / 20000) * 100), 100) : Math.min(Math.round(((d.totalRevenue || 0) / 20000) * 100), 100)
+  const pct = Math.min(Math.round(((d.totalRevenue || 0) / 20000) * 100), 100)
+  const dailyChart = d.dailyChart || []
+  const maxVal = Math.max(...dailyChart.map((x: any) => x.value), 1)
 
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden"}}>
@@ -60,8 +61,6 @@ export default function DashboardPage() {
         <div style={{fontSize:"14px",fontWeight:500,color:"#111"}}>Dashboard</div>
         <div style={{fontSize:"11px",color:"#666"}}>{new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}</div>
       </div>
-
-      {/* FILTRO */}
       <div style={{background:"white",borderBottom:"0.5px solid #e5e7eb",padding:"10px 16px",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap",flexShrink:0}}>
         <button onClick={() => applyPreset("month")} style={{padding:"5px 12px",fontSize:"12px",border:"0.5px solid #e5e7eb",borderRadius:"6px",cursor:"pointer",background:preset==="month"?primary:"white",color:preset==="month"?"white":"#666"}}>Este mes</button>
         <button onClick={() => setPreset("custom")} style={{padding:"5px 12px",fontSize:"12px",border:"0.5px solid #e5e7eb",borderRadius:"6px",cursor:"pointer",background:preset==="custom"?primary:"white",color:preset==="custom"?"white":"#666"}}>Personalizado</button>
@@ -74,7 +73,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-
       <div style={{flex:1,overflowY:"auto",padding:"16px"}}>
         {loading ? (
           <div style={{textAlign:"center",padding:"40px",color:"#888"}}>Carregando...</div>
@@ -94,7 +92,6 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-
             <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px",flexWrap:"wrap",gap:"4px"}}>
                 <span style={{fontSize:"13px",fontWeight:500}}>Meta mensal</span>
@@ -104,19 +101,17 @@ export default function DashboardPage() {
                 <div style={{height:"100%",background:primary,borderRadius:"4px",width:pct+"%",transition:"width 0.5s"}} />
               </div>
             </div>
-
             <div className="dash-mid">
               <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px"}}>
                 <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Vendas por dia</div>
-                {(d.dailyChart||[]).length > 0 ? (
-                  <div style={{display:"flex",alignItems:"flex-end",gap:"4px",height:"120px",paddingBottom:"20px",position:"relative"}}>
-                    {(d.dailyChart||[]).slice().reverse().map((x:any) => {
-                      const max = Math.max(...(d.dailyChart||[]).map((v:any) => v.value), 1)
-                      const h = Math.max((x.value/max)*100, 4)
+                {dailyChart.length > 0 ? (
+                  <div style={{display:"flex",alignItems:"flex-end",gap:"2px",height:"140px"}}>
+                    {dailyChart.map((x: any) => {
+                      const barH = Math.max(Math.round((x.value / maxVal) * 100), 5)
                       return (
-                        <div key={x.day} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",height:"100%"}}>
-                          <div style={{width:"100%",background:primary,borderRadius:"4px 4px 0 0",height:h+"%",minHeight:"4px"}} title={fmt(x.value)} />
-                          <div style={{fontSize:"9px",color:"#888",marginTop:"4px",whiteSpace:"nowrap"}}>{x.day}</div>
+                        <div key={x.day} style={{minWidth:"16px",flex:1,display:"flex",flexDirection:"column",alignItems:"center",height:"100%",justifyContent:"flex-end"}}>
+                          <div style={{width:"100%",background:primary,borderRadius:"3px 3px 0 0",height:barH+"%"}} title={fmt(x.value)} />
+                          <div style={{fontSize:"8px",color:"#888",marginTop:"3px",textAlign:"center"}}>{x.day}</div>
                         </div>
                       )
                     })}
@@ -139,9 +134,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-              </div>
             </div>
-
             {(d.topProducts||[]).length > 0 && (
               <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
                 <div style={{fontSize:"13px",fontWeight:500,marginBottom:"14px"}}>Top Produtos</div>
@@ -163,7 +156,7 @@ export default function DashboardPage() {
                     <div style={{width:"24px",height:"24px",background:i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#b45309":primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"11px",fontWeight:700,flexShrink:0}}>{i+1}</div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:"13px",fontWeight:500}}>{s.name}</div>
-                      <div style={{fontSize:"11px",color:"#888"}}>{s.count} venda{s.count !== 1 ? "s" : ""}</div>
+                      <div style={{fontSize:"11px",color:"#888"}}>{s.count} venda{s.count!==1?"s":""}</div>
                     </div>
                     <div style={{fontSize:"13px",color:primary,fontWeight:600}}>{fmt(s.total)}</div>
                   </div>
