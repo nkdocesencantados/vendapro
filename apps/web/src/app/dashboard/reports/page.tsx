@@ -1,5 +1,5 @@
 ﻿"use client"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt } from "@/lib/utils"
 
@@ -13,6 +13,8 @@ function Bar({ value, max, color = "#1D9E75" }: any) {
 }
 
 export default function ReportsPage() {
+  const [primary, setPrimary] = React.useState("#1D9E75")
+  React.useEffect(() => { try { const cfg = localStorage.getItem("storeConfig"); if (cfg) { const p = JSON.parse(cfg); if (p.primaryColor) setPrimary(p.primaryColor) } } catch {} }, [])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState("overview")
   const [data, setData] = useState<any>(null)
@@ -112,7 +114,7 @@ export default function ReportsPage() {
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "10px 20px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
         <button onClick={() => setPreset("year")} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Este ano</button>
         <div style={{ marginLeft: "auto", display: "flex", gap: "6px" }}>
-          <button onClick={exportPdf} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #1D9E75", borderRadius: "6px", cursor: "pointer", background: "white", color: "#1D9E75" }}>PDF</button>
+          <button onClick={exportPdf} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #1D9E75", borderRadius: "6px", cursor: "pointer", background: "white", color: primary }}>PDF</button>
           <button onClick={exportCsv} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>CSV</button>
           <button onClick={() => window.print()} style={{ padding: "5px 10px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: "white", color: "#666" }}>Imprimir</button>
         </div>
@@ -137,7 +139,7 @@ export default function ReportsPage() {
               <>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px", marginBottom: "20px" }}>
                   {[
-                    { label: "Faturamento", value: fmt(d.totalRevenue || 0), color: "#1D9E75", sub: `${d.totalSales || 0} vendas` },
+                    { label: "Faturamento", value: fmt(d.totalRevenue || 0), color: primary, sub: `${d.totalSales || 0} vendas` },
                     { label: "Ticket Medio", value: fmt(d.avgTicket || 0), color: "#3b82f6", sub: "por venda" },
                     { label: "Lucro Estimado", value: fmt(d.estimatedProfit || 0), color: "#8b5cf6", sub: "margem estimada" },
                     { label: "Produtos Parados", value: String(d.slowProducts || 0), color: "#f59e0b", sub: "sem movimento" },
@@ -165,12 +167,12 @@ export default function ReportsPage() {
                     <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>Top 5 Produtos</div>
                     {topProducts.slice(0, 5).map((p: any, i: number) => (
                       <div key={p.name} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                        <div style={{ width: "20px", height: "20px", background: "#1D9E75", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "10px", flexShrink: 0 }}>{i + 1}</div>
+                        <div style={{ width: "20px", height: "20px", background: primary, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "10px", flexShrink: 0 }}>{i + 1}</div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "12px", fontWeight: 500 }}>{p.name}</div>
                           <Bar value={p.revenue} max={maxProduct} />
                         </div>
-                        <div style={{ fontSize: "12px", color: "#1D9E75", fontWeight: 600, flexShrink: 0 }}>{fmt(p.revenue)}</div>
+                        <div style={{ fontSize: "12px", color: primary, fontWeight: 600, flexShrink: 0 }}>{fmt(p.revenue)}</div>
                       </div>
                     ))}
                     {topProducts.length === 0 && <div style={{ color: "#888", fontSize: "13px" }}>Sem dados no periodo</div>}
@@ -189,7 +191,7 @@ export default function ReportsPage() {
                   <div key={p.name} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "8px", padding: "10px 0", borderTop: "0.5px solid #f3f4f6", alignItems: "center" }}>
                     <div><div style={{ fontSize: "13px", fontWeight: 500 }}>{p.name}</div><div style={{ fontSize: "11px", color: "#888" }}>{p.category || "Sem categoria"}</div></div>
                     <div style={{ textAlign: "center", fontSize: "13px" }}>{p.quantity} un</div>
-                    <div style={{ textAlign: "right", fontSize: "13px", color: "#1D9E75", fontWeight: 600 }}>{fmt(p.revenue)}</div>
+                    <div style={{ textAlign: "right", fontSize: "13px", color: primary, fontWeight: 600 }}>{fmt(p.revenue)}</div>
                     <div style={{ textAlign: "right" }}><div style={{ fontSize: "12px", color: "#666" }}>{d.totalRevenue > 0 ? Math.round((p.revenue / d.totalRevenue) * 100) : 0}%</div><Bar value={p.revenue} max={maxProduct} color="#3b82f6" /></div>
                   </div>
                 ))}
@@ -207,7 +209,7 @@ export default function ReportsPage() {
                   ].map(m => (
                     <div key={m.label} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
                       <div style={{ fontSize: "12px", color: "#888", marginBottom: "6px" }}>{m.label}</div>
-                      <div style={{ fontSize: "22px", fontWeight: 700, color: "#1D9E75" }}>{m.value}</div>
+                      <div style={{ fontSize: "22px", fontWeight: 700, color: primary }}>{m.value}</div>
                       {m.suffix && <div style={{ fontSize: "11px", color: "#aaa" }}>{m.suffix}</div>}
                     </div>
                   ))}
@@ -231,7 +233,7 @@ export default function ReportsPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "12px" }}>
                   {[
-                    { label: "Receita total", value: fmt(d.totalRevenue || 0), color: "#1D9E75" },
+                    { label: "Receita total", value: fmt(d.totalRevenue || 0), color: primary },
                     { label: "Custo estimado", value: fmt((d.totalRevenue || 0) * 0.6), color: "#ef4444" },
                     { label: "Lucro estimado", value: fmt(d.estimatedProfit || 0), color: "#8b5cf6" },
                   ].map(m => (
