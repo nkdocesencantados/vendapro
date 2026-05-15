@@ -27,7 +27,8 @@ function darken(hex: string, amount = 0.5): string {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const { user, logout, loadUser, isAuthenticated } = useAuthStore()
+  const [authChecked, setAuthChecked] = useState(false)
   const [primary, setPrimary] = useState("#1D9E75")
   const [storeName, setStoreName] = useState("VendaPro")
   const [initials, setInitials] = useState("VP")
@@ -35,6 +36,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isMobile, setIsMobile] = useState(false)
 
   const role = (user as any)?.role || "store_owner"
+  useEffect(() => {
+    const check = async () => {
+      if (!isAuthenticated) {
+        await loadUser()
+      }
+      setAuthChecked(true)
+    }
+    check()
+  }, [])
+  useEffect(() => {
+    if (authChecked && !isAuthenticated) {
+      router.push("/login")
+    }
+  }, [authChecked, isAuthenticated])
   const MENU = MENU_ALL.filter(item => item.roles.includes(role))
 
   useEffect(() => {
