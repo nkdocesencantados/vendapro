@@ -27,6 +27,13 @@ export default function CashPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ type: "expense", category: "other", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true })
   const [saving, setSaving] = useState(false)
+  const [primary, setPrimary] = useState("#1D9E75")
+  useEffect(() => {
+    try {
+      const c = localStorage.getItem("storeConfig")
+      if (c) { const p = JSON.parse(c); if (p.primaryColor) setPrimary(p.primaryColor) }
+    } catch {}
+  }, [])
 
   useEffect(() => { loadData() }, [month, year])
   useEffect(() => { if (showCompare) loadCompareData() }, [compareMonth, compareYear, showCompare])
