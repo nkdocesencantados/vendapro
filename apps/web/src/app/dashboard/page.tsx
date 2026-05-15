@@ -125,7 +125,7 @@ export default function DashboardPage() {
                 {(d.sellerRanking||[]).length === 0 && <div style={{color:"#ccc",fontSize:"13px",textAlign:"center",padding:"20px 0"}}>Sem dados no periodo</div>}
                 {(d.sellerRanking||[]).slice(0,5).map((s:any,i:number) => (
                   <div key={s.name} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}}>
-                    <div style={{width:"24px",height:"24px",background:i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#b45309":primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"11px",fontWeight:700,flexShrink:0}}>{i+1}</div>
+                    <div style={{width:"24px",height:"24px",background:i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#b45309":primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"14px",fontWeight:700,flexShrink:0}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:"13px",fontWeight:500}}>{s.name}</div>
                       <div style={{fontSize:"11px",color:"#888"}}>{s.count} venda{s.count!==1?"s":""}</div>
