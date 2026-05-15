@@ -23,14 +23,10 @@ export default function SettingsPage() {
 
   async function loadStore() {
     try {
-      const authRaw = localStorage.getItem("auth-storage")
-      const auth = authRaw ? JSON.parse(authRaw) : null
-      const sid = auth?.state?.user?.storeId || (user as any)?.storeId
-      if (!sid) { setLoading(false); return }
-      setStoreId(sid)
-      const r = await api.get(`/stores/${sid}`)
-      const s = r.data
+      const r = await api.get("/stores")
+      const s = Array.isArray(r.data) ? r.data[0] : r.data
       if (s) {
+        setStoreId(s.id)
         setStore({ name: s?.name || "", primaryColor: s?.primaryColor || "#1D9E75" })
       }
     } catch (e) { console.error(e) }
