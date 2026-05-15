@@ -42,8 +42,7 @@ export default function SettingsPage() {
     try {
       await api.patch(`/stores/${storeId}`, { name: store.name, primaryColor: store.primaryColor })
       localStorage.setItem("storeConfig", JSON.stringify({ name: store.name, primaryColor: store.primaryColor }))
-      localStorage.setItem("storeConfig_ts", Date.now().toString())
-      window.location.href = "/dashboard"
+      window.location.replace(window.location.href.split("?")[0] + "?t=" + Date.now())
     } catch (e: any) {
       console.error(e)
       alert("Erro ao salvar: " + (e?.response?.data?.message || e.message || "verifique o console"))
