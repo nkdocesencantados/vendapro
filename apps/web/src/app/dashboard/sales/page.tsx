@@ -135,7 +135,7 @@ export default function SalesPage() {
                 <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
               </div>
               <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } @media (max-width: 767px) { .item-grid { grid-template-columns: 1fr 50px 80px 32px; } .item-headers { display: none !important; } }`}</style>
+                <style>{`.item-grid { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; } @media (max-width: 767px) { .item-grid { grid-template-columns: 1fr 48px 72px 32px; gap: 4px; } .item-headers { display: none !important; } }`}</style>
                 <div className="item-grid item-headers" style={{ marginBottom: "6px" }}>
                   {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
                 </div>
