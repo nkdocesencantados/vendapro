@@ -7,8 +7,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [primary, setPrimary] = useState("#1D9E75")
-  const [form, setForm] = useState({ name:"", email:"", password:"", role:"seller", phone:"", commissionRate:15 })
-  const [editCommission, setEditCommission] = useState(null)
+  const [form, setForm] = useState({ name:"", email:"", password:"", role:"seller", phone:"" })
 
   useEffect(() => {
     loadTeam()
@@ -26,40 +25,19 @@ export default function TeamPage() {
     try {
       await api.post("/users", form)
       setShowForm(false)
-      setForm({ name:"", email:"", password:"", role:"seller", phone:"", commissionRate:15 })
+      setForm({ name:"", email:"", password:"", role:"seller", phone:"" })
       loadTeam()
       alert("Funcionario salvo!")
     } catch { alert("Erro ao salvar") }
   }
 
-  async function saveCommission() {
-    if (!editCommission) return
-    try {
-      await api.patch("/users/" + editCommission.id, { commissionRate: Number(editCommission.rate) })
-      setEditCommission(null)
-      loadTeam()
-    } catch { alert("Erro ao salvar comissao") }
-  }
 
   const roleLabel = { seller:"Vendedor", manager:"Gerente", admin:"Admin", store_owner:"Dono da Loja", super_admin:"Super Admin" }
   const filtered = team.filter((u) => u.role !== "super_admin")
 
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-      {editCommission && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"320px"}}>
-            <h3 style={{fontWeight:500,marginBottom:"8px"}}>Editar Comissao</h3>
-            <p style={{fontSize:"13px",color:"#888",marginBottom:"16px"}}>{editCommission.name}</p>
-            <label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>Comissao (%)</label>
-            <input type="number" min="0" max="100" value={editCommission.rate} onChange={e=>setEditCommission({...editCommission,rate:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginBottom:"16px",boxSizing:"border-box"}} />
-            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-              <button onClick={()=>setEditCommission(null)} style={{padding:"8px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
-              <button onClick={saveCommission} style={{padding:"8px 16px",background:primary,color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Salvar</button>
-            </div>
-          </div>
-        </div>
-      )}
+
       <div style={{background:"white",borderBottom:"0.5px solid #e5e7eb",padding:"0 20px",height:"50px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div style={{fontSize:"14px",fontWeight:500}}>Equipe</div>
         <button onClick={()=>setShowForm(true)} style={{background:primary,color:"white",border:"none",borderRadius:"8px",padding:"7px 14px",fontSize:"13px",cursor:"pointer"}}>+ Novo Funcionario</button>
@@ -93,10 +71,7 @@ export default function TeamPage() {
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:"12px",background:"#E1F5EE",color:"#0F6E56",padding:"3px 8px",borderRadius:"20px",marginBottom:"4px"}}>{roleLabel[u.role]||u.role}</div>
-                  <div style={{display:"flex",alignItems:"center",gap:"6px",justifyContent:"flex-end"}}>
-                    <span style={{fontSize:"11px",color:"#1D9E75",fontWeight:500}}>{u.commissionRate ? u.commissionRate+"% comissao" : "Sem comissao"}</span>
-                    <button onClick={()=>setEditCommission({id:u.id,name:u.name,rate:String(u.commissionRate||0)})} style={{fontSize:"10px",color:"#888",background:"none",border:"0.5px solid #e5e7eb",borderRadius:"4px",padding:"1px 6px",cursor:"pointer"}}>editar</button>
-                  </div>
+
                 </div>
               </div>
             ))}
