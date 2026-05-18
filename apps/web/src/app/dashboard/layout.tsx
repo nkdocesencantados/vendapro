@@ -28,7 +28,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout, loadUser, isAuthenticated } = useAuthStore()
-  const [authChecked, setAuthChecked] = useState(false)
   const [primary, setPrimary] = useState("#1D9E75")
   const [storeName, setStoreName] = useState("VendaPro")
   const [initials, setInitials] = useState("VP")
@@ -36,20 +35,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isMobile, setIsMobile] = useState(false)
 
   const role = (user as any)?.role || "store_owner"
+  const [hydrated, setHydrated] = useState(false)
   useEffect(() => {
-    const check = async () => {
-      if (!isAuthenticated) {
-        await loadUser()
-      }
-      setAuthChecked(true)
-    }
-    check()
+    setHydrated(true)
   }, [])
   useEffect(() => {
-    if (authChecked && !isAuthenticated) {
-      router.push("/login")
+    if (!hydrated) return
+    if (!user && !isAuthenticated) {
+      loadUser().then(() => {
+        if (!useAuthStore.getState().isAuthenticated) {
+          router.push("/login")
+        }
+      })
     }
-  }, [authChecked, isAuthenticated])
+  }, [hydrated])
   const MENU = MENU_ALL.filter(item => item.roles.includes(role))
 
   useEffect(() => {
