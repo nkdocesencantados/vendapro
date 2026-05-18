@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
@@ -8,7 +8,7 @@ export default function TeamPage() {
   const [showForm, setShowForm] = useState(false)
   const [primary, setPrimary] = useState("#1D9E75")
   const [form, setForm] = useState({ name:"", email:"", password:"", role:"seller", phone:"", commissionRate:15 })
-  const [editCommission, setEditCommission] = useState<{id:string,name:string,rate:string}|null>(null)
+  const [editCommission, setEditCommission] = useState(null)
 
   useEffect(() => {
     loadTeam()
@@ -41,8 +41,8 @@ export default function TeamPage() {
     } catch { alert("Erro ao salvar comissao") }
   }
 
-  const roleLabel: any = { seller:"Vendedor", manager:"Gerente", admin:"Admin", store_owner:"Dono da Loja", super_admin:"Super Admin" }
-  const filtered = (team as any[]).filter((u: any) => u.role !== "super_admin")
+  const roleLabel = { seller:"Vendedor", manager:"Gerente", admin:"Admin", store_owner:"Dono da Loja", super_admin:"Super Admin" }
+  const filtered = team.filter((u) => u.role !== "super_admin")
 
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
@@ -70,7 +70,7 @@ export default function TeamPage() {
             <h3 style={{marginBottom:"16px",fontWeight:500}}>Novo Funcionario</h3>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}}>
               {[["Nome","name","text"],["Email","email","email"],["Senha","password","password"],["Telefone","phone","text"],["Comissao %","commissionRate","number"]].map(([label,field,type]) => (
-                <div key={field}><label style={{fontSize:"12px",color:"#666"}}>{label}</label><input type={type} value={(form as any)[field]} onChange={e=>setForm({...form,[field]:type==="number"?+e.target.value:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px",boxSizing:"border-box"}} /></div>
+                <div key={field}><label style={{fontSize:"12px",color:"#666"}}>{label}</label><input type={type} value={form[field]} onChange={e=>setForm({...form,[field]:type==="number"?+e.target.value:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px",boxSizing:"border-box"}} /></div>
               ))}
               <div><label style={{fontSize:"12px",color:"#666"}}>Cargo</label><select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}}><option value="seller">Vendedor</option><option value="manager">Gerente</option><option value="admin">Admin</option></select></div>
             </div>
@@ -84,7 +84,7 @@ export default function TeamPage() {
           <div style={{textAlign:"center",color:"#888",padding:"60px"}}>Nenhum funcionario cadastrado.</div>
         ) : (
           <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
-            {filtered.map((u:any) => (
+            {filtered.map((u) => (
               <div key={u.id} style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"10px",padding:"14px 16px",display:"flex",alignItems:"center",gap:"12px"}}>
                 <div style={{width:"36px",height:"36px",background:primary,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:600,flexShrink:0}}>{u.name?.charAt(0)}</div>
                 <div style={{flex:1}}>
@@ -92,9 +92,9 @@ export default function TeamPage() {
                   <div style={{fontSize:"12px",color:"#888"}}>{u.email}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:"12px",background:"#E1F5EE",color:"#0F6E56",padding:"3px 8px",borderRadius:"20px"}}>{roleLabel[u.role]||u.role}</div>
-                  <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"4px"}}>
-                    <span style={{fontSize:"11px",color:"#1D9E75",fontWeight:500}}>{u.commissionRate ? "Comissao: "+u.commissionRate+"%" : "Sem comissao"}</span>
+                  <div style={{fontSize:"12px",background:"#E1F5EE",color:"#0F6E56",padding:"3px 8px",borderRadius:"20px",marginBottom:"4px"}}>{roleLabel[u.role]||u.role}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px",justifyContent:"flex-end"}}>
+                    <span style={{fontSize:"11px",color:"#1D9E75",fontWeight:500}}>{u.commissionRate ? u.commissionRate+"% comissao" : "Sem comissao"}</span>
                     <button onClick={()=>setEditCommission({id:u.id,name:u.name,rate:String(u.commissionRate||0)})} style={{fontSize:"10px",color:"#888",background:"none",border:"0.5px solid #e5e7eb",borderRadius:"4px",padding:"1px 6px",cursor:"pointer"}}>editar</button>
                   </div>
                 </div>
@@ -103,7 +103,6 @@ export default function TeamPage() {
           </div>
         )}
       </div>
-    </div>
     </div>
   )
 }
