@@ -25,7 +25,7 @@ export default function CashPage() {
   const [compareData, setCompareData] = useState<any>({ income: 0, expense: 0, profit: 0, entries: [] })
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ type: "expense", category: "other", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true })
+  const [form, setForm] = useState({ type: "expense", category: "", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true })
   const [saving, setSaving] = useState(false)
   const [primary, setPrimary] = useState("#1D9E75")
   useEffect(() => {

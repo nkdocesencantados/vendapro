@@ -69,7 +69,7 @@ export default function TeamPage() {
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:"12px",background:"#E1F5EE",color:"#0F6E56",padding:"3px 8px",borderRadius:"20px"}}>{roleLabel[u.role]||u.role}</div>
-                  {u.commissionRate > 0 && <div style={{fontSize:"11px",color:"#888",marginTop:"4px"}}>Comissao: {u.commissionRate}%</div>}
+                  {u.commissionRate > 0 && <div style={{fontSize:"11px",color:"#888",marginTop:"4px"}}>Comissao: {u.commissionRate ? u.commissionRate+"%" : "Nao definida"}</div>}
                 </div>
               </div>
             ))}
