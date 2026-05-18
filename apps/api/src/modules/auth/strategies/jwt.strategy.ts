@@ -8,7 +8,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'vendapro-secret',
+      secretOrKey: process.env.JWT_SECRET || 'vp-fallback-' + (process.env.DATABASE_URL || 'local').slice(-8),
     });
   }
   async validate(payload: any) {

@@ -14,7 +14,7 @@ import { User } from '../users/user.entity';
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'vendapro-secret',
-      signOptions: { expiresIn: '7d' },
+      signOptions: { expiresIn: '24h' },
     }),
   ],
   controllers: [AuthController],

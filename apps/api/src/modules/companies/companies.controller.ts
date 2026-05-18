@@ -2,7 +2,8 @@
 import { ApiTags, ApiBearerAuth } from "@nestjs/swagger"
 import { CompaniesService } from "./companies.service"
 import { JwtAuthGuard } from "../auth/guards/local-auth.guard"
-@ApiTags("Companies") @ApiBearerAuth() @UseGuards(JwtAuthGuard) @Controller("companies")
+import { SuperAdminGuard } from "../auth/guards/super-admin.guard"
+@ApiTags("Companies") @ApiBearerAuth() @UseGuards(JwtAuthGuard, SuperAdminGuard) @Controller("companies")
 export class CompaniesController {
   constructor(private service: CompaniesService) {}
   @Get() findAll() { return this.service.findAll() }
