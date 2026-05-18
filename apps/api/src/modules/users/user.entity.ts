@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
+﻿import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 
 export enum UserRole {
@@ -38,6 +38,9 @@ export class User {
 
   @Column({ nullable: true })
   storeId: string;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0, nullable: true })
+  commissionRate: number;
 
   @Column({ nullable: true, type: 'timestamp' })
   lastLoginAt: Date;
