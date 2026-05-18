@@ -29,8 +29,8 @@ export class ReportsService {
     const todayTotal = todaySales.reduce((a, s) => a + Number(s.total), 0);
     const monthTotal = monthSales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = todaySales.length ? todayTotal / todaySales.length : 0;
-    const storeData = await this.storeRepo.findOne({ where: { id: storeId } });
-    const monthGoal = storeData?.monthlyGoal ? Number(storeData.monthlyGoal) : 20000;
+    const storeRows = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
+    const monthGoal = storeRows?.[0]?.monthlyGoal ? Number(storeRows[0].monthlyGoal) : 20000;
     const weeklyChart = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
@@ -102,8 +102,8 @@ export class ReportsService {
       }
     }
     const sellerRanking = Object.values(sellerMap).sort((a: any, b: any) => b.total - a.total);
-    const storeInfo = await this.storeRepo.findOne({ where: { id: storeId } });
-    const monthlyGoal = storeInfo?.monthlyGoal ? Number(storeInfo.monthlyGoal) : 20000;
+    const storeRows2 = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
+    const monthlyGoal = storeRows2?.[0]?.monthlyGoal ? Number(storeRows2[0].monthlyGoal) : 20000;
     return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal };
   }
 }
