@@ -134,12 +134,20 @@ export default function CashPage() {
               <div>
                 <label style={{ fontSize: "12px", color: "#666" }}>Categoria</label>
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={inputStyle}>
-                  <option value="sale">Venda</option>
-                  <option value="rent">Aluguel</option>
-                  <option value="salary">Salario</option>
-                  <option value="supplier">Fornecedor</option>
-                  <option value="tax">Imposto</option>
-                  <option value="other">Outro</option>
+                  <option value="">Selecione...</option>
+                  {form.type === "income" ? <>
+                    <option value="sale">Venda</option>
+                    <option value="service">Servico</option>
+                    <option value="other">Outros</option>
+                  </> : <>
+                    <option value="rent">Aluguel</option>
+                    <option value="salary">Salario</option>
+                    <option value="supplier">Fornecedor</option>
+                    <option value="tax">Imposto</option>
+                    <option value="utilities">Contas</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="other">Outros</option>
+                  </>}
                 </select>
               </div>
               <div>
