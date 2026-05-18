@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "../sales/sale.entity";
+import { Store } from "../stores/store.entity";
 import { SaleItem } from "../sales/sale-item.entity";
 import { Product } from "../products/product.entity";
 
@@ -11,6 +12,7 @@ export class ReportsService {
     @InjectRepository(Sale) private saleRepo: Repository<Sale>,
     @InjectRepository(SaleItem) private itemRepo: Repository<SaleItem>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
+    @InjectRepository(Store) private storeRepo: Repository<Store>,
   ) {}
 
   async dashboard(storeId: string, sellerId?: string) {
@@ -27,7 +29,8 @@ export class ReportsService {
     const todayTotal = todaySales.reduce((a, s) => a + Number(s.total), 0);
     const monthTotal = monthSales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = todaySales.length ? todayTotal / todaySales.length : 0;
-    const monthGoal = 20000;
+    const storeData = await this.storeRepo.findOne({ where: { id: storeId } });
+    const monthGoal = storeData?.monthlyGoal ? Number(storeData.monthlyGoal) : 20000;
     const weeklyChart = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);

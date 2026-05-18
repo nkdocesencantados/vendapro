@@ -23,7 +23,7 @@ export class StoresService {
   }
 
   async update(id: string, data: any) {
-    await this.repo.query(`UPDATE stores SET name = $1, "primaryColor" = $2 WHERE id = $3`, [data.name, data.primaryColor, id]);
+    await this.repo.query(`UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3 WHERE id = $4`, [data.name, data.primaryColor, data.monthlyGoal || 0, id]);
     return this.findOne(id);
   }
 }
