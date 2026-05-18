@@ -165,7 +165,7 @@ export default function CashPage() {
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
               <button onClick={() => setShowForm(false)} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-              <button onClick={saveEntry} disabled={saving} style={{ padding: "8px 16px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>{saving ? "Salvando..." : "Salvar"}</button>
+              <button onClick={saveEntry} disabled={saving} style={{ padding: "8px 16px", background: saving ? "#9ca3af" : primary, color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>{saving ? "Salvando..." : "Salvar"}</button>
             </div>
           </div>
         )}
