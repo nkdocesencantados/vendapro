@@ -247,29 +247,3 @@ export default function SalesPage() {
         )}
       </div>
     </div>
-  return (
-    <>
-      {toast && (
-        <div style={{position:"fixed",top:"16px",right:"16px",zIndex:999,background:"#E1F5EE",border:"1px solid #1D9E75",borderRadius:"10px",padding:"12px 18px",display:"flex",alignItems:"center",gap:"10px",boxShadow:"0 4px 12px rgba(0,0,0,0.1)"}}>
-          <span style={{fontSize:"18px"}}>✅</span>
-          <span style={{fontSize:"13px",color:"#0F6E56",fontWeight:500}}>{toast}</span>
-        </div>
-      )}
-      {cancelConfirm && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"340px"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"12px"}}>
-              <span style={{fontSize:"22px"}}>⚠️</span>
-              <span style={{fontSize:"15px",fontWeight:500}}>Cancelar venda?</span>
-            </div>
-            <p style={{fontSize:"13px",color:"#666",marginBottom:"20px"}}>Esta acao nao pode ser desfeita.</p>
-            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-              <button onClick={()=>setCancelConfirm(null)} style={{padding:"8px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Voltar</button>
-              <button onClick={()=>confirmCancel(cancelConfirm)} style={{padding:"8px 16px",background:"#ef4444",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Sim, cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
