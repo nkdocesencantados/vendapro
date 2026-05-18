@@ -102,6 +102,8 @@ export class ReportsService {
       }
     }
     const sellerRanking = Object.values(sellerMap).sort((a: any, b: any) => b.total - a.total);
-    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking };
+    const storeInfo = await this.storeRepo.findOne({ where: { id: storeId } });
+    const monthlyGoal = storeInfo?.monthlyGoal ? Number(storeInfo.monthlyGoal) : 20000;
+    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal };
   }
 }

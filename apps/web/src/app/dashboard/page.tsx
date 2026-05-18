@@ -44,7 +44,8 @@ export default function DashboardPage() {
   }
 
   const d = data || {}
-  const pct = Math.min(Math.round(((d.totalRevenue || 0) / monthlyGoal) * 100), 100)
+  const goalValue = d.monthlyGoal || monthlyGoal
+  const pct = Math.min(Math.round(((d.totalRevenue || 0) / goalValue) * 100), 100)
   const dailyChart = d.dailyChart || []
   const maxVal = Math.max(...dailyChart.map((x: any) => x.value), 1)
 
@@ -96,7 +97,7 @@ export default function DashboardPage() {
             <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px",marginBottom:"16px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px",flexWrap:"wrap",gap:"4px"}}>
                 <span style={{fontSize:"13px",fontWeight:500}}>Meta mensal</span>
-                <span style={{fontSize:"12px",color:"#1D9E75",fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(monthlyGoal)} ({pct}%)</span>
+                <span style={{fontSize:"12px",color:"#1D9E75",fontWeight:500}}>{fmt(d.totalRevenue||0)} de {fmt(goalValue)} ({pct}%)</span>
               </div>
               <div style={{height:"8px",background:"#E1F5EE",borderRadius:"4px"}}>
                 <div style={{height:"100%",background:"#1D9E75",borderRadius:"4px",width:pct+"%",transition:"width 0.5s"}} />
