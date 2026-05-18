@@ -247,3 +247,5 @@ export default function SalesPage() {
         )}
       </div>
     </div>
+  )
+}
