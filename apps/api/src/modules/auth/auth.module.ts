@@ -7,11 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { User } from '../users/user.entity';
+import { Store } from '../stores/store.entity';
 
 @Module({
   imports: [
     PassportModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Store]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'vendapro-secret',
       signOptions: { expiresIn: '24h' },

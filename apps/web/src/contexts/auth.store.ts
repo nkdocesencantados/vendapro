@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 
 interface User {
   id: string; name: string; email: string;
-  role: string; storeId?: string; permissions?: any;
+  role: string; storeId?: string; permissions?: any; plan?: string;
 }
 
 interface AuthState {

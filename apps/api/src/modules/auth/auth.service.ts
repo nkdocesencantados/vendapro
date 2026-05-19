@@ -4,11 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../users/user.entity';
+import { InjectRepository as IR } from '@nestjs/typeorm';
+import { Repository as Rep } from 'typeorm';
+import { Store } from '../stores/store.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private usersRepo: Repository<User>,
+    @InjectRepository(Store) private storesRepo: Repository<Store>,
     private jwtService: JwtService,
   ) {}
 
@@ -27,10 +31,15 @@ export class AuthService {
 
   async login(user: User) {
     await this.usersRepo.update(user.id, { lastLoginAt: new Date() });
-    const payload = { sub: user.id, email: user.email, role: user.role, storeId: user.storeId };
+    let plan = 'basic';
+    if (user.storeId) {
+      const storeRows = await this.storesRepo.query('SELECT plan FROM stores WHERE id = $1', [user.storeId]);
+      if (storeRows?.[0]?.plan) plan = storeRows[0].plan;
+    }
+    const payload = { sub: user.id, email: user.email, role: user.role, storeId: user.storeId, plan };
     return {
       accessToken: this.jwtService.sign(payload),
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, storeId: user.storeId },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, storeId: user.storeId, plan },
     };
   }
 
