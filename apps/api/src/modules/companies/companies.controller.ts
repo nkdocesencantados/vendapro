@@ -11,4 +11,5 @@ export class CompaniesController {
   @Patch(":id/status") updateStatus(@Param("id") id: string, @Body() body: any) { return this.service.updateStatus(id, body.status) }
   @Delete(":id") remove(@Param("id") id: string) { return this.service.remove(id) }
   @Patch(":id/reset-password") resetPassword(@Param("id") id: string, @Body() body: any) { return this.service.resetPassword(id, body.password) }
+  @Patch(":id/plan") updatePlan(@Param("id") id: string, @Body() body: any) { return this.service.updatePlan(id, body.plan) }
 }

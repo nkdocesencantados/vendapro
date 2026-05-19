@@ -63,6 +63,11 @@ export class CompaniesService {
     return { message: "Senha redefinida com sucesso" }
   }
 
+  async updatePlan(id: string, plan: string) {
+    await this.repo.query(`UPDATE stores SET plan = $1 WHERE "companyId" = $2`, [plan, id])
+    return { message: "Plano atualizado com sucesso" }
+  }
+
   async remove(id: string) {
     const stores = await this.repo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
     for (const s of stores) {
