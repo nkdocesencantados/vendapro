@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -11,7 +11,9 @@ import { SalesModule } from './modules/sales/sales.module';
 import { StockModule } from './modules/stock/stock.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { ReportsModule } from './modules/reports/reports.module';
-import { CompaniesModule } from './modules/companies/companies.module';
+import { CompaniesModule } from './modules/companies/companies.module'
+import { ScheduleModule } from '@nestjs/schedule'
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -34,7 +36,10 @@ import { CompaniesModule } from './modules/companies/companies.module';
     FinancialModule,
     ReportsModule,    
     CompaniesModule,
+    ScheduleModule.forRoot(),
+    SchedulerModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
+

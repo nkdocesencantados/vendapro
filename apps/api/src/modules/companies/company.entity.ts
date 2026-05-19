@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
+﻿import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
 @Entity("companies")
 export class Company {
   @PrimaryGeneratedColumn("uuid") id: string
@@ -9,6 +9,8 @@ export class Company {
   @Column({ default:"basic" }) plan: string
   @Column({ default:"active" }) status: string
   @Column({ nullable:true }) ownerId: string
+  @Column({ nullable:true, type:"timestamp" }) trialEndsAt: Date
   @CreateDateColumn() createdAt: Date
   @UpdateDateColumn() updatedAt: Date
 }
+
