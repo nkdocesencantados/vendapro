@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div className="login-right" style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", background:"#f5f4f0", padding:"24px" }}>
         <div style={{ width:"100%", maxWidth:"400px" }}>
           <div className="login-logo-mobile" style={{ alignItems:"center", gap:"10px", marginBottom:"32px", justifyContent:"center" }}>
-            <div style={{ width:"36px", height:"36px", background:"#1D9E75", borderRadius:"9px", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, color:"white", fontSize:"14px" }}>VP</div>
+            <VendaProLogo size={36} darkColor="#1D9E75" />
             <span style={{ fontSize:"18px", fontWeight:600, color:"#111" }}>VendaPro</span>
           </div>
 
@@ -103,3 +103,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
