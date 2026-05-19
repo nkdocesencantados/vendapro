@@ -112,7 +112,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#f5f4f0" }}>
         <div style={{ background: dark, padding: "0 16px", height: "52px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, zIndex: 50, position: "relative" }}>
           <VendaProLogo size={32} />
-          </div>
           <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: "8px", display: "flex", flexDirection: "column", gap: "5px" }}>
             <div style={{ width: "22px", height: "2px", background: "white", borderRadius: "2px" }} />
             <div style={{ width: "22px", height: "2px", background: "white", borderRadius: "2px" }} />
@@ -197,3 +196,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   )
 }
+
