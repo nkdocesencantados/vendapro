@@ -4,3 +4,5 @@
 dist/
 backups/
 backup.js
+apps/web/.next/
+apps/api/dist/
