@@ -14,6 +14,7 @@ export default function SuperAdminPage() {
   const [form, setForm] = useState({ name:"", email:"", phone:"", document:"", plan:"basic", password:"" })
   const [stats, setStats] = useState({ total:0, active:0, blocked:0, trial:0 })
   const [resetModal, setResetModal] = useState<{companyId:string, name:string}|null>(null)
+  const [planModal, setPlanModal] = useState<{companyId:string, name:string, plan:string}|null>(null)
   const [newPassword, setNewPassword] = useState("")
   const [resetting, setResetting] = useState(false)
 
@@ -41,6 +42,15 @@ export default function SuperAdminPage() {
       loadCompanies()
       alert("Empresa criada! O cliente ja pode fazer login.")
     } catch (e:any) { alert("Erro: " + (e?.response?.data?.message || "verifique o console")) }
+  }
+
+  async function changePlan(plan: string) {
+    if (!planModal) return
+    try {
+      await api.patch(`/companies/${planModal.companyId}/status`, { plan })
+      setPlanModal(null)
+      loadCompanies()
+    } catch { alert("Erro ao alterar plano") }
   }
 
   async function resetPassword() {
@@ -175,6 +185,7 @@ export default function SuperAdminPage() {
                           </button>
                           <button onClick={()=>deleteCompany(co.id,co.name)} style={{padding:"6px 12px",border:"1px solid #ef4444",color:"white",background:"#ef4444",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Excluir</button>
                           <button onClick={()=>{setResetModal({companyId:co.id,name:co.name});setNewPassword("")}} style={{padding:"6px 12px",border:"1px solid #f59e0b",color:"#f59e0b",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Senha</button>
+                          <button onClick={()=>setPlanModal({companyId:co.id,name:co.name,plan:co.plan||"basic"})} style={{padding:"6px 12px",border:"1px solid #3b82f6",color:"#3b82f6",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Plano</button>
                         </td>
                       </tr>
                     ))}
@@ -234,6 +245,31 @@ export default function SuperAdminPage() {
         </div>
       </main>
 
+      {planModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"380px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
+            <h3 style={{fontWeight:500,marginBottom:"8px"}}>Alterar Plano</h3>
+            <p style={{fontSize:"13px",color:"#888",marginBottom:"20px"}}>Empresa: <strong>{planModal.name}</strong></p>
+            <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}}>
+              {[
+                {value:"basic",label:"Basic",desc:"1 usuario, funcionalidades essenciais",color:"#6b7280"},
+                {value:"starter",label:"Starter — R$ 99/mes",desc:"Ate 2 vendedores, relatorios completos",color:"#3b82f6"},
+                {value:"pro",label:"Pro — R$ 149/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
+                {value:"business",label:"Business — R$ 249/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
+              ].map(p => (
+                <div key={p.value} onClick={()=>setPlanModal({...planModal,plan:p.value})} style={{padding:"12px 16px",border:`2px solid ${planModal.plan===p.value?p.color:"#e5e7eb"}`,borderRadius:"10px",cursor:"pointer",background:planModal.plan===p.value?"#f9fafb":"white"}}>
+                  <div style={{fontWeight:500,fontSize:"14px",color:p.color}}>{p.label}</div>
+                  <div style={{fontSize:"12px",color:"#888",marginTop:"2px"}}>{p.desc}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
+              <button onClick={()=>setPlanModal(null)} style={{padding:"9px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
+              <button onClick={()=>changePlan(planModal.plan)} style={{padding:"9px 16px",background:"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Salvar Plano</button>
+            </div>
+          </div>
+        </div>
+      )}
       {resetModal && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"360px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
