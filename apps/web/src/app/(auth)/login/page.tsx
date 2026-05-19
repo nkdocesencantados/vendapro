@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
 
             <div style={{ textAlign:"right", marginBottom:"24px" }}>
-              <a href="mailto:suporte@vendapro.com.br" style={{ fontSize:"13px", color:"#0F6E56", textDecoration:"none" }}>Esqueceu a senha? Fale com o suporte</a>
+              <a href="https://wa.me/5511958924764?text=Ola,%20esqueci%20minha%20senha%20do%20VendaPro" style={{ fontSize:"13px", color:"#0F6E56", textDecoration:"none" }}>Esqueceu a senha? Fale com o suporte</a>
             </div>
 
             <button type="submit" disabled={loading}
@@ -96,13 +96,14 @@ export default function LoginPage() {
           </form>
 
           <p style={{ textAlign:"center", fontSize:"12px", color:"#aaa", marginTop:"28px" }}>
-            Problemas? <a href="mailto:suporte@vendapro.com.br" style={{ color:"#0F6E56" }}>Fale com o suporte</a>
+            Problemas? <a href="https://wa.me/5511958924764?text=Ola,%20preciso%20de%20suporte%20no%20VendaPro" style={{ color:"#0F6E56" }}>Fale com o suporte</a>
           </p>
         </div>
       </div>
     </div>
   );
 }
+
 
 
 
