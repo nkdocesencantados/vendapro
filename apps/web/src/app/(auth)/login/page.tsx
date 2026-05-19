@@ -95,14 +95,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p style={{ textAlign:"center", fontSize:"12px", color:"#aaa", marginTop:"28px" }}>
-            Problemas? <a href="https://wa.me/5511958924764?text=Ola,%20preciso%20de%20suporte%20no%20VendaPro" style={{ color:"#0F6E56" }}>Fale com o suporte</a>
-          </p>
+
         </div>
       </div>
     </div>
   );
 }
+
 
 
 
