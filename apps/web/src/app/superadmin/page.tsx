@@ -86,7 +86,7 @@ export default function SuperAdminPage() {
     <div style={{display:"flex",height:"100vh",fontFamily:"DM Sans, sans-serif",background:"#f5f4f0"}}>
       <aside style={{width:"220px",background:"#04342C",display:"flex",flexDirection:"column",flexShrink:0}}>
         <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:"10px"}}>
-          <VendaProLogo size={32} />
+          <VendaProLogo size={44} />
         </div>
         <nav style={{flex:1,padding:"12px 8px"}}>
           {navItems.map(item => (
@@ -284,6 +284,7 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+
 
 
 

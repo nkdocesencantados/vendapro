@@ -40,7 +40,7 @@ export default function LoginPage() {
       `}</style>
 
       <div className="login-left" style={{ background:"#04342C", flexDirection:"column", justifyContent:"space-between", padding:"64px", color:"white" }}>
-        <VendaProLogo size={38} />
+        <VendaProLogo size={52} />
         <div>
           <h1 style={{ fontSize:"48px", fontWeight:500, lineHeight:1.2, marginBottom:"24px" }}>Gestao inteligente para o seu negocio.</h1>
           <p style={{ color:"#9FE1CB", fontSize:"18px", opacity:0.8 }}>Controle vendas, estoque, equipe e financeiro em um so lugar.</p>
@@ -103,4 +103,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
