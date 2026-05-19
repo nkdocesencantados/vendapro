@@ -43,10 +43,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!hydrated) return
     if (!user && !isAuthenticated) {
       loadUser().then(() => {
-        if (!useAuthStore.getState().isAuthenticated) {
+        const s = useAuthStore.getState()
+        if (!s.isAuthenticated) {
           router.push("/login")
+        } else if ((s.user as any)?.role === "super_admin") {
+          router.push("/superadmin")
         }
       })
+    } else if (isAuthenticated && (user as any)?.role === "super_admin") {
+      router.push("/superadmin")
     }
   }, [hydrated])
   const MENU = MENU_ALL.filter(item => item.roles.includes(role))
