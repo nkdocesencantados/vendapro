@@ -23,6 +23,7 @@ export class CompaniesService {
       document: data.document,
       plan: data.plan || "basic",
       status: "active",
+      trialEndsAt: data.plan === "trial" ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null,
     }))
 
     const storeData = await this.storeRepo.query(
@@ -79,3 +80,4 @@ export class CompaniesService {
     return { message: "Empresa excluida" }
   }
 }
+
