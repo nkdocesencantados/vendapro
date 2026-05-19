@@ -253,9 +253,9 @@ export default function SuperAdminPage() {
             <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}}>
               {[
                 {value:"basic",label:"Basic",desc:"1 usuario, funcionalidades essenciais",color:"#6b7280"},
-                {value:"starter",label:"Starter — R$ 99/mes",desc:"Ate 2 vendedores, relatorios completos",color:"#3b82f6"},
-                {value:"pro",label:"Pro — R$ 149/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
-                {value:"business",label:"Business — R$ 249/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
+                {value:"starter",label:"Starter — R$ 100/mes",desc:"Ate 2 vendedores, relatorios completos",color:"#3b82f6"},
+                {value:"pro",label:"Pro — R$ 150/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
+                {value:"business",label:"Business — R$ 200/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
               ].map(p => (
                 <div key={p.value} onClick={()=>setPlanModal({...planModal,plan:p.value})} style={{padding:"12px 16px",border:`2px solid ${planModal.plan===p.value?p.color:"#e5e7eb"}`,borderRadius:"10px",cursor:"pointer",background:planModal.plan===p.value?"#f9fafb":"white"}}>
                   <div style={{fontWeight:500,fontSize:"14px",color:p.color}}>{p.label}</div>
@@ -287,3 +287,4 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+
