@@ -47,7 +47,7 @@ export default function SuperAdminPage() {
   async function changePlan(plan: string) {
     if (!planModal) return
     try {
-      await api.patch(`/companies/${planModal.companyId}/status`, { plan })
+      await api.patch(`/companies/${planModal.companyId}/plan`, { plan })
       setPlanModal(null)
       loadCompanies()
     } catch { alert("Erro ao alterar plano") }
@@ -69,7 +69,7 @@ export default function SuperAdminPage() {
   async function toggleStatus(id: string, status: string) {
     const newStatus = status==="active" ? "blocked" : "active"
     if (!confirm(newStatus==="blocked" ? "Bloquear esta empresa?" : "Reativar esta empresa?")) return
-    try { await api.patch(`/companies/${id}/status`, { status: newStatus }); loadCompanies() } catch { alert("Erro") }
+    try { await api.patch(`/companies/${id}/plan`, { status: newStatus }); loadCompanies() } catch { alert("Erro") }
   }
 
   async function deleteCompany(id: string, name: string) {
@@ -252,8 +252,8 @@ export default function SuperAdminPage() {
             <p style={{fontSize:"13px",color:"#888",marginBottom:"20px"}}>Empresa: <strong>{planModal.name}</strong></p>
             <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}}>
               {[
-                {value:"basic",label:"Basic",desc:"1 usuario, funcionalidades essenciais",color:"#6b7280"},
-                {value:"starter",label:"Starter — R$ 100/mes",desc:"Ate 2 vendedores, relatorios completos",color:"#3b82f6"},
+                {value:"trial",label:"Trial — 7 dias gratis",desc:"Acesso completo por 7 dias",color:"#f59e0b"},
+                
                 {value:"pro",label:"Pro — R$ 150/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
                 {value:"business",label:"Business — R$ 200/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
               ].map(p => (
