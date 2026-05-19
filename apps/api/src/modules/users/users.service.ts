@@ -1,11 +1,19 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole, UserStatus } from './user.entity';
+import { Store } from '../stores/store.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private repo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private repo: Repository<User>,
+    @InjectRepository(Store) private storeRepo: Repository<Store>,
+  ) {}
+
+  private planLimits: Record<string, number> = {
+    basic: 0, trial: 0, starter: 2, pro: 5, business: 999
+  }
 
   async findAll(storeId?: string) {
     const where = storeId ? { storeId } : {};
@@ -21,6 +29,14 @@ export class UsersService {
   async create(data: Partial<User>) {
     const exists = await this.repo.findOne({ where: { email: data.email } });
     if (exists) throw new ConflictException('Email ja cadastrado');
+    if (data.storeId && data.role === 'seller') {
+      const store = await this.storeRepo.findOne({ where: { id: data.storeId } });
+      if (store) {
+        const limit = this.planLimits[store.plan] ?? 0;
+        const count = await this.repo.count({ where: { storeId: data.storeId, role: 'seller', status: UserStatus.ACTIVE } });
+        if (count >= limit) throw new BadRequestException(Plano \ permite no maximo \ vendedor(es). Faca upgrade para adicionar mais.);
+      }
+    }
     const user = this.repo.create({ ...data, status: UserStatus.ACTIVE });
     return this.repo.save(user);
   }
@@ -37,3 +53,4 @@ export class UsersService {
     return { message: 'Usuario desativado com sucesso' };
   }
 }
+
