@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
 
             <div style={{ textAlign:"right", marginBottom:"24px" }}>
-              <a href="/forgot-password" style={{ fontSize:"13px", color:"#0F6E56", textDecoration:"none" }}>Esqueceu a senha?</a>
+              <a href="mailto:suporte@vendapro.com.br" style={{ fontSize:"13px", color:"#0F6E56", textDecoration:"none" }}>Esqueceu a senha? Fale com o suporte</a>
             </div>
 
             <button type="submit" disabled={loading}
@@ -103,6 +103,8 @@ export default function LoginPage() {
     </div>
   );
 }
+
+
 
 
 
