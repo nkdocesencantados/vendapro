@@ -32,7 +32,7 @@ export default function TeamPage() {
   }
 
 
-  const roleLabel = { seller:"Vendedor", manager:"Gerente", admin:"Admin", store_owner:"Dono da Loja", super_admin:"Super Admin" }
+  const roleLabel = { seller:"Vendedor", store_owner:"Dono da Loja", super_admin:"Super Admin" }
   const filtered = team.filter((u) => u.role !== "super_admin")
 
   return (
@@ -50,7 +50,7 @@ export default function TeamPage() {
               {[["Nome","name","text"],["Email","email","email"],["Senha","password","password"],["Telefone","phone","text"],["Comissao %","commissionRate","number"]].map(([label,field,type]) => (
                 <div key={field}><label style={{fontSize:"12px",color:"#666"}}>{label}</label><input type={type} value={form[field]} onChange={e=>setForm({...form,[field]:type==="number"?+e.target.value:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px",boxSizing:"border-box"}} /></div>
               ))}
-              <div><label style={{fontSize:"12px",color:"#666"}}>Cargo</label><select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}}><option value="seller">Vendedor</option><option value="manager">Gerente</option><option value="admin">Admin</option></select></div>
+              <div><label style={{fontSize:"12px",color:"#666"}}>Cargo</label><select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} style={{width:"100%",padding:"8px",border:"1px solid #e5e7eb",borderRadius:"6px",fontSize:"13px",marginTop:"4px"}}><option value="seller">Vendedor</option></select></div>
             </div>
             <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
               <button onClick={()=>setShowForm(false)} style={{padding:"8px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
