@@ -34,7 +34,7 @@ export class UsersService {
       if (store) {
         const limit = this.planLimits[store.plan] ?? 0;
         const count = await this.repo.count({ where: { storeId: data.storeId, role: 'seller', status: UserStatus.ACTIVE } });
-        if (count >= limit) throw new BadRequestException(Plano \ permite no maximo \ vendedor(es). Faca upgrade para adicionar mais.);
+        if (count >= limit) throw new BadRequestException("Plano " + store.plan + " permite no maximo " + limit + " vendedor(es). Faca upgrade para adicionar mais.");
       }
     }
     const user = this.repo.create({ ...data, status: UserStatus.ACTIVE });
@@ -53,4 +53,5 @@ export class UsersService {
     return { message: 'Usuario desativado com sucesso' };
   }
 }
+
 
