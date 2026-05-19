@@ -165,7 +165,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div style={{ display: "flex", height: "100vh", background: "#f5f4f0" }}>
       <div style={{ width: "220px", background: dark, display: "flex", flexDirection: "column", flexShrink: 0 }}>
         <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <VendaProLogo size={34} />
+          <div style={{ width: "36px", height: "36px", background: primary, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "14px", flexShrink: 0 }}>{initials}</div>
+          <span style={{ color: "white", fontWeight: 600, fontSize: "15px", letterSpacing: "-0.3px" }}>{storeName}</span>
         </div>
         <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: "2px", overflowY: "auto" }}>
           {menuItems.map(item => (
@@ -196,4 +197,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   )
 }
+
 
