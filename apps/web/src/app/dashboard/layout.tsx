@@ -1,4 +1,5 @@
 ﻿"use client"
+import { VendaProLogo } from "@/components/logo"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -110,11 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#f5f4f0" }}>
         <div style={{ background: dark, padding: "0 16px", height: "52px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, zIndex: 50, position: "relative" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "32px", height: "32px", background: primary, borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "13px" }}>
-              {initials}
-            </div>
-            <span style={{ color: "white", fontWeight: 600, fontSize: "14px" }}>{storeName}</span>
+          <VendaProLogo size={32} />
           </div>
           <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", cursor: "pointer", padding: "8px", display: "flex", flexDirection: "column", gap: "5px" }}>
             <div style={{ width: "22px", height: "2px", background: "white", borderRadius: "2px" }} />
@@ -129,8 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "260px", background: dark, display: "flex", flexDirection: "column", zIndex: 201 }}>
               <div style={{ padding: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "32px", height: "32px", background: primary, borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "13px" }}>{initials}</div>
-                  <span style={{ color: "white", fontWeight: 600, fontSize: "14px" }}>{storeName}</span>
+                  <VendaProLogo size={32} />
                 </div>
                 <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "white", cursor: "pointer", fontSize: "20px", padding: "4px" }}>×</button>
               </div>
@@ -170,10 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div style={{ display: "flex", height: "100vh", background: "#f5f4f0" }}>
       <div style={{ width: "220px", background: dark, display: "flex", flexDirection: "column", flexShrink: 0 }}>
         <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <div style={{ width: "36px", height: "36px", background: primary, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "14px", flexShrink: 0 }}>
-            {initials}
-          </div>
-          <span style={{ color: "white", fontWeight: 600, fontSize: "14px", lineHeight: 1.2 }}>{storeName}</span>
+          <VendaProLogo size={34} />
         </div>
         <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: "2px", overflowY: "auto" }}>
           {menuItems.map(item => (

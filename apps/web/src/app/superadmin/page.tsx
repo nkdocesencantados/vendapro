@@ -1,4 +1,5 @@
 ﻿"use client"
+import { VendaProLogo } from "@/components/logo"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
@@ -85,11 +86,7 @@ export default function SuperAdminPage() {
     <div style={{display:"flex",height:"100vh",fontFamily:"DM Sans, sans-serif",background:"#f5f4f0"}}>
       <aside style={{width:"220px",background:"#04342C",display:"flex",flexDirection:"column",flexShrink:0}}>
         <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:"10px"}}>
-          <div style={{width:"36px",height:"36px",background:"#1D9E75",borderRadius:"9px",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:700,fontSize:"13px"}}>SA</div>
-          <div>
-            <div style={{fontSize:"15px",fontWeight:600,color:"white"}}>VendaPro</div>
-            <div style={{fontSize:"10px",color:"#9FE1CB",opacity:0.6}}>Super Admin</div>
-          </div>
+          <VendaProLogo size={32} />
         </div>
         <nav style={{flex:1,padding:"12px 8px"}}>
           {navItems.map(item => (
@@ -287,5 +284,6 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+
 
 

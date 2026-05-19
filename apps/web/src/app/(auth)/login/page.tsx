@@ -1,4 +1,5 @@
 ﻿"use client";
+import { VendaProLogo } from "@/components/logo";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/contexts/auth.store";
@@ -39,10 +40,7 @@ export default function LoginPage() {
       `}</style>
 
       <div className="login-left" style={{ background:"#04342C", flexDirection:"column", justifyContent:"space-between", padding:"64px", color:"white" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-          <div style={{ width:"40px", height:"40px", background:"#1D9E75", borderRadius:"10px", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, color:"white", fontSize:"16px" }}>VP</div>
-          <span style={{ fontSize:"20px", fontWeight:500 }}>VendaPro</span>
-        </div>
+        <VendaProLogo size={38} />
         <div>
           <h1 style={{ fontSize:"48px", fontWeight:500, lineHeight:1.2, marginBottom:"24px" }}>Gestao inteligente para o seu negocio.</h1>
           <p style={{ color:"#9FE1CB", fontSize:"18px", opacity:0.8 }}>Controle vendas, estoque, equipe e financeiro em um so lugar.</p>
