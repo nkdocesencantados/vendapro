@@ -64,6 +64,7 @@ export class CompaniesService {
   }
 
   async updatePlan(id: string, plan: string) {
+    await this.repo.update(id, { plan })
     await this.repo.query(`UPDATE stores SET plan = $1 WHERE "companyId" = $2`, [plan, id])
     return { message: "Plano atualizado com sucesso" }
   }
