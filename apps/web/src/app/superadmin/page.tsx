@@ -48,7 +48,7 @@ export default function SuperAdminPage() {
   async function changePlan(plan: string) {
     if (!planModal) return
     try {
-      await api.patch(`/companies/${planModal.companyId}/plan`, { plan })
+      await api.patch(`/companies/${planModal.companyId}/plan`, { plan }); alert("Plano alterado com sucesso!")
       setPlanModal(null)
       loadCompanies()
     } catch { alert("Erro ao alterar plano") }
@@ -78,8 +78,8 @@ export default function SuperAdminPage() {
     try { await api.delete(`/companies/${id}`); loadCompanies() } catch { alert("Erro ao excluir") }
   }
 
-  const planLabel: any = { trial:"Trial", basic:"Basic", pro:"Pro", enterprise:"Enterprise" }
-  const planColor: any = { trial:"#f59e0b", basic:"#3b82f6", pro:"#8b5cf6", enterprise:"#1D9E75" }
+  const planLabel: any = { trial:"Trial", basic:"Basic", starter:"Starter", pro:"Pro", business:"Business", enterprise:"Enterprise" }
+  const planColor: any = { trial:"#f59e0b", basic:"#6b7280", starter:"#3b82f6", pro:"#8b5cf6", business:"#1D9E75", enterprise:"#1D9E75" }
   const navItems = ["Empresas","Assinaturas","Relatorios"]
 
   return (
@@ -284,6 +284,7 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+
 
 
 
