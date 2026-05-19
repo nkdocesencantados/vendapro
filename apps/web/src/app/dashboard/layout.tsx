@@ -11,10 +11,10 @@ const MENU_ALL = [
   { label: "🛒 Vendas", href: "/dashboard/sales", roles: ["store_owner","seller"], plans: ["basic","starter","pro","business"] },
   { label: "📦 Estoque", href: "/dashboard/inventory", roles: ["store_owner"], plans: ["basic","starter","pro","business"] },
   { label: "🧾 Recibos", href: "/dashboard/receipts", roles: ["store_owner","seller"], plans: ["basic","starter","pro","business"] },
-  { label: "⚙️ Config", href: "/dashboard/settings", roles: ["store_owner"], plans: ["basic","starter","pro","business"] },
   { label: "💰 Caixa", href: "/dashboard/cash", roles: ["store_owner"], plans: ["starter","pro","business"] },
   { label: "📈 Relatorios", href: "/dashboard/reports", roles: ["store_owner"], plans: ["starter","pro","business"] },
   { label: "👥 Equipe", href: "/dashboard/team", roles: ["store_owner"], plans: ["starter","pro","business"] },
+  { label: "⚙️ Config", href: "/dashboard/settings", roles: ["store_owner"], plans: ["basic","starter","pro","business"] },
 ]
 
 function darken(hex: string, amount = 0.5): string {
@@ -197,5 +197,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   )
 }
+
 
 
