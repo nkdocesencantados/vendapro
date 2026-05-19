@@ -252,7 +252,7 @@ export default function SuperAdminPage() {
             <p style={{fontSize:"13px",color:"#888",marginBottom:"20px"}}>Empresa: <strong>{planModal.name}</strong></p>
             <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}}>
               {[
-                {value:"trial",label:"Trial — 7 dias gratis",desc:"Acesso completo por 7 dias",color:"#f59e0b"},
+                {value:"trial",label:"Trial — 7 dias gratis",desc:"Acesso completo por 7 dias",color:"#f59e0b"},{value:"basic",label:"Basic — R$ 100/mes",desc:"Funcionalidades essenciais",color:"#6b7280"},
                 
                 {value:"pro",label:"Pro — R$ 150/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
                 {value:"business",label:"Business — R$ 200/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
@@ -287,4 +287,5 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+
 
