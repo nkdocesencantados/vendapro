@@ -262,7 +262,7 @@ export default function SalesPage() {
                     </div>
                   )}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginLeft: "12px" }}>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : primary, fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
                     <div style={{ fontSize: "11px", color: s.status === "completed" ? primary : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
@@ -270,6 +270,7 @@ export default function SalesPage() {
                   {s.status !== "cancelled" && (
                     <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
                   )}
+                </div>
                 </div>
               </div>
             ))}
@@ -279,3 +280,4 @@ export default function SalesPage() {
     </div>
   )
 }
+
