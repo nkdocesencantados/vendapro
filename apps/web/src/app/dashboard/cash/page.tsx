@@ -88,7 +88,7 @@ export default function CashPage() {
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ fontSize: "14px", fontWeight: 500 }}>Caixa</div>
-        <button onClick={() => setShowForm(true)} style={{ background: primary, color: 'white', border: 'none', borderRadius: '8px', padding: '7px 14px', fontSize: '13px', cursor: 'pointer' }}>+ Lancamento</button>
+        <button onClick={() => { setForm({ type: "expense", category: "", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true }); setShowForm(true) }} style={{ background: primary, color: 'white', border: 'none', borderRadius: '8px', padding: '7px 14px', fontSize: '13px', cursor: 'pointer' }}>+ Lancamento</button>
       </div>
 
       {/* FILTRO DE MES */}
