@@ -245,32 +245,30 @@ export default function SalesPage() {
               ))}
             </div>
             {filtered.map((s: any) => (
-              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px" }}>
+              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "18px 20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
-                    {s.sellerName && <span style={{ fontSize: "11px", background: "#f3f4f6", color: "#666", padding: "2px 8px", borderRadius: "20px" }}>vendedor: {s.sellerName}</span>}
-                  </div>
-                  <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>{fmtDate(s.createdAt)} · {payLabel[s.paymentMethod] || s.paymentMethod}</div>
-                  {s.items && s.items.length > 0 && (
-                    <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                      {s.items.map((item: any, idx: number) => (
-                        <span key={idx} style={{ fontSize: "11px", background: "#f9fafb", border: "0.5px solid #e5e7eb", color: "#555", padding: "2px 8px", borderRadius: "20px" }}>
-                          {item.quantity}x {item.name}
-                        </span>
-                      ))}
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                      <div style={{ fontWeight: 600, fontSize: "15px" }}>{s.customerName || "Cliente nao informado"}</div>
+                      {s.sellerName && <span style={{ fontSize: "11px", background: "#f0fdf4", color: "#16a34a", border: "0.5px solid #bbf7d0", padding: "2px 10px", borderRadius: "20px" }}>{s.sellerName}</span>}
                     </div>
-                  )}
+                    <div style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "10px" }}>{fmtDate(s.createdAt)} &nbsp;·&nbsp; {payLabel[s.paymentMethod] || s.paymentMethod}</div>
+                    {s.items && s.items.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                        {s.items.map((item: any, idx: number) => (
+                          <span key={idx} style={{ fontSize: "12px", background: "#f9fafb", border: "0.5px solid #e5e7eb", color: "#374151", padding: "4px 10px", borderRadius: "6px" }}>
+                            {item.quantity}x {item.name || "Produto"}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginLeft: "12px" }}>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : primary, fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
-                    <div style={{ fontSize: "11px", color: s.status === "completed" ? primary : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
-                  </div>
-                  {s.status !== "cancelled" && (
-                    <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
-                  )}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", marginLeft: "20px", flexShrink: 0 }}>
+                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#9ca3af" : primary, fontSize: "17px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
+                    <div style={{ fontSize: "11px", color: s.status === "completed" ? "#16a34a" : "#ef4444", background: s.status === "completed" ? "#f0fdf4" : "#fef2f2", padding: "2px 10px", borderRadius: "20px" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
+                    {s.status !== "cancelled" && (
+                      <button onClick={() => cancelSale(s.id)} style={{ background: "none", color: "#ef4444", border: "0.5px solid #fca5a5", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", marginTop: "4px" }}>Cancelar</button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -281,6 +279,8 @@ export default function SalesPage() {
     </div>
   )
 }
+
+
 
 
 
