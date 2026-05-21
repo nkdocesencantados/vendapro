@@ -5,6 +5,7 @@ import { Sale, SaleStatus } from "./sale.entity";
 import { SaleItem } from "./sale-item.entity";
 import { Product } from "../products/product.entity";
 import { FinancialEntry, EntryType, EntryCategory } from "../financial/financial-entry.entity";
+import { User } from "../users/user.entity";
 
 @Injectable()
 export class SalesService {
@@ -13,13 +14,23 @@ export class SalesService {
     @InjectRepository(SaleItem) private itemRepo: Repository<SaleItem>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(FinancialEntry) private financialRepo: Repository<FinancialEntry>,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
-  findAll(storeId: string, from?: string, to?: string, sellerId?: string) {
+  async findAll(storeId: string, from?: string, to?: string, sellerId?: string) {
     const where: any = { storeId };
     if (from && to) where.createdAt = Between(new Date(from), new Date(to));
     if (sellerId) where.sellerId = sellerId;
-    return this.saleRepo.find({ where, order: { createdAt: "DESC" } });
+    const sales = await this.saleRepo.find({ where, order: { createdAt: "DESC" } });
+    const sellerIds = [...new Set(sales.map((s: any) => s.sellerId).filter(Boolean))];
+    const sellers = sellerIds.length > 0 ? await this.userRepo.findByIds(sellerIds) : [];
+    const sellerMap: any = {};
+    sellers.forEach((u: any) => sellerMap[u.id] = u.name);
+    const salesWithItems = await Promise.all(sales.map(async (sale: any) => {
+      const items = await this.itemRepo.find({ where: { saleId: sale.id } });
+      return { ...sale, items, sellerName: sellerMap[sale.sellerId] || null };
+    }));
+    return salesWithItems;
   }
 
   async findOne(id: string) {
@@ -99,3 +110,4 @@ export class SalesService {
     return { total, count: sales.length, avgTicket };
   }
 }
+

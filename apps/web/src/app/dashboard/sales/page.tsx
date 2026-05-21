@@ -244,10 +244,23 @@ export default function SalesPage() {
               ))}
             </div>
             {sales.filter((s: any) => filter === "all" || s.status === filter || (filter === "active" && s.status === "completed")).map((s: any) => (
-              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
-                  <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>{fmtDate(s.createdAt)} - {payLabel[s.paymentMethod] || s.paymentMethod}</div>
+              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
+                    {s.sellerName && <span style={{ fontSize: "11px", background: "#f3f4f6", color: "#666", padding: "2px 8px", borderRadius: "20px" }}>vendedor: {s.sellerName}</span>}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>{fmtDate(s.createdAt)} · {payLabel[s.paymentMethod] || s.paymentMethod}</div>
+                  {s.items && s.items.length > 0 && (
+                    <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                      {s.items.map((item: any, idx: number) => (
+                        <span key={idx} style={{ fontSize: "11px", background: "#f9fafb", border: "0.5px solid #e5e7eb", color: "#555", padding: "2px 8px", borderRadius: "20px" }}>
+                          {item.quantity}x {item.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ textAlign: "right" }}>
