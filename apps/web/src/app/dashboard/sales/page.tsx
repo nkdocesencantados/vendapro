@@ -102,6 +102,7 @@ export default function SalesPage() {
   const total = form.items.reduce((a: number, i: any) => a + (+i.quantity || 0) * (+i.unitPrice || 0), 0) - form.discount
   const inputStyle: any = { padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", background: "white", width: "100%", boxSizing: "border-box" }
   const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Credito", debit_card: "Debito" }
+  const filtered = sales.filter((s: any) => filter === "all" || s.status === filter || (filter === "active" && s.status === "completed"))
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
@@ -243,10 +244,10 @@ export default function SalesPage() {
                 <button key={v} onClick={() => setFilter(v)} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: filter === v ? primary : "white", color: filter === v ? "white" : "#666" }}>{l}</button>
               ))}
             </div>
-            {sales.filter((s: any) => filter === "all" || s.status === filter || (filter === "active" && s.status === "completed")).map((s: any) => (
+            {filtered.map((s: any) => (
               <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
                     {s.sellerName && <span style={{ fontSize: "11px", background: "#f3f4f6", color: "#666", padding: "2px 8px", borderRadius: "20px" }}>vendedor: {s.sellerName}</span>}
@@ -261,8 +262,8 @@ export default function SalesPage() {
                       ))}
                     </div>
                   )}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginLeft: "12px" }}>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginLeft: "12px" }}>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : primary, fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
                     <div style={{ fontSize: "11px", color: s.status === "completed" ? primary : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
@@ -270,7 +271,7 @@ export default function SalesPage() {
                   {s.status !== "cancelled" && (
                     <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
                   )}
-                </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -280,4 +281,6 @@ export default function SalesPage() {
     </div>
   )
 }
+
+
 
