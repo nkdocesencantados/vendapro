@@ -49,3 +49,13 @@ body {
 }
 
 :root { --font-mono: "Geist Mono", ui-monospace, monospace; } .mono, [style*="font-mono"] { font-variant-numeric: normal; font-feature-settings: normal; }
+
+/* Remove zero com barra da Geist Mono */
+@font-face {
+  font-family: 'Geist Mono';
+  font-feature-settings: 'zero' 0;
+}
+* {
+  font-variant-numeric: normal !important;
+  font-feature-settings: normal !important;
+}
