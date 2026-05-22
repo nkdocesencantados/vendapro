@@ -224,14 +224,14 @@ export default function DashboardPage() {
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:20,fontWeight:600,fontFamily:"var(--font-mono)",letterSpacing:"-.02em"}}>
-                    {BRL(fat)} <span style={{color:"var(--text-subtle)",fontSize:13}}>/ {BRL(meta)}</span>
+                    {BRL(fat)} <span style={{color:"var(--text-subtle)",fontSize:13}}>/ {BRL(Number(meta))}</span>
                   </div>
                   <div style={{fontSize:12,color:primary,fontWeight:500,marginTop:2}}>{metaPct}% atingido</div>
                 </div>
               </div>
               <div className="progress"><span style={{width:`${metaPct}%`,background:primary}}/></div>
               <div style={{marginTop:8,display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text-subtle)",fontFamily:"var(--font-mono)"}}>
-                <span>0</span><span>{BRL(meta/2)}</span><span>{BRL(meta)}</span>
+                <span>R$ 0</span><span>{BRL(Number(meta)/2)}</span><span>{BRL(Number(meta))}</span>
               </div>
             </div>
           )}
