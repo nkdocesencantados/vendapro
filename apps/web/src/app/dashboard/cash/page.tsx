@@ -145,9 +145,9 @@ export default function CashPage() {
                     <td style={{fontWeight:500}}>{e.description||CAT_MAP[e.category]||e.category}</td>
                     <td><span className="vp-pill vp-pill-grey">{CAT_MAP[e.category]||e.category}</span></td>
                     <td>
+                      {e.type==="income"
                         ? <span className="vp-pill vp-pill-in">+ Receita</span>
                         : <span className="vp-pill vp-pill-out">- Despesa</span>}
-                        : <span className="vp-pill vp-pill-out">â†“ Despesa</span>}
                     </td>
                     <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:600,color:e.type==="income"?"var(--success)":"var(--text)"}}>
                       {e.type==="income"?"+":"âˆ’"} {BRL(Number(e.amount))}
