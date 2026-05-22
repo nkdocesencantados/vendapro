@@ -137,7 +137,7 @@ export default function LoginPage() {
           </form>
 
           <div style={{marginTop:24,paddingTop:18,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,color:"#78716C"}}>
-            <span>VendaPro â€” Gestao para varejo</span>
+            VendaPro - Gestao para varejo
             <span>v2.0</span>
           </div>
         </div>
