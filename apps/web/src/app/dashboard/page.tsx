@@ -163,7 +163,14 @@ export default function DashboardPage() {
         .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
         @media(max-width:1100px){.dash-grid{grid-template-columns:1fr!important;}}
         @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
-        @media(max-width:540px){.kpi-grid{grid-template-columns:1fr;}}
+        @media(max-width:540px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+        @media(max-width:640px){
+          .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+          .tbl{min-width:480px;}
+          .tbl th,.tbl td{padding:8px 10px;}
+          .dash-grid{grid-template-columns:1fr!important;}
+          .bar-labels{font-size:8px!important;}
+        }
       `}</style>
 
       {/* PAGE HEAD */}
@@ -393,3 +400,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

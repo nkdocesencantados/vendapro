@@ -1,9 +1,9 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃ©dito", debit_card:"DÃ©bito" }
 
 function BRL(v:number){ return v?.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})||"R$ 0,00" }
 const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
@@ -100,6 +100,21 @@ export default function SalesPage() {
         .kpi .val{font-size:22px;font-weight:600;letter-spacing:-.02em;font-family:var(--font-mono,"Geist Mono",monospace);}
         .kpi .delta{margin-top:6px;font-size:11px;color:var(--success);}
         @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:640px){
+          .kpi-grid{grid-template-columns:1fr 1fr!important;}
+          .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+          .vp-tbl{min-width:560px;}
+          .vp-tbl th,.vp-tbl td{padding:8px 10px;}
+        }
+        @media(max-width:640px){
+          .vp-tbl thead{display:none;}
+          .vp-tbl tbody tr{display:block;padding:12px 14px;border-bottom:1px solid var(--border);}
+          .vp-tbl tbody td{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border:none;font-size:13px;}
+          .vp-tbl tbody td:empty{display:none;}
+          .vp-tbl tbody td[data-label]:before{content:attr(data-label);font-size:11px;color:var(--text-subtle);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-right:8px;}
+          .vp-tbl tbody td:last-child{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+          .kpi-grid{grid-template-columns:1fr 1fr!important;}
+        }
       `}</style>
 
       {/* HEADER */}
@@ -107,7 +122,7 @@ export default function SalesPage() {
         <div>
           <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Vendas</h1>
           <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
-            {sales.filter((s:any)=>s.status==="completed").length} vendas · {BRL(totalRev)} faturados
+            {sales.filter((s:any)=>s.status==="completed").length} vendas Â· {BRL(totalRev)} faturados
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
@@ -119,7 +134,7 @@ export default function SalesPage() {
 
       {/* KPIs */}
       <div className="kpi-grid">
-        <div className="kpi"><div className="lbl">Faturamento do mes</div><div className="val">{BRL(totalRev)}</div><div className="delta">↑ {sales.filter((s:any)=>s.status==="completed").length} vendas</div></div>
+        <div className="kpi"><div className="lbl">Faturamento do mes</div><div className="val">{BRL(totalRev)}</div><div className="delta">â†‘ {sales.filter((s:any)=>s.status==="completed").length} vendas</div></div>
         <div className="kpi"><div className="lbl">Concluidas</div><div className="val">{sales.filter((s:any)=>s.status==="completed").length}</div></div>
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{sales.filter((s:any)=>s.status==="cancelled").length}</div></div>
         <div className="kpi"><div className="lbl">Ticket medio</div><div className="val">{BRL(sales.filter((s:any)=>s.status==="completed").length ? totalRev/sales.filter((s:any)=>s.status==="completed").length : 0)}</div></div>
@@ -153,7 +168,7 @@ export default function SalesPage() {
                         <span className="vp-av" style={{background:primary,color:"white"}}>{s.sellerName.split(" ").map((x:string)=>x[0]).slice(0,2).join("")}</span>
                         {s.sellerName}
                       </span>
-                    ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
+                    ) : <span style={{color:"var(--text-subtle)"}}>â€”</span>}
                   </td>
                   <td>
                     {s.items?.length > 0 ? (
@@ -163,7 +178,7 @@ export default function SalesPage() {
                         ))}
                         {s.items.length>3 && <span className="vp-pill vp-pill-grey">+{s.items.length-3}</span>}
                       </div>
-                    ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
+                    ) : <span style={{color:"var(--text-subtle)"}}>â€”</span>}
                   </td>
                   <td><span className="vp-pill vp-pill-grey">{PAY[s.paymentMethod]||s.paymentMethod}</span></td>
                   <td>
@@ -190,7 +205,7 @@ export default function SalesPage() {
           <div className="vp-modal" onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head">
               <h2>Nova venda</h2>
-              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>✕</button>
+              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>âœ•</button>
             </div>
             <div className="vp-modal-body">
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
@@ -224,13 +239,13 @@ export default function SalesPage() {
                     ) : (
                       <select className="vp-select" value={item.productId} onChange={e=>selectProduct(i,e.target.value)}>
                         <option value="">Selecione</option>
-                        {products.map((p:any)=><option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>)}
+                        {products.map((p:any)=><option key={p.id} value={p.id}>{p.name} â€” R$ {Number(p.price).toFixed(2)}</option>)}
                         <option value="__manual__">Digitar manualmente</option>
                       </select>
                     )}
                     <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} />
                     <input className="vp-input" type="number" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" />
-                    <button onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>×</button>
+                    <button onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>Ã—</button>
                   </div>
                 ))}
               </div>
@@ -265,3 +280,5 @@ export default function SalesPage() {
     </div>
   )
 }
+
+
