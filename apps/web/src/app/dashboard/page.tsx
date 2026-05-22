@@ -281,7 +281,7 @@ export default function DashboardPage() {
                       </button>
                     </Link>
                   </div>
-                  <table className="tbl">
+                  <div className="tbl-wrap"><table className="tbl">
                     <thead>
                       <tr>
                         <th style={{width:80}}>ID</th>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               )}
             </div>
