@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+﻿import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "../sales/sale.entity";
@@ -42,7 +42,42 @@ export class ReportsService {
       weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { weekday: "short" }), value: sales.reduce((a, s) => a + Number(s.total), 0) });
     }
     const lowStock = await this.productRepo.createQueryBuilder("p").where("p.storeId = :storeId", { storeId }).andWhere("p.stock <= p.minStock").getMany();
-    return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * 0.263), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart };
+    // topSellers
+    const sellerMap: Record<string, { sellerName: string; count: number; revenue: number }> = {};
+    for (const s of monthSales) {
+      const key = s.sellerId || "owner";
+      if (!sellerMap[key]) sellerMap[key] = { sellerName: (s as any).sellerName || key, count: 0, revenue: 0 };
+      sellerMap[key].count += 1;
+      sellerMap[key].revenue += Number(s.total);
+    }
+    const sellerIds = [...new Set(monthSales.map(s => s.sellerId).filter(Boolean))];
+    const { User } = await import("../users/user.entity");
+    const users = sellerIds.length > 0 ? await (this.saleRepo.manager.find(User, { where: sellerIds.map((id: string) => ({ id })) })) : [];
+    const userMap: Record<string, string> = {};
+    users.forEach((u: any) => userMap[u.id] = u.name);
+    const topSellers = Object.entries(sellerMap).map(([id, v]) => ({ ...v, sellerName: userMap[id] || v.sellerName })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    // topProducts
+    const monthSaleIds = monthSales.map(s => s.id);
+    let topProducts: any[] = [];
+    if (monthSaleIds.length > 0) {
+      const items = await this.itemRepo.createQueryBuilder("i").where("i.saleId IN (:...ids)", { ids: monthSaleIds }).getMany();
+      const prodMap: Record<string, { name: string; quantity: number; revenue: number }> = {};
+      for (const item of items) {
+        const key = item.productId || item.productName || "avulso";
+        if (!prodMap[key]) prodMap[key] = { name: item.productName || "Item avulso", quantity: 0, revenue: 0 };
+        prodMap[key].quantity += Number(item.quantity);
+        prodMap[key].revenue += Number(item.quantity) * Number(item.unitPrice);
+      }
+      topProducts = Object.values(prodMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    }
+    // recentSales
+    const recentSales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED }, order: { createdAt: "DESC" }, take: 5 });
+    const recentSellerIds = [...new Set(recentSales.map(s => s.sellerId).filter(Boolean))];
+    const recentUsers = recentSellerIds.length > 0 ? await (this.saleRepo.manager.find(User, { where: recentSellerIds.map((id: string) => ({ id })) })) : [];
+    const recentUserMap: Record<string, string> = {};
+    recentUsers.forEach((u: any) => recentUserMap[u.id] = u.name);
+    const recentSalesData = recentSales.map(s => ({ ...s, sellerName: recentUserMap[s.sellerId] || null }));
+    return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * 0.263), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthSalesCount: monthSales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart, topSellers, topProducts, recentSales: recentSalesData };
   }
 
   async advanced(storeId: string, from: string, to: string, sellerId?: string) {
