@@ -1,7 +1,49 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 * { box-sizing: border-box; }
 body { font-family: "DM Sans", sans-serif; }
+
+/* VendaPro Design Tokens */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --brand: #1D9E75;
+  --brand-deep: #04342C;
+  --brand-soft: #34D399;
+  --brand-tint: #E7F5EF;
+  --bg: #FAFAF9;
+  --bg-elevated: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F5F5F4;
+  --surface-3: #EDEBE8;
+  --border: #E7E5E4;
+  --border-strong: #D6D3D1;
+  --text: #0C0A09;
+  --text-muted: #57534E;
+  --text-subtle: #78716C;
+  --success: #1D9E75;
+  --success-bg: #E7F5EF;
+  --warning: #B45309;
+  --warning-bg: #FEF3C7;
+  --danger: #B91C1C;
+  --danger-bg: #FEE2E2;
+  --info: #1E40AF;
+  --info-bg: #DBEAFE;
+  --shadow-sm: 0 1px 2px rgba(12,10,9,0.04);
+  --shadow: 0 1px 3px rgba(12,10,9,0.06), 0 1px 2px rgba(12,10,9,0.04);
+  --shadow-md: 0 4px 12px rgba(12,10,9,0.06), 0 2px 4px rgba(12,10,9,0.04);
+  --shadow-lg: 0 12px 32px rgba(12,10,9,0.10), 0 4px 8px rgba(12,10,9,0.04);
+  --r-sm: 6px; --r: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 24px;
+  --font: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
