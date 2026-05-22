@@ -150,7 +150,7 @@ export default function CashPage() {
                         : <span className="vp-pill vp-pill-out">- Despesa</span>}
                     </td>
                     <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:600,color:e.type==="income"?"var(--success)":"var(--text)"}}>
-                      {e.type==="income"?"+":"âˆ’"} {BRL(Number(e.amount))}
+                      {e.type==="income"?"+":"-"} {BRL(Number(e.amount))}
                     </td>
                   </tr>
                 ))}
