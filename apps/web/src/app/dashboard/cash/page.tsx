@@ -5,6 +5,24 @@ import { api } from "@/lib/api"
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
+﻿function vpCSV(headers: string[], rows: any[][], filename: string) {
+  const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
+  const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+function vpPDF(html: string) {
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 600); }
+}
+function vpTable(title: string, headers: string[], rows: string[][]) {
+  const th = headers.map((h:string) => '<th>' + h + '</th>').join('');
+  const tr = rows.map((r:string[]) => '<tr>' + r.map((c:string) => '<td>' + c + '</td>').join('') + '</tr>').join('');
+  return '<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th{background:#1D9E75;color:white;padding:8px;font-size:11px}td{padding:7px;border-bottom:1px solid #eee;font-size:11px}</style></head><body><h2>'+title+'</h2><table><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table></body></html>';
+}
+
 function exportCashCSV(entries: any[], month: number, year: number) {
   const M=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const C: Record<string,string>={sale:'Venda',service:'Servico',rent:'Aluguel',salary:'Salario',supplier:'Fornecedor',tax:'Imposto',utilities:'Contas',marketing:'Marketing',other:'Outros'};
