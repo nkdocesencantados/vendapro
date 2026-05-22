@@ -358,7 +358,7 @@ export default function DashboardPage() {
                     <div style={{color:"var(--text-subtle)",fontSize:13,padding:"8px 0"}}>Sem dados de produtos.</div>
                   ) : products.slice(0,5).map((p:any,i:number)=>(
                     <div key={i} className="list-item">
-                      <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-2)",display:"grid",placeItems:"center",fontSize:16,flexShrink:0}}>ðŸ“¦</div>
+                      <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-2)",display:"grid",placeItems:"center",flexShrink:0}}><Icon name="package"/></div>
                       <div className="list-meta">
                         <strong>{p.name}</strong>
                         <small>{p.quantity} un. vendidas</small>
