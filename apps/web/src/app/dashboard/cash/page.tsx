@@ -1,282 +1,214 @@
 ﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { fmt } from "@/lib/utils"
 
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-
-function Bar({ value, max, color = "#1D9E75", height = 8 }: any) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0
-  return (
-    <div style={{ background: "#f3f4f6", borderRadius: 4, height, flex: 1 }}>
-      <div style={{ background: color, borderRadius: 4, height, width: `${pct}%`, transition: "width 0.6s" }} />
-    </div>
-  )
-}
+const CAT_MAP: Record<string,string> = { sale:"Venda", service:"Servico", rent:"Aluguel", salary:"Salario", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
 export default function CashPage() {
   const now = new Date()
-  const [month, setMonth] = useState(now.getMonth() + 1)
-  const [year, setYear] = useState(now.getFullYear())
-  const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth())
-  const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear())
-  const [showCompare, setShowCompare] = useState(false)
-  const [data, setData] = useState<any>({ income: 0, expense: 0, profit: 0, entries: [] })
-  const [compareData, setCompareData] = useState<any>({ income: 0, expense: 0, profit: 0, entries: [] })
+  const [month, setMonth] = useState(now.getMonth()+1)
+  const [year, setYear]   = useState(now.getFullYear())
+  const [data, setData]   = useState<any>({income:0,expense:0,profit:0,entries:[]})
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ type: "expense", category: "other", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true })
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
+  const [primary, setPrimary] = useState("#1D9E75")
+  const [form, setForm] = useState({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true})
 
-  useEffect(() => { loadData() }, [month, year])
-  useEffect(() => { if (showCompare) loadCompareData() }, [compareMonth, compareYear, showCompare])
+  useEffect(()=>{
+    try{ const sc=localStorage.getItem("storeConfig"); if(sc){const p=JSON.parse(sc);if(p.primaryColor)setPrimary(p.primaryColor)} }catch{}
+    load()
+  },[month,year])
 
-  async function loadData() {
+  async function load(){
     setLoading(true)
-    try {
-      const r = await api.get(`/financial/summary?month=${month}&year=${year}`)
+    try{
+      const r = await api.get(`/financial/summary?month=${month}&year=${year}`).catch(()=>api.get("/financial"))
       setData(r.data)
-    } catch (e) { console.error(e) }
-    finally { setLoading(false) }
+    }catch(e){console.error(e)}finally{setLoading(false)}
   }
 
-  async function loadCompareData() {
-    try {
-      const r = await api.get(`/financial/summary?month=${compareMonth}&year=${compareYear}`)
-      setCompareData(r.data)
-    } catch (e) { console.error(e) }
-  }
-
-  async function saveEntry() {
+  async function save(){
+    if(!form.amount||+form.amount<=0) return alert("Informe o valor")
     setSaving(true)
-    try {
-      await api.post("/financial", form)
+    try{
+      await api.post("/financial",form)
       setShowForm(false)
-      setForm({ type: "expense", category: "other", description: "", amount: 0, date: new Date().toISOString().split("T")[0], isPaid: true })
-      loadData()
-    } catch { alert("Erro ao salvar") }
-    finally { setSaving(false) }
+      setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true})
+      load()
+    }catch(e:any){alert(e?.response?.data?.message||"Erro")}
+    finally{setSaving(false)}
   }
 
-  const margin = data.income > 0 ? Math.round((data.profit / data.income) * 100) : 0
-  const incomeChange = compareData.income > 0 ? Math.round(((data.income - compareData.income) / compareData.income) * 100) : null
-  const expenseChange = compareData.expense > 0 ? Math.round(((data.expense - compareData.expense) / compareData.expense) * 100) : null
-
-  const catMap: any = { sale: "Venda", rent: "Aluguel", salary: "Salario", supplier: "Fornecedor", tax: "Imposto", other: "Outro" }
-  const typeMap: any = { income: "Receita", expense: "Despesa" }
-
-  // Agrupamento por categoria de despesas
-  const expenseByCategory = (data.entries || [])
-    .filter((e: any) => e.type === "expense")
-    .reduce((acc: any, e: any) => {
-      const cat = catMap[e.category] || e.category
-      acc[cat] = (acc[cat] || 0) + Number(e.amount)
-      return acc
-    }, {})
-  const maxCat = Math.max(...Object.values(expenseByCategory) as number[], 1)
-
-  const inputStyle: any = { width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", marginTop: "4px", boxSizing: "border-box" }
+  const margin = data.income>0?Math.round((data.profit/data.income)*100):0
+  const entries: any[] = data.entries||[]
+  const expByCat: Record<string,number> = {}
+  entries.filter((e:any)=>e.type==="expense").forEach((e:any)=>{ expByCat[CAT_MAP[e.category]||e.category]=(expByCat[CAT_MAP[e.category]||e.category]||0)+Number(e.amount) })
+  const cats = Object.entries(expByCat).sort((a,b)=>b[1]-a[1])
+  const maxCat = cats[0]?.[1]||1
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 500 }}>Caixa</div>
-        <button onClick={() => setShowForm(true)} style={{ background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Lancamento</button>
-      </div>
+    <div style={{padding:"clamp(12px,3vw,28px)",maxWidth:1440,margin:"0 auto"}}>
+      <style>{`
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn-primary{background:var(--brand,#1D9E75);color:white;} .vp-btn-primary:hover{background:#178A65;}
+        .vp-btn-ghost{color:var(--text-muted);} .vp-btn-ghost:hover{background:var(--surface-2);}
+        .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
+        .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s,box-shadow .12s;}
+        .vp-input:focus{border-color:var(--brand,#1D9E75);box-shadow:0 0 0 3px rgba(29,158,117,0.12);}
+        .vp-select{appearance:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);cursor:pointer;}
+        .vp-select:focus{border-color:var(--brand,#1D9E75);}
+        .vp-field{display:flex;flex-direction:column;gap:6px;}
+        .vp-field label{font-size:12px;font-weight:500;color:var(--text-muted);}
+        .vp-modal-bg{position:fixed;inset:0;background:rgba(12,10,9,0.6);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:100;padding:16px;}
+        .vp-modal{width:min(480px,100%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;max-height:90vh;overflow:auto;}
+        .vp-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .vp-modal-head h2{margin:0;font-size:16px;font-weight:600;}
+        .vp-modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+        .vp-modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
+        .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .kpi-lbl{font-size:11px;color:var(--text-subtle);margin-bottom:4px;}
+        .kpi-val{font-size:clamp(14px,4vw,20px);font-weight:600;letter-spacing:-.02em;color:var(--text);}
+        .kpi-dlt{font-size:11px;color:var(--text-subtle);margin-top:2px;}
+        .nbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--brand,#1D9E75);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;width:100%;margin-bottom:14px;cursor:pointer;}
+        .entry-card{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);}
+        .entry-card:last-child{border:none;}
+        .entry-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;}
+        .entry-name{font-size:13px;font-weight:500;color:var(--text);}
+        .entry-meta{font-size:11px;color:var(--text-subtle);margin-top:2px;}
+        .mini-bar{height:4px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin-top:5px;}
+        .mini-bar-fill{display:block;height:100%;border-radius:999px;}
+        .month-sel{display:flex;gap:8px;margin-bottom:14px;}
+        .card-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+        .card-head-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .card-head-title{font-size:13px;font-weight:600;color:var(--text);}
+        .card-head-sub{font-size:11px;color:var(--text-subtle);}
+      `}</style>
 
-      {/* FILTRO DE MES */}
-      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "10px 20px", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "12px", color: "#888" }}>Mes:</span>
-          <select value={month} onChange={e => setMonth(+e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }}>
-            {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-          </select>
-          <select value={year} onChange={e => setYear(+e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }}>
-            {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+        <div>
+          <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Caixa</h1>
+          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>{MONTHS[month-1]} de {year}</div>
         </div>
-        <button onClick={() => { setShowCompare(!showCompare); if (!showCompare) loadCompareData() }} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: showCompare ? "#1D9E75" : "white", color: showCompare ? "white" : "#666" }}>
-          {showCompare ? "Ocultar comparativo" : "Comparar com outro mes"}
-        </button>
-        {showCompare && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "12px", color: "#888" }}>Comparar com:</span>
-            <select value={compareMonth} onChange={e => setCompareMonth(+e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }}>
-              {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-            </select>
-            <select value={compareYear} onChange={e => setCompareYear(+e.target.value)} style={{ padding: "5px 8px", border: "0.5px solid #e5e7eb", borderRadius: "6px", fontSize: "12px" }}>
-              {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-        )}
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
-        {/* FORMULARIO */}
-        {showForm && (
-          <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
-            <h3 style={{ marginBottom: "16px", fontWeight: 500 }}>Novo Lancamento</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666" }}>Tipo</label>
-                <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} style={inputStyle}>
-                  <option value="income">Receita</option>
-                  <option value="expense">Despesa</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666" }}>Categoria</label>
-                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={inputStyle}>
-                  <option value="sale">Venda</option>
-                  <option value="rent">Aluguel</option>
-                  <option value="salary">Salario</option>
-                  <option value="supplier">Fornecedor</option>
-                  <option value="tax">Imposto</option>
-                  <option value="other">Outro</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666" }}>Descricao</label>
-                <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666" }}>Valor</label>
-                <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: +e.target.value })} style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666" }}>Data</label>
-                <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} style={inputStyle} />
-              </div>
+      <div className="month-sel">
+        <select className="vp-select" value={month} onChange={e=>setMonth(+e.target.value)} style={{flex:1}}>
+          {MONTHS.map((m,i)=><option key={i} value={i+1}>{m}</option>)}
+        </select>
+        <select className="vp-select" value={year} onChange={e=>setYear(+e.target.value)}>
+          {[2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+
+      <div className="kpi-grid">
+        <div className="kpi"><div className="kpi-lbl">Entradas</div><div className="kpi-val" style={{color:"#1D9E75"}}>{BRLshort(data.income)}</div></div>
+        <div className="kpi"><div className="kpi-lbl">Saidas</div><div className="kpi-val" style={{color:"var(--danger)"}}>{BRLshort(data.expense)}</div></div>
+        <div className="kpi" style={{gridColumn:"span 2"}}>
+          <div className="kpi-lbl">Saldo do mes</div>
+          <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
+          <div className="kpi-dlt">{margin}% margem</div>
+        </div>
+      </div>
+
+      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>
+        + Novo lancamento
+      </button>
+
+      <div className="card-wrap">
+        <div className="card-head-row">
+          <div className="card-head-title">Lancamentos</div>
+          <div className="card-head-sub">{entries.length} registros</div>
+        </div>
+        {loading ? (
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
+        ) : entries.length===0 ? (
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lancamento neste periodo.</div>
+        ) : entries.map((e:any)=>(
+          <div key={e.id} className="entry-card">
+            <div className="entry-icon" style={{background:e.type==="income"?"rgba(29,158,117,0.15)":"rgba(185,28,28,0.15)"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={e.type==="income"?"#1D9E75":"#f87171"} strokeWidth="2.5" strokeLinecap="round">
+                {e.type==="income" ? <path d="M12 19V5M5 12l7-7 7 7"/> : <path d="M12 5v14M5 12l7 7 7-7"/>}
+              </svg>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-              <button onClick={() => setShowForm(false)} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-              <button onClick={saveEntry} disabled={saving} style={{ padding: "8px 16px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>{saving ? "Salvando..." : "Salvar"}</button>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="entry-name">{e.description||CAT_MAP[e.category]||e.category}</div>
+              <div className="entry-meta">{new Date(e.date||e.createdAt).toLocaleDateString("pt-BR")} - {CAT_MAP[e.category]||e.category}</div>
+            </div>
+            <div style={{fontWeight:700,fontSize:13,color:e.type==="income"?"#1D9E75":"var(--danger)",whiteSpace:"nowrap"}}>
+              {e.type==="income"?"+":"-"} {BRLshort(Number(e.amount))}
             </div>
           </div>
-        )}
-
-        {loading ? <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Carregando...</div> : (
-          <>
-            {/* CARDS PRINCIPAIS */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "10px", marginBottom: "16px" }}>
-              {[
-                { label: "Receitas", value: data.income, compare: compareData.income, color: "#1D9E75", change: incomeChange },
-                { label: "Despesas", value: data.expense, compare: compareData.expense, color: "#ef4444", change: expenseChange },
-                { label: "Lucro", value: data.profit, compare: compareData.profit, color: "#3b82f6", change: null },
-                { label: "Margem", value: `${margin}%`, compare: null, color: "#8b5cf6", change: null, isText: true },
-              ].map(m => (
-                <div key={m.label} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
-                  <div style={{ fontSize: "12px", color: "#888", marginBottom: "6px" }}>{m.label}</div>
-                  <div style={{ fontSize: "22px", fontWeight: 700, color: m.color }}>{m.isText ? m.value : fmt(m.value as number)}</div>
-                  {showCompare && m.compare !== null && (
-                    <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>
-                      Anterior: {fmt(m.compare as number)}
-                      {m.change !== null && (
-                        <span style={{ marginLeft: "6px", color: (m.change as number) >= 0 ? "#1D9E75" : "#ef4444", fontWeight: 500 }}>
-                          {(m.change as number) >= 0 ? "+" : ""}{m.change}%
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* COMPARATIVO VISUAL */}
-            {showCompare && (
-              <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px", marginBottom: "20px" }}>
-                <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>
-                  Comparativo: {MONTHS[month - 1]} {year} vs {MONTHS[compareMonth - 1]} {compareYear}
-                </div>
-                {[
-                  { label: "Receitas", cur: data.income, prev: compareData.income, color: "#1D9E75" },
-                  { label: "Despesas", cur: data.expense, prev: compareData.expense, color: "#ef4444" },
-                  { label: "Lucro", cur: data.profit, prev: compareData.profit, color: "#3b82f6" },
-                ].map(item => {
-                  const max = Math.max(item.cur, item.prev, 1)
-                  return (
-                    <div key={item.label} style={{ marginBottom: "14px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "12px", color: "#666" }}>{item.label}</span>
-                        <span style={{ fontSize: "12px", color: "#666" }}>{fmt(item.cur)} vs {fmt(item.prev)}</span>
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span style={{ fontSize: "10px", color: "#888", width: "60px" }}>{MONTHS[month - 1].slice(0, 3)}</span>
-                          <Bar value={item.cur} max={max} color={item.color} height={10} />
-                          <span style={{ fontSize: "11px", width: "70px", textAlign: "right" }}>{fmt(item.cur)}</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span style={{ fontSize: "10px", color: "#aaa", width: "60px" }}>{MONTHS[compareMonth - 1].slice(0, 3)}</span>
-                          <Bar value={item.prev} max={max} color="#d1d5db" height={10} />
-                          <span style={{ fontSize: "11px", color: "#aaa", width: "70px", textAlign: "right" }}>{fmt(item.prev)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", marginBottom: "16px" }}>
-              {/* DESPESAS POR CATEGORIA */}
-              <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>Despesas por categoria</div>
-                {Object.keys(expenseByCategory).length === 0 ? (
-                  <div style={{ color: "#888", fontSize: "13px" }}>Sem despesas no periodo</div>
-                ) : (
-                  Object.entries(expenseByCategory).sort((a: any, b: any) => b[1] - a[1]).map(([cat, val]: any) => (
-                    <div key={cat} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                      <div style={{ fontSize: "12px", width: "80px", flexShrink: 0 }}>{cat}</div>
-                      <Bar value={val} max={maxCat} color="#ef4444" />
-                      <div style={{ fontSize: "12px", width: "70px", textAlign: "right" }}>{fmt(val)}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* ULTIMOS LANCAMENTOS */}
-              <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "16px" }}>Ultimos lancamentos</div>
-                {(data.entries || []).slice(0, 6).map((e: any) => (
-                  <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "0.5px solid #f3f4f6" }}>
-                    <div>
-                      <div style={{ fontSize: "13px", fontWeight: 500 }}>{e.description || catMap[e.category] || e.category}</div>
-                      <div style={{ fontSize: "11px", color: "#888" }}>{catMap[e.category] || e.category} - {new Date(e.date).toLocaleDateString("pt-BR")}</div>
-                    </div>
-                    <div style={{ fontWeight: 600, color: e.type === "income" ? "#1D9E75" : "#ef4444", fontSize: "14px" }}>
-                      {e.type === "income" ? "+" : "-"}{fmt(e.amount)}
-                    </div>
-                  </div>
-                ))}
-                {(data.entries || []).length === 0 && <div style={{ color: "#888", fontSize: "13px" }}>Sem lancamentos</div>}
-              </div>
-            </div>
-
-            {/* LISTA COMPLETA */}
-            <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 500, marginBottom: "12px" }}>Todos os lancamentos - {MONTHS[month - 1]} {year}</div>
-              {(data.entries || []).length === 0 ? (
-                <div style={{ color: "#888", fontSize: "13px", padding: "20px 0", textAlign: "center" }}>Nenhum lancamento neste mes</div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {(data.entries || []).map((e: any) => (
-                    <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "#f9fafb", borderRadius: "8px" }}>
-                      <div>
-                        <div style={{ fontWeight: 500, fontSize: "13px" }}>{e.description || catMap[e.category] || e.category}</div>
-                        <div style={{ fontSize: "11px", color: "#888" }}>{typeMap[e.type]} - {catMap[e.category] || e.category} - {new Date(e.date).toLocaleDateString("pt-BR")}</div>
-                      </div>
-                      <div style={{ fontWeight: 600, color: e.type === "income" ? "#1D9E75" : "#ef4444", fontSize: "15px" }}>
-                        {e.type === "income" ? "+" : "-"}{fmt(e.amount)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
+        ))}
       </div>
+
+      {cats.length > 0 && (
+        <div className="card-wrap">
+          <div className="card-head-row">
+            <div className="card-head-title">Despesas por categoria</div>
+          </div>
+          <div style={{padding:"10px 14px"}}>
+            {cats.map(([cat,val])=>(
+              <div key={cat} style={{marginBottom:10}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+                  <span style={{color:"var(--text)"}}>{cat}</span>
+                  <span style={{fontWeight:600,color:"var(--text)"}}>{BRLshort(val as number)}</span>
+                </div>
+                <div className="mini-bar"><span className="mini-bar-fill" style={{width:`${((val as number)/maxCat)*100}%`,background:primary}}/></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showForm && (
+        <div className="vp-modal-bg" onClick={()=>setShowForm(false)}>
+          <div className="vp-modal" onClick={e=>e.stopPropagation()}>
+            <div className="vp-modal-head">
+              <h2>Novo lancamento</h2>
+              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
+            </div>
+            <div className="vp-modal-body">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div className="vp-field">
+                  <label>Tipo</label>
+                  <select className="vp-select" value={form.type} onChange={e=>setForm({...form,type:e.target.value,category:""})}>
+                    <option value="expense">Despesa</option>
+                    <option value="income">Receita</option>
+                  </select>
+                </div>
+                <div className="vp-field">
+                  <label>Categoria</label>
+                  <select className="vp-select" value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
+                    <option value="">Selecione...</option>
+                    {form.type==="income"?(
+                      <><option value="sale">Venda</option><option value="service">Servico</option><option value="other">Outros</option></>
+                    ):(
+                      <><option value="rent">Aluguel</option><option value="salary">Salario</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
+                    )}
+                  </select>
+                </div>
+              </div>
+              <div className="vp-field">
+                <label>Descricao</label>
+                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mes" />
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div className="vp-field"><label>Valor (R$)</label><input className="vp-input" type="number" value={form.amount||""} onChange={e=>setForm({...form,amount:+e.target.value})} placeholder="0,00" /></div>
+                <div className="vp-field"><label>Data</label><input className="vp-input" type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} /></div>
+              </div>
+            </div>
+            <div className="vp-modal-foot">
+              <button className="vp-btn vp-btn-ghost" onClick={()=>setShowForm(false)}>Cancelar</button>
+              <button className="vp-btn vp-btn-primary" onClick={save} disabled={saving}>{saving?"Salvando...":"Salvar"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
