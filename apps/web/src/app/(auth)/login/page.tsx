@@ -35,15 +35,40 @@ export default function LoginPage() {
         .login-btn{width:100%;padding:11px;background:#1D9E75;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:background .12s;font-family:inherit;}
         .login-btn:hover{background:#178A65;}
         .login-btn:disabled{background:#9CA3AF;cursor:not-allowed;}
+        .right-panel{display:flex;align-items:center;justify-content:center;padding:48px 32px;background:#FAFAF9;}
         @media(max-width:768px){
           .login-art{display:none!important;}
-          div[style*="gridTemplateColumns"]{grid-template-columns:1fr!important;}
+          div[style*="gridTemplateColumns"]{grid-template-columns:1fr!important;background:#04130F!important;}
+          .right-panel{
+            align-items:flex-start!important;
+            padding:0!important;
+            background:transparent!important;
+            min-height:100vh;
+          }
+          .form-card{
+            background:#FAFAF9;
+            border-radius:24px 24px 0 0;
+            padding:32px 24px 40px;
+            margin-top:auto;
+            width:100%;
+          }
+          .mobile-header{
+            display:flex!important;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:48px 24px 32px;
+            gap:16px;
+          }
+          .mobile-tagline{display:block!important;}
         }
+        .mobile-header{display:none;}
+        .mobile-tagline{display:none;}
+        .form-card{width:100%;max-width:360px;}
       `}</style>
 
-      {/* LADO ESQUERDO â€” arte */}
+      {/* LADO ESQUERDO - arte (desktop only) */}
       <div className="login-art" style={{background:"#04130F",color:"#E5F2EC",padding:48,flexDirection:"column",position:"relative",overflow:"hidden"}}>
-        {/* Glow */}
         <div style={{position:"absolute",inset:"-40% -20% 30% 30%",background:"radial-gradient(circle,rgba(29,158,117,0.4),transparent 60%)",filter:"blur(20px)",pointerEvents:"none"}} />
 
         {/* Logo */}
@@ -51,7 +76,6 @@ export default function LoginPage() {
           <div style={{width:64,height:64,borderRadius:16,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
             <svg width={40} height={40} viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="4" r="3" fill="white"/><circle cx="4" cy="18" r="3" fill="white"/><circle cx="20" cy="18" r="3" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" strokeWidth="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" strokeWidth="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" strokeWidth="1.5"/>
-
             </svg>
           </div>
           <strong style={{fontSize:18,letterSpacing:"-0.01em",color:"white"}}>VendaPro</strong>
@@ -66,8 +90,6 @@ export default function LoginPage() {
           <p style={{fontSize:15,lineHeight:1.6,color:"#B2C9C0",margin:0,maxWidth:380}}>
             Vendas, estoque, caixa e equipe - pensado para o pequeno comercio brasileiro.
           </p>
-
-          {/* Stats */}
           <div style={{display:"flex",gap:24,marginTop:32,paddingTop:24,borderTop:"1px solid #1F3A33"}}>
             {[["7 dias","trial gratis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
               <div key={l}>
@@ -76,8 +98,6 @@ export default function LoginPage() {
               </div>
             ))}
           </div>
-
-          {/* WhatsApp */}
           <div style={{marginTop:28,padding:14,borderRadius:12,background:"rgba(255,255,255,0.04)",border:"1px solid #1F3A33",display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:36,height:36,borderRadius:"50%",background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
               <svg width={18} height={18} viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -90,20 +110,26 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* LADO DIREITO â€” form */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#FAFAF9"}}>
-        <div style={{width:"100%",maxWidth:360}}>
-          {/* Mobile logo */}
-          <div style={{display:"none",alignItems:"center",gap:10,marginBottom:32,justifyContent:"center"}} className="mobile-logo">
-            <div style={{width:32,height:32,borderRadius:8,background:"#1D9E75",display:"grid",placeItems:"center"}}>
-              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/>
-                <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="8" x2="12" y2="16"/><line x1="16" y1="8" x2="12" y2="16"/>
+      {/* LADO DIREITO - form */}
+      <div className="right-panel" style={{display:"flex",flexDirection:"column"}}>
+
+        {/* Header mobile (fundo escuro com logo e tagline) */}
+        <div className="mobile-header">
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:56,height:56,borderRadius:14,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
+              <svg width={34} height={34} viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="4" r="3" fill="white"/><circle cx="4" cy="18" r="3" fill="white"/><circle cx="20" cy="18" r="3" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" strokeWidth="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" strokeWidth="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" strokeWidth="1.5"/>
               </svg>
             </div>
-            <strong style={{fontSize:18,color:"#0C0A09"}}>VendaPro</strong>
+            <strong style={{fontSize:22,letterSpacing:"-0.01em",color:"white"}}>VendaPro</strong>
           </div>
+          <p className="mobile-tagline" style={{fontSize:13,color:"#8DA39A",textAlign:"center",margin:0}}>
+            Gestao completa da sua loja
+          </p>
+        </div>
 
+        {/* Card do formulario */}
+        <div className="form-card" style={{margin:"0 auto"}}>
           <h1 style={{margin:"0 0 8px",fontSize:26,fontWeight:600,letterSpacing:"-0.02em",color:"#0C0A09"}}>Entrar no VendaPro</h1>
           <p style={{fontSize:14,color:"#78716C",margin:"0 0 28px"}}>Acesse sua conta e gerencie sua loja.</p>
 
@@ -121,7 +147,7 @@ export default function LoginPage() {
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>Senha</label>
               <div style={{position:"relative"}}>
-                <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required style={{paddingRight:42}} />
+                <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:42}} />
                 <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#78716C",fontSize:13}}>
                   {show?"Ocultar":"Ver"}
                 </button>
@@ -145,4 +171,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
