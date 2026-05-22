@@ -31,7 +31,7 @@ export default function CashPage() {
   async function load(){
     setLoading(true)
     try{
-      const r = await api.get(`/financial?month=${month}&year=${year}`)
+      const r = await api.get(`/financial?month=${month}&year=${year}`).catch(() => api.get('/financial'))
       setData(r.data)
     }catch(e){console.error(e)}finally{setLoading(false)}
   }

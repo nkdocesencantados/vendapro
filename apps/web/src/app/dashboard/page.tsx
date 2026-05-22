@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import Link from "next/link"
@@ -36,7 +36,7 @@ function KPI({ label, icon, value, delta, deltaDir="up", spark, mono=true }: any
       </div>
       {delta && (
         <div style={{ marginTop:6, fontSize:12, display:"inline-flex", alignItems:"center", gap:4, color: deltaDir==="up"?"var(--success)":"var(--danger)", position:"relative", zIndex:1 }}>
-          {deltaDir==="up" ? "â†‘" : "â†“"} {delta}
+          {deltaDir==="up" ? "↑" : "↓"} {delta}
         </div>
       )}
       {spark}
@@ -170,10 +170,10 @@ export default function DashboardPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:22,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:28,fontWeight:600,letterSpacing:"-.025em"}}>
-            Ola, {firstName} ðŸ‘‹
+            Ola, {firstName} 👋
           </h1>
           <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
-            Visao geral da {storeName} â€” {monthLabel} de {year}
+            Visao geral da {storeName} — {monthLabel} de {year}
           </div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                     <Icon name="target"/> Meta mensal
                   </div>
                   <div style={{fontSize:12,color:"var(--text-subtle)",marginTop:2}}>
-                    {meta>fat?`Faltam ${BRL(meta-fat)} para a meta`:"Meta atingida! ðŸŽ‰"}
+                    {meta>fat?`Faltam ${BRL(meta-fat)} para a meta`:"Meta atingida! 🎉"}
                   </div>
                 </div>
                 <div style={{textAlign:"right"}}>
@@ -241,7 +241,7 @@ export default function DashboardPage() {
             {/* ESQUERDA */}
             <div className="dash-left">
 
-              {/* GRÃFICO */}
+              {/* GRÁFICO */}
               <div className="card">
                 <div className="card-head">
                   <div>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* ÃšLTIMAS VENDAS */}
+              {/* ÚLTIMAS VENDAS */}
               {recentSales.length > 0 && (
                 <div className="card">
                   <div className="card-head">
@@ -297,7 +297,7 @@ export default function DashboardPage() {
                                 </span>
                                 {s.sellerName}
                               </span>
-                            ) : <span style={{color:"var(--text-subtle)"}}>â€”</span>}
+                            ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
                           </td>
                           <td><span className="pill">{PAY[s.paymentMethod]||s.paymentMethod}</span></td>
                           <td className="num" style={{fontWeight:600,color:primary}}>{BRL(s.total)}</td>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
                     <div style={{color:"var(--text-subtle)",fontSize:13,padding:"8px 0"}}>Sem dados de produtos.</div>
                   ) : products.slice(0,5).map((p:any,i:number)=>(
                     <div key={i} className="list-item">
-                      <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-2)",display:"grid",placeItems:"center",fontSize:16,flexShrink:0}}>ðŸ“¦</div>
+                      <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-2)",display:"grid",placeItems:"center",fontSize:16,flexShrink:0}}>📦</div>
                       <div className="list-meta">
                         <strong>{p.name}</strong>
                         <small>{p.quantity} un. vendidas</small>
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                     <div>
                       <div style={{fontWeight:500,fontSize:13,color:"var(--warning)"}}>Atencao: estoque baixo</div>
                       <div style={{fontSize:12,marginTop:4,color:"var(--text)",lineHeight:1.5}}>
-                        {lowStock.slice(0,3).map((p:any)=>p.name).join(", ")} {lowStock.length>1?"estao":"esta"} com estoque baixo.
+                        {lowStock.slice(0,3).map((p:any)=><strong key={p.id}>{p.name}</strong>).reduce((a:any,b:any)=>[a,", ",b])} {lowStock.length>1?"estao":"esta"} com estoque baixo.
                       </div>
                       <Link href="/dashboard/inventory">
                         <button className="vp-btn vp-btn-secondary vp-btn-sm" style={{marginTop:10}}>Ir ao estoque</button>
@@ -393,4 +393,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-

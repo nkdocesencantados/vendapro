@@ -22,11 +22,20 @@ export default function SettingsPage() {
   const COLORS = ["#1D9E75","#04342C","#D946EF","#E11D48","#2563EB","#F59E0B","#7C3AED","#0EA5E9","#16A34A","#DC2626"]
 
   useEffect(() => {
+    const sc = localStorage.getItem("storeConfig")
+    if(sc) {
+      try {
+        const s = JSON.parse(sc)
+        setName(s.name||""); setColor(s.primaryColor||"#1D9E75")
+        setGoal(String(s.monthlyGoal||"")); setPhone(s.phone||"")
+      } catch{}
+    }
     api.get("/stores").then(r => {
       const s = Array.isArray(r.data) ? r.data[0] : r.data
       if(s) {
         setName(s.name||""); setColor(s.primaryColor||"#1D9E75")
-        setGoal(String(s.monthlyGoal||"")); setPhone(s.phone||"")
+        setGoal(s.monthlyGoal ? String(s.monthlyGoal) : "")
+        setPhone(s.phone||"")
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
     }).catch(()=>{})
