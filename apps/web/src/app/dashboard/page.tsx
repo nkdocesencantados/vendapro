@@ -165,6 +165,13 @@ export default function DashboardPage() {
         @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
         @media(max-width:540px){.kpi-grid{grid-template-columns:1fr 1fr;}}
         @media(max-width:640px){
+          .kpi-val{font-size:18px!important;}
+          .kpi-card{padding:12px!important;}
+          .dash-grid{grid-template-columns:1fr!important;}
+          .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+          .tbl{min-width:480px;}
+        }
+        @media(max-width:640px){
           .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
           .tbl{min-width:480px;}
           .tbl th,.tbl td{padding:8px 10px;}
@@ -400,4 +407,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
 

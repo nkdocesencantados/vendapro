@@ -151,6 +151,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
         .vp-store-meta { display:flex; flex-direction:column; min-width:0; flex:1; }
         .vp-store-meta strong { font-size:13.5px; font-weight:600; color:#F0F7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.01em; }
+        .vp-crumbs { font-size:12px; }
+        @media(max-width:900px){ .vp-crumbs span:first-child { display:none; } }
         .vp-store-meta small { font-size:11px; color:#7A9990; margin-top:2px; }
 
         .vp-nav { padding:10px 8px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:1px; scrollbar-width:none; }
@@ -285,4 +287,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </>
   )
 }
+
 

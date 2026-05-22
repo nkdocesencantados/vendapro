@@ -122,7 +122,7 @@ export default function SalesPage() {
         <div>
           <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Vendas</h1>
           <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
-            {sales.filter((s:any)=>s.status==="completed").length} vendas Â· {BRL(totalRev)} faturados
+            {sales.filter((s:any)=>s.status==="completed").length} vendas - {BRL(totalRev)} faturados
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
@@ -280,5 +280,6 @@ export default function SalesPage() {
     </div>
   )
 }
+
 
 
