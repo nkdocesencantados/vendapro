@@ -64,7 +64,7 @@ export default function LoginPage() {
             <span style={{color:"#34D399"}}>um so lugar</span>.
           </h2>
           <p style={{fontSize:15,lineHeight:1.6,color:"#B2C9C0",margin:0,maxWidth:380}}>
-            Vendas, estoque, caixa e equipe â€” pensado para o pequeno comercio brasileiro.
+            Vendas, estoque, caixa e equipe - pensado para o pequeno comercio brasileiro.
           </p>
 
           {/* Stats */}
