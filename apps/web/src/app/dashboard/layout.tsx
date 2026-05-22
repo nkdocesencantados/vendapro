@@ -53,15 +53,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<any>(null)
   const [store, setStore] = useState<any>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [dark, setDark] = useState(false)
+
+  function toggleDark() {
+    const next = !dark
+    setDark(next)
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light")
+    localStorage.setItem("theme", next ? "dark" : "light")
+  }
 
   useEffect(() => {
     const u = localStorage.getItem("user")
     if (!u) { router.push("/login"); return }
     const parsed = JSON.parse(u)
     setUser(parsed)
+    const savedTheme = localStorage.getItem("theme")
+    if (savedTheme === "dark") {
+      setDark(true)
+      document.documentElement.setAttribute("data-theme", "dark")
+    }
     const sc = localStorage.getItem("storeConfig")
     if (sc) { try { setStore(JSON.parse(sc)) } catch {} }
-    api.get("/stores/me").then(r => {
+    api.get("/stores").then(r => {
       setStore(r.data)
       localStorage.setItem("storeConfig", JSON.stringify(r.data))
     }).catch(() => {})
@@ -123,6 +136,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .vp-plan-pro{background:var(--brand-tint);color:var(--brand-deep);}
         .vp-plan-business{background:linear-gradient(135deg,#04342C,#1D9E75);color:white;}
         .vp-content{flex:1;overflow-y:auto;background:var(--bg);}
+        
+        [data-theme="dark"] {
+          --bg:#0A1412; --bg-elevated:#0F1B18; --surface:#0F1B18;
+          --surface-2:#142421; --surface-3:#1A2E29;
+          --border:#1F3A33; --border-strong:#2A4D44;
+          --text:#F5F5F4; --text-muted:#A8B3AF; --text-subtle:#7A8480;
+          --brand-tint:rgba(29,158,117,0.12);
+          --success-bg:rgba(29,158,117,0.14);
+          --warning-bg:rgba(180,83,9,0.16);
+          --danger-bg:rgba(185,28,28,0.16);
+          --info-bg:rgba(30,64,175,0.18);
+          --shadow-lg:0 16px 40px rgba(0,0,0,0.55),0 4px 8px rgba(0,0,0,0.35);
+        }
+        .vp-theme-btn{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;font-size:13px;color:#8DA39A;cursor:pointer;transition:background 0.12s,color 0.12s;}
+        .vp-theme-btn:hover{background:#0E2620;color:#E5F2EC;}
         .vp-mob-btn{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);color:var(--text-muted);align-items:center;justify-content:center;}
         @media(max-width:900px){.vp-sidebar{position:fixed;transform:translateX(-100%);transition:transform 0.2s;box-shadow:var(--shadow-lg);}.vp-sidebar.open{transform:translateX(0);}.vp-mob-btn{display:flex;}}
       `}</style>
@@ -147,6 +175,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
           <div className="vp-sidebar-foot">
+            <div className="vp-theme-btn" onClick={toggleDark}>
+              <Icon name="sun" size={16}/>
+              <span>{dark ? "Modo claro" : "Modo escuro"}</span>
+            </div>
             <div className="vp-user-pill" onClick={logout}>
               <div className="vp-user-avatar" style={{background:primaryColor}}>{userInitials}</div>
               <div className="vp-user-meta">
