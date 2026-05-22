@@ -47,3 +47,5 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
+
+:root { --font-mono: "Geist Mono", ui-monospace, monospace; } .mono, [style*="font-mono"] { font-variant-numeric: normal; font-feature-settings: normal; }
