@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [name, setName]   = useState("")
   const [color, setColor] = useState("#1D9E75")
   const [goal, setGoal]   = useState("")
+  const [lowStock, setLowStock] = useState("5")
   const [userName, setUserName] = useState("")
   const [userEmail, setUserEmail] = useState("")
   const [newPwd, setNewPwd] = useState("")
@@ -22,13 +23,13 @@ export default function SettingsPage() {
     if(sc) {
       try {
         const s = JSON.parse(sc)
-        setName(s.name||""); setColor(s.primaryColor||"#1D9E75"); setGoal(String(s.monthlyGoal||""))
+        setName(s.name||""); setColor(s.primaryColor||"#1D9E75"); setGoal(String(s.monthlyGoal||"")); setLowStock(String(s.lowStockThreshold||"5"))
       } catch{}
     }
     api.get("/stores").then(r => {
       const s = Array.isArray(r.data) ? r.data[0] : r.data
       if(s) {
-        setName(s.name||""); setColor(s.primaryColor||"#1D9E75"); setGoal(s.monthlyGoal?String(s.monthlyGoal):"")
+        setName(s.name||""); setColor(s.primaryColor||"#1D9E75"); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setLowStock(String(s.lowStockThreshold||"5"))
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
     }).catch(()=>{})
@@ -40,8 +41,8 @@ export default function SettingsPage() {
     try {
       const sc = localStorage.getItem("storeConfig")
       const store = sc ? JSON.parse(sc) : {}
-      await api.patch(`/stores/${store.id}`, { name, primaryColor:color, monthlyGoal:+goal||0 })
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,primaryColor:color,monthlyGoal:+goal||0}))
+      await api.patch(`/stores/${store.id}`, { name, primaryColor:color, monthlyGoal:+goal||0, lowStockThreshold:+lowStock||5 })
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,primaryColor:color,monthlyGoal:+goal||0,lowStockThreshold:+lowStock||5}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     } catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
@@ -164,4 +165,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
 

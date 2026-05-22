@@ -14,10 +14,11 @@ export default function StockPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name:"", price:"", stock:"", description:"" })
   const [primary, setPrimary] = useState("#1D9E75")
+  const [threshold, setThreshold] = useState(5)
 
   useEffect(() => {
     load()
-    try { const sc=localStorage.getItem("storeConfig"); if(sc){const p=JSON.parse(sc);if(p.primaryColor)setPrimary(p.primaryColor)} } catch{}
+    try { const sc=localStorage.getItem("storeConfig"); if(sc){const p=JSON.parse(sc);if(p.primaryColor)setPrimary(p.primaryColor);if(p.lowStockThreshold)setThreshold(+p.lowStockThreshold||5)} } catch{}
   }, [])
 
   async function load() {
@@ -46,11 +47,11 @@ export default function StockPage() {
   }
 
   const filtered = products.filter(p => {
-    if(filter==="low") return p.stock > 0 && p.stock <= 5
+    if(filter==="low") return p.stock > 0 && p.stock <= threshold
     if(filter==="out") return p.stock === 0
     return true
   })
-  const lowCount = products.filter(p=>p.stock>0&&p.stock<=5).length
+  const lowCount = products.filter(p=>p.stock>0&&p.stock<=threshold).length
   const outCount = products.filter(p=>p.stock===0).length
   const totalVal = products.reduce((a,p)=>a+p.stock*p.price,0)
 
@@ -132,7 +133,7 @@ export default function StockPage() {
             <div className="prod-price">{BRL(p.price)} por unidade</div>
             <div style={{marginTop:5}}>
               {p.stock===0 ? <span className="vp-pill vp-pill-bad">Esgotado</span>
-              : p.stock<=5 ? <span className="vp-pill vp-pill-warn">{p.stock} un - Baixo</span>
+              : p.stock<=threshold ? <span className="vp-pill vp-pill-warn">{p.stock} un - Baixo</span>
               : <span className="vp-pill vp-pill-ok">{p.stock} un</span>}
             </div>
           </div>
@@ -171,4 +172,5 @@ export default function StockPage() {
     </div>
   )
 }
+
 
