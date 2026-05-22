@@ -50,7 +50,7 @@ export default function LoginPage() {
         <div style={{display:"flex",alignItems:"center",gap:10,position:"relative"}}>
           <div style={{width:64,height:64,borderRadius:16,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
             <svg width={40} height={40} viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="4" r="2" fill="white"/><circle cx="4" cy="18" r="2" fill="white"/><circle cx="20" cy="18" r="2" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" strokeWidth="2"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" strokeWidth="2"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" strokeWidth="2"/>
+              <circle cx="12" cy="4" r="3" fill="white"/><circle cx="4" cy="18" r="3" fill="white"/><circle cx="20" cy="18" r="3" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" strokeWidth="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" strokeWidth="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" strokeWidth="1.5"/>
 
             </svg>
           </div>
