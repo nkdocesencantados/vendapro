@@ -1,10 +1,13 @@
-﻿"use client" // v2
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { fmt, fmtDate } from "@/lib/utils"
 
-const emptyItem = () => ({ productId: "", name: "", quantity: "1", unitPrice: "", isManual: false })
-const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, installments: 1, saleDate: new Date().toISOString().split("T")[0], items: [emptyItem()] })
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
+
+function BRL(v:number){ return v?.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})||"R$ 0,00" }
+const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
+const emptyForm = () => ({ customerName:"", paymentMethod:"pix", discount:0, installments:1, saleDate:new Date().toISOString().split("T")[0], items:[emptyItem()] })
 
 export default function SalesPage() {
   const [sales, setSales] = useState<any[]>([])
@@ -12,275 +15,253 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState("")
-  const [cancelConfirm, setCancelConfirm] = useState<string|null>(null)
   const [filter, setFilter] = useState("active")
   const [form, setForm] = useState<any>(emptyForm())
+  const [cancelId, setCancelId] = useState<string|null>(null)
   const [primary, setPrimary] = useState("#1D9E75")
 
   useEffect(() => {
-    loadSales(); loadProducts()
-    try {
-      const c = localStorage.getItem("storeConfig")
-      if (c) { const p = JSON.parse(c); if (p.primaryColor) setPrimary(p.primaryColor) }
-    } catch {}
+    load(); loadProducts()
+    try { const sc = localStorage.getItem("storeConfig"); if(sc){const p=JSON.parse(sc);if(p.primaryColor)setPrimary(p.primaryColor)} } catch{}
   }, [])
 
-  async function loadSales() {
+  async function load() {
     try { const r = await api.get("/sales"); setSales(r.data) }
-    catch (e) { console.error(e) }
-    finally { setLoading(false) }
+    catch(e){ console.error(e) } finally { setLoading(false) }
   }
-
   async function loadProducts() {
-    try { const r = await api.get("/products"); setProducts(r.data) }
-    catch (e) { console.error(e) }
+    try { const r = await api.get("/products"); setProducts(r.data) } catch{}
   }
-
-  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3000) }
-
   async function saveSale() {
-    const saleDate = new Date(form.saleDate)
-    const today = new Date(); today.setHours(23,59,59,999)
-    if (saleDate > today) return alert("Nao e possivel registrar vendas em datas futuras")
-    const validItems = form.items.filter((i: any) => i.name && +i.unitPrice > 0)
-    if (!validItems.length) return alert("Adicione ao menos um produto com preco")
+    const valid = form.items.filter((i:any) => i.name && +i.unitPrice > 0)
+    if(!valid.length) return alert("Adicione ao menos um produto")
     setSaving(true)
     try {
-      const payload = {
-        ...form,
-        items: validItems.map((i: any) => ({
-          productId: i.productId || null,
-          name: i.name,
-          quantity: +i.quantity || 1,
-          unitPrice: +i.unitPrice || 0,
-          isManual: !i.productId,
-        }))
-      }
-      await api.post("/sales", { ...payload, createdAt: form.saleDate ? new Date(form.saleDate).toISOString() : undefined })
-      setShowForm(false)
-      setForm(emptyForm())
-      loadSales()
-      loadProducts()
-    } catch (e: any) {
-      const msg = e?.response?.data?.message || "Erro ao salvar venda"
-      alert(typeof msg === "string" ? msg : JSON.stringify(msg))
-    } finally { setSaving(false) }
+      await api.post("/sales", { ...form, items: valid.map((i:any) => ({ productId:i.productId||null, name:i.name, quantity:+i.quantity||1, unitPrice:+i.unitPrice||0, isManual:!i.productId })) })
+      setShowForm(false); setForm(emptyForm()); load(); loadProducts()
+    } catch(e:any) { alert(e?.response?.data?.message||"Erro ao salvar") }
+    finally { setSaving(false) }
   }
-
-  async function cancelSale(id: string) {
-    setCancelConfirm(id)
+  async function confirmCancel(id:string) {
+    setCancelId(null)
+    try { await api.patch(`/sales/${id}/cancel`); load(); loadProducts() } catch{ load() }
   }
-  async function confirmCancel(id: string) {
-    setCancelConfirm(null)
-    if (!id) return
-    try { await api.patch(`/sales/${id}/cancel`); loadSales(); loadProducts() }
-    catch { loadSales() }
-  }
-
-  const addItem = () => setForm({ ...form, items: [...form.items, emptyItem()] })
-  const removeItem = (i: number) => setForm({ ...form, items: form.items.filter((_: any, j: number) => j !== i) })
-
-  function selectProduct(i: number, productId: string) {
+  function selectProduct(i:number, pid:string) {
     const it = [...form.items]
-    if (productId === "__manual__") {
-      it[i] = { productId: "", name: "", quantity: it[i].quantity, unitPrice: "", isManual: true }
-    } else {
-      const p = products.find((p: any) => p.id === productId)
-      if (p) it[i] = { productId: p.id, name: p.name, quantity: it[i].quantity, unitPrice: String(p.price), isManual: false }
-      else it[i] = { ...it[i], productId: "" }
-    }
-    setForm({ ...form, items: it })
+    if(pid==="__manual__") { it[i]={productId:"",name:"",quantity:it[i].quantity,unitPrice:"",isManual:true} }
+    else { const p=products.find((p:any)=>p.id===pid); if(p)it[i]={productId:p.id,name:p.name,quantity:it[i].quantity,unitPrice:String(p.price),isManual:false} }
+    setForm({...form,items:it})
   }
-
-  function updateItem(i: number, field: string, val: string) {
-    const it = [...form.items]
-    it[i] = { ...it[i], [field]: val }
-    setForm({ ...form, items: it })
-  }
-
-  const total = form.items.reduce((a: number, i: any) => a + (+i.quantity || 0) * (+i.unitPrice || 0), 0) - form.discount
-  const inputStyle: any = { padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", background: "white", width: "100%", boxSizing: "border-box" }
-  const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Credito", debit_card: "Debito" }
-  const filtered = sales.filter((s: any) => filter === "all" || s.status === filter || (filter === "active" && s.status === "completed"))
+  function updateItem(i:number, f:string, v:string) { const it=[...form.items]; it[i]={...it[i],[f]:v}; setForm({...form,items:it}) }
+  const total = form.items.reduce((a:number,i:any) => a+(+i.quantity||0)*(+i.unitPrice||0), 0) - form.discount
+  const filtered = sales.filter((s:any) => filter==="all" || s.status===filter || (filter==="active"&&s.status==="completed"))
+  const totalRev = sales.filter((s:any)=>s.status==="completed").reduce((a:any,s:any)=>a+Number(s.total),0)
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
-      {toast && (
-        <div style={{position:"fixed",top:"16px",right:"16px",zIndex:999,background:"#E1F5EE",border:"1px solid #1D9E75",borderRadius:"10px",padding:"12px 18px",display:"flex",alignItems:"center",gap:"10px"}}>
-          <span style={{fontSize:"13px",color:"#0F6E56",fontWeight:500}}>✅ {toast}</span>
-        </div>
-      )}
-      {cancelConfirm && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"320px"}}>
-            <p style={{fontSize:"15px",fontWeight:500,marginBottom:"8px"}}>⚠️ Cancelar venda?</p>
-            <p style={{fontSize:"13px",color:"#666",marginBottom:"20px"}}>Esta acao nao pode ser desfeita.</p>
-            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-              <button onClick={()=>setCancelConfirm(null)} style={{padding:"8px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Voltar</button>
-              <button onClick={()=>confirmCancel(cancelConfirm)} style={{padding:"8px 16px",background:"#ef4444",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Sim, cancelar</button>
-            </div>
+    <div style={{padding:28,maxWidth:1440,margin:"0 auto"}}>
+      <style>{`
+        .vp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;}
+        .vp-card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+        .vp-card-head h3{margin:0;font-size:14px;font-weight:600;}
+        .vp-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+        .vp-tbl th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-subtle);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+        .vp-tbl td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+        .vp-tbl tr:last-child td{border-bottom:0;}
+        .vp-tbl tr:hover td{background:var(--surface-2);}
+        .vp-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:500;}
+        .vp-pill-ok{background:var(--success-bg);color:var(--success);}
+        .vp-pill-bad{background:var(--danger-bg);color:var(--danger);}
+        .vp-pill-grey{background:var(--surface-3);color:var(--text-muted);}
+        .vp-av{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:600;flex-shrink:0;}
+        .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s,box-shadow .12s;}
+        .vp-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+        .vp-select{appearance:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 32px 9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;cursor:pointer;}
+        .vp-select:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn-primary{background:var(--brand);color:white;}
+        .vp-btn-primary:hover{background:#178A65;}
+        .vp-btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text);}
+        .vp-btn-secondary:hover{background:var(--surface-2);}
+        .vp-btn-ghost{color:var(--text-muted);}
+        .vp-btn-ghost:hover{background:var(--surface-2);color:var(--text);}
+        .vp-btn-danger{background:var(--danger-bg);color:var(--danger);border-color:var(--danger-bg);}
+        .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
+        .vp-modal-bg{position:fixed;inset:0;background:rgba(12,10,9,0.5);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:100;}
+        .vp-modal{width:min(580px,94vw);background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);max-height:88vh;overflow:auto;}
+        .vp-modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .vp-modal-head h2{margin:0;font-size:17px;font-weight:600;}
+        .vp-modal-body{padding:22px;}
+        .vp-modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center;background:var(--surface-2);border-radius:0 0 18px 18px;}
+        .vp-field{display:flex;flex-direction:column;gap:6px;}
+        .vp-field label{font-size:12px;font-weight:500;color:var(--text-muted);}
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+        .kpi{padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px;}
+        .kpi .lbl{font-size:12px;color:var(--text-subtle);font-weight:500;margin-bottom:10px;}
+        .kpi .val{font-size:22px;font-weight:600;letter-spacing:-.02em;font-family:var(--font-mono,"Geist Mono",monospace);}
+        .kpi .delta{margin-top:6px;font-size:11px;color:var(--success);}
+        @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+      `}</style>
+
+      {/* HEADER */}
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:24,flexWrap:"wrap"}}>
+        <div>
+          <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Vendas</h1>
+          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
+            {sales.filter((s:any)=>s.status==="completed").length} vendas · {BRL(totalRev)} faturados
           </div>
         </div>
-      )}
-      <style>{`
-        .sale-item-desktop { display: grid; grid-template-columns: 2.5fr 60px 90px 32px; gap: 6px; margin-bottom: 6px; }
-        .sale-item-mobile { display: none; }
-        @media (max-width: 767px) {
-          .sale-item-desktop { display: none; }
-          .sale-item-mobile { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; }
-        }
-      `}</style>
-      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 500 }}>Vendas</div>
-        <button onClick={() => setShowForm(!showForm)} style={{ background: primary, color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Nova Venda</button>
+        <div style={{display:"flex",gap:8}}>
+          <button className="vp-btn vp-btn-primary" onClick={()=>{setForm(emptyForm());setShowForm(true)}}>
+            + Nova venda
+          </button>
+        </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-        {showForm && (
-          <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
-            <h3 style={{ marginBottom: "16px", fontWeight: 500, fontSize: "15px" }}>Nova Venda</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Cliente</label>
-                <input value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} placeholder="Nome do cliente" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Pagamento</label>
-                <select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })} style={inputStyle}>
-                  <option value="cash">Dinheiro</option>
-                  <option value="pix">PIX</option>
-                  <option value="credit_card">Cartao Credito</option>
-                  <option value="debit_card">Cartao Debito</option>
-                </select>
-              </div>
-              {form.paymentMethod === "credit_card" && (
-                <div>
-                  <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Parcelas</label>
-                  <select value={form.installments} onChange={e => setForm({ ...form, installments: +e.target.value })} style={inputStyle}>
-                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => (
-                      <option key={n} value={n}>{n}x de {fmt(total > 0 ? total / n : 0)}</option>
-                    ))}
+      {/* KPIs */}
+      <div className="kpi-grid">
+        <div className="kpi"><div className="lbl">Faturamento do mes</div><div className="val">{BRL(totalRev)}</div><div className="delta">↑ {sales.filter((s:any)=>s.status==="completed").length} vendas</div></div>
+        <div className="kpi"><div className="lbl">Concluidas</div><div className="val">{sales.filter((s:any)=>s.status==="completed").length}</div></div>
+        <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{sales.filter((s:any)=>s.status==="cancelled").length}</div></div>
+        <div className="kpi"><div className="lbl">Ticket medio</div><div className="val">{BRL(sales.filter((s:any)=>s.status==="completed").length ? totalRev/sales.filter((s:any)=>s.status==="completed").length : 0)}</div></div>
+      </div>
+
+      {/* TABELA */}
+      <div className="vp-card">
+        <div className="vp-card-head">
+          <div style={{display:"flex",gap:4}}>
+            {[["active","Concluidas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+              <button key={v} className={`vp-btn vp-btn-sm ${filter===v?"vp-btn-primary":"vp-btn-ghost"}`} onClick={()=>setFilter(v)}>{l}</button>
+            ))}
+          </div>
+        </div>
+        {loading ? (
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{textAlign:"center",padding:48,color:"var(--text-subtle)"}}>Nenhuma venda encontrada.</div>
+        ) : (
+          <table className="vp-tbl">
+            <thead>
+              <tr><th>Cliente</th><th>Vendedor</th><th>Produtos</th><th>Pagamento</th><th>Status</th><th style={{textAlign:"right"}}>Total</th><th></th></tr>
+            </thead>
+            <tbody>
+              {filtered.map((s:any)=>(
+                <tr key={s.id}>
+                  <td style={{fontWeight:500}}>{s.customerName||"Cliente avulso"}</td>
+                  <td>
+                    {s.sellerName ? (
+                      <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
+                        <span className="vp-av" style={{background:primary,color:"white"}}>{s.sellerName.split(" ").map((x:string)=>x[0]).slice(0,2).join("")}</span>
+                        {s.sellerName}
+                      </span>
+                    ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
+                  </td>
+                  <td>
+                    {s.items?.length > 0 ? (
+                      <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                        {s.items.slice(0,3).map((it:any,i:number)=>(
+                          <span key={i} className="vp-pill vp-pill-grey">{it.quantity}x {it.name||"Produto"}</span>
+                        ))}
+                        {s.items.length>3 && <span className="vp-pill vp-pill-grey">+{s.items.length-3}</span>}
+                      </div>
+                    ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
+                  </td>
+                  <td><span className="vp-pill vp-pill-grey">{PAY[s.paymentMethod]||s.paymentMethod}</span></td>
+                  <td>
+                    <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
+                      {s.status==="completed"?"Concluida":"Cancelada"}
+                    </span>
+                  </td>
+                  <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:600,color:s.status==="cancelled"?"var(--text-subtle)":primary,textDecoration:s.status==="cancelled"?"line-through":"none"}}>{BRL(s.total)}</td>
+                  <td>
+                    {s.status!=="cancelled" && (
+                      <button className="vp-btn vp-btn-sm vp-btn-danger" onClick={()=>setCancelId(s.id)}>Cancelar</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* MODAL NOVA VENDA */}
+      {showForm && (
+        <div className="vp-modal-bg" onClick={()=>setShowForm(false)}>
+          <div className="vp-modal" onClick={e=>e.stopPropagation()}>
+            <div className="vp-modal-head">
+              <h2>Nova venda</h2>
+              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>✕</button>
+            </div>
+            <div className="vp-modal-body">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
+                <div className="vp-field">
+                  <label>Cliente</label>
+                  <input className="vp-input" value={form.customerName} onChange={e=>setForm({...form,customerName:e.target.value})} placeholder="Nome do cliente" />
+                </div>
+                <div className="vp-field">
+                  <label>Pagamento</label>
+                  <select className="vp-select" value={form.paymentMethod} onChange={e=>setForm({...form,paymentMethod:e.target.value})}>
+                    <option value="pix">PIX</option>
+                    <option value="cash">Dinheiro</option>
+                    <option value="credit_card">Cartao Credito</option>
+                    <option value="debit_card">Cartao Debito</option>
                   </select>
                 </div>
-              )}
-              <div>
-                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Data da venda</label>
-                <input type="date" value={form.saleDate} onChange={e => setForm({ ...form, saleDate: e.target.value })} style={inputStyle} />
-              </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                <label style={{ fontSize: "12px", color: "#666" }}>Itens da venda</label>
-                <button onClick={addItem} style={{ background: "none", border: `1px solid ${primary}`, color: primary, borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
-              </div>
-              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <div className="sale-item-desktop" style={{ marginBottom: "6px" }}>
-                  {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
+                <div className="vp-field">
+                  <label>Data</label>
+                  <input className="vp-input" type="date" value={form.saleDate} onChange={e=>setForm({...form,saleDate:e.target.value})} />
                 </div>
-                {form.items.map((item: any, i: number) => (
-                  <div key={i}>
-                    <div className="sale-item-desktop">
-                      {item.isManual ? (
-                        <div style={{ display: "flex", gap: "4px" }}>
-                          <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={{ ...inputStyle, flex: 1 }} />
-                          <button onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem(), quantity: it[i].quantity }; setForm({ ...form, items: it }) }} style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "14px", color: "#666" }}>&#8617;</button>
-                        </div>
-                      ) : (
-                        <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
-                          <option value="">Selecione um produto</option>
-                          {products.map((p: any) => <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)} ({p.stock} un)</option>)}
-                          <option value="__manual__">Digitar manualmente</option>
-                        </select>
-                      )}
-                      <input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} />
-                      <input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} />
-                      <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>x</button>
-                    </div>
-                    <div className="sale-item-mobile">
-                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                        <div style={{ flex: 1 }}>
-                          {item.isManual ? (
-                            <input value={item.name} onChange={e => updateItem(i, "name", e.target.value)} placeholder="Nome do produto" style={inputStyle} />
-                          ) : (
-                            <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
-                              <option value="">Selecione um produto</option>
-                              {products.map((p: any) => <option key={p.id} value={p.id}>{p.name} - R$ {Number(p.price).toFixed(2)}</option>)}
-                              <option value="__manual__">Digitar manualmente</option>
-                            </select>
-                          )}
-                        </div>
-                        <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700, padding: "8px 10px" }}>x</button>
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                        <div><label style={{ fontSize: "11px", color: "#888" }}>Qtd</label><input value={item.quantity} onChange={e => updateItem(i, "quantity", e.target.value)} type="number" min="1" style={{ ...inputStyle, textAlign: "center" }} /></div>
-                        <div><label style={{ fontSize: "11px", color: "#888" }}>Preco (R$)</label><input value={item.unitPrice} onChange={e => updateItem(i, "unitPrice", e.target.value)} type="number" min="0" step="0.01" placeholder="0,00" style={inputStyle} /></div>
-                      </div>
-                    </div>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <label style={{fontSize:12,fontWeight:500,color:"var(--text-muted)"}}>Itens da venda</label>
+                <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>setForm({...form,items:[...form.items,emptyItem()]})}>+ Item</button>
+              </div>
+              <div style={{background:"var(--surface-2)",borderRadius:10,padding:12}}>
+                {form.items.map((item:any,i:number)=>(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 80px 100px 32px",gap:8,marginBottom:8}}>
+                    {item.isManual ? (
+                      <input className="vp-input" value={item.name} onChange={e=>updateItem(i,"name",e.target.value)} placeholder="Nome do produto" />
+                    ) : (
+                      <select className="vp-select" value={item.productId} onChange={e=>selectProduct(i,e.target.value)}>
+                        <option value="">Selecione</option>
+                        {products.map((p:any)=><option key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</option>)}
+                        <option value="__manual__">Digitar manualmente</option>
+                      </select>
+                    )}
+                    <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} />
+                    <input className="vp-input" type="number" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" />
+                    <button onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>×</button>
                   </div>
                 ))}
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: primary }}>Total: {fmt(total)}</div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <button onClick={() => { setShowForm(false); setForm(emptyForm()) }} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-                <button onClick={saveSale} disabled={saving} style={{ padding: "8px 20px", background: saving ? "#9ca3af" : primary, color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: 500 }}>
-                  {saving ? "Salvando..." : "Salvar Venda"}
-                </button>
+            <div className="vp-modal-foot">
+              <div style={{marginRight:"auto"}}>
+                <span style={{fontSize:11,color:"var(--text-subtle)"}}>Total</span>
+                <div style={{fontSize:20,fontWeight:700,fontFamily:"var(--font-mono)"}}>{BRL(total)}</div>
               </div>
+              <button className="vp-btn vp-btn-ghost" onClick={()=>setShowForm(false)}>Cancelar</button>
+              <button className="vp-btn vp-btn-primary" onClick={saveSale} disabled={saving}>{saving?"Salvando...":"Finalizar venda"}</button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Carregando...</div>
-        ) : sales.length === 0 ? (
-          <div style={{ textAlign: "center", color: "#888", padding: "60px" }}>Nenhuma venda registrada ainda.</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
-              {[["active","Concluidas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l]) => (
-                <button key={v} onClick={() => setFilter(v)} style={{ padding: "5px 12px", fontSize: "12px", border: "0.5px solid #e5e7eb", borderRadius: "6px", cursor: "pointer", background: filter === v ? primary : "white", color: filter === v ? "white" : "#666" }}>{l}</button>
-              ))}
+      {/* MODAL CANCELAR */}
+      {cancelId && (
+        <div className="vp-modal-bg" onClick={()=>setCancelId(null)}>
+          <div className="vp-modal" style={{maxWidth:340}} onClick={e=>e.stopPropagation()}>
+            <div className="vp-modal-head"><h2>Cancelar venda?</h2></div>
+            <div className="vp-modal-body">
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta acao nao pode ser desfeita.</p>
             </div>
-            {filtered.map((s: any) => (
-              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "18px 20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-                      <div style={{ fontWeight: 600, fontSize: "15px" }}>{s.customerName || "Cliente nao informado"}</div>
-                      {s.sellerName && <span style={{ fontSize: "11px", background: "#f0fdf4", color: "#16a34a", border: "0.5px solid #bbf7d0", padding: "2px 10px", borderRadius: "20px" }}>{s.sellerName}</span>}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "10px" }}>{fmtDate(s.createdAt)} &nbsp;·&nbsp; {payLabel[s.paymentMethod] || s.paymentMethod}</div>
-                    {s.items && s.items.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                        {s.items.map((item: any, idx: number) => (
-                          <span key={idx} style={{ fontSize: "12px", background: "#f9fafb", border: "0.5px solid #e5e7eb", color: "#374151", padding: "4px 10px", borderRadius: "6px" }}>
-                            {item.quantity}x {item.name || "Produto"}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", marginLeft: "20px", flexShrink: 0 }}>
-                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#9ca3af" : primary, fontSize: "17px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
-                    <div style={{ fontSize: "11px", color: s.status === "completed" ? "#16a34a" : "#ef4444", background: s.status === "completed" ? "#f0fdf4" : "#fef2f2", padding: "2px 10px", borderRadius: "20px" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
-                    {s.status !== "cancelled" && (
-                      <button onClick={() => cancelSale(s.id)} style={{ background: "none", color: "#ef4444", border: "0.5px solid #fca5a5", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", marginTop: "4px" }}>Cancelar</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="vp-modal-foot">
+              <button className="vp-btn vp-btn-ghost" onClick={()=>setCancelId(null)}>Voltar</button>
+              <button className="vp-btn vp-btn-danger" onClick={()=>confirmCancel(cancelId)}>Sim, cancelar</button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
-
-
-
-
-

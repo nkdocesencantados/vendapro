@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { api } from "@/lib/api"
@@ -8,7 +8,7 @@ import Link from "next/link"
 const NAV_ALL = [
   { id:"dashboard",  href:"/dashboard",         label:"Dashboard",  icon:"dashboard" },
   { id:"vendas",     href:"/dashboard/sales",    label:"Vendas",     icon:"cart" },
-  { id:"estoque",    href:"/dashboard/stock",    label:"Estoque",    icon:"box" },
+  { id:"estoque",    href:"/dashboard/inventory",    label:"Estoque",    icon:"box" },
   { id:"recibos",    href:"/dashboard/receipts", label:"Recibos",    icon:"receipt" },
   { id:"caixa",      href:"/dashboard/cash",     label:"Caixa",      icon:"cash",    premium:true },
   { id:"relatorios", href:"/dashboard/reports",  label:"Relatorios", icon:"chart",   premium:true },
@@ -107,7 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <>
       <style>{`
-        /* ── Dark mode tokens ── */
+        /* â”€â”€ Dark mode tokens â”€â”€ */
         [data-theme="dark"] {
           --bg:#0A1412; --bg-elevated:#0F1B18; --surface:#0F1B18;
           --surface-2:#142421; --surface-3:#1A2E29;
@@ -124,11 +124,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           --shadow-lg:0 16px 40px rgba(0,0,0,0.55);
         }
 
-        /* ── App shell ── */
+        /* â”€â”€ App shell â”€â”€ */
         html, body, #__next { height: 100%; }
         .vp-app { display:flex; height:100vh; overflow:hidden; background:var(--bg); color:var(--text); font-family:var(--font,"Geist",sans-serif); }
 
-        /* ── Sidebar ── */
+        /* â”€â”€ Sidebar â”€â”€ */
         .vp-sb {
           width:248px; flex-shrink:0;
           background:#04130F;
@@ -184,10 +184,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .vp-user-meta strong { font-size:13px; font-weight:500; color:#F0F7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .vp-user-meta small { font-size:11px; color:#7A9990; }
 
-        /* ── Main ── */
+        /* â”€â”€ Main â”€â”€ */
         .vp-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
 
-        /* ── Topbar ── */
+        /* â”€â”€ Topbar â”€â”€ */
         .vp-topbar {
           height:56px; padding:0 24px;
           border-bottom:1px solid var(--border);
@@ -206,10 +206,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .vp-plan-pro      { background:var(--brand-tint); color:var(--brand-deep); }
         .vp-plan-business { background:linear-gradient(135deg,#04342C,#1D9E75); color:white; }
 
-        /* ── Content ── */
+        /* â”€â”€ Content â”€â”€ */
         .vp-content { flex:1; overflow-y:auto; background:var(--bg); }
 
-        /* ── Mobile ── */
+        /* â”€â”€ Mobile â”€â”€ */
         .vp-mob-btn { display:none; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); color:var(--text-muted); align-items:center; justify-content:center; }
         .vp-overlay { display:none; }
         @media (max-width:900px) {
@@ -223,7 +223,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="vp-app">
         {mobileOpen && <div className="vp-overlay" onClick={()=>setMobileOpen(false)} />}
 
-        {/* ── SIDEBAR ── */}
+        {/* â”€â”€ SIDEBAR â”€â”€ */}
         <aside className={`vp-sb${mobileOpen?" open":""}`}>
           <div className="vp-sb-head">
             <div className="vp-store-card">
@@ -262,7 +262,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </aside>
 
-        {/* ── MAIN ── */}
+        {/* â”€â”€ MAIN â”€â”€ */}
         <div className="vp-main">
           <header className="vp-topbar">
             <button className="vp-mob-btn" onClick={()=>setMobileOpen(true)}>
@@ -285,3 +285,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </>
   )
 }
+
