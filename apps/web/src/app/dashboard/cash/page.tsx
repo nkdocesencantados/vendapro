@@ -4,6 +4,21 @@ import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
+
+function exportCashCSV(entries: any[], month: number, year: number) {
+  const M=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const C: Record<string,string>={sale:'Venda',service:'Servico',rent:'Aluguel',salary:'Salario',supplier:'Fornecedor',tax:'Imposto',utilities:'Contas',marketing:'Marketing',other:'Outros'};
+  vpCSV(['Data','Descricao','Categoria','Tipo','Valor'],
+    entries.map((e:any)=>[new Date(e.date||e.createdAt).toLocaleDateString('pt-BR'),e.description||C[e.category]||e.category,C[e.category]||e.category,e.type==='income'?'Receita':'Despesa',(e.type==='income'?'+':'-')+Number(e.amount).toFixed(2)]),
+    'caixa-'+M[month-1]+'-'+year);
+}
+function exportCashPDF(entries: any[], income: number, expense: number, profit: number, month: number, year: number) {
+  const M=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const C: Record<string,string>={sale:'Venda',service:'Servico',rent:'Aluguel',salary:'Salario',supplier:'Fornecedor',tax:'Imposto',utilities:'Contas',marketing:'Marketing',other:'Outros'};
+  const kpis='<div style="display:flex;gap:10px;margin-bottom:16px;"><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Entradas</div><div style="font-size:15px;font-weight:700;color:#1D9E75">R$ '+income.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Saidas</div><div style="font-size:15px;font-weight:700;color:#ef4444">R$ '+expense.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Saldo</div><div style="font-size:15px;font-weight:700">R$ '+profit.toFixed(2)+'</div></div></div>';
+  const tbl=vpTable('Caixa - '+M[month-1]+' '+year,['Data','Descricao','Categoria','Tipo','Valor'],entries.map((e:any)=>[new Date(e.date||e.createdAt).toLocaleDateString('pt-BR'),e.description||C[e.category]||e.category,C[e.category]||e.category,e.type==='income'?'Receita':'Despesa',(e.type==='income'?'+ R$ ':'- R$ ')+Number(e.amount).toFixed(2)]));
+  vpPDF(tbl.replace('<table',kpis+'<table'));
+}
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 const CAT_MAP: Record<string,string> = { sale:"Venda", service:"Serviço", rent:"Aluguel", salary:"Salário", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
@@ -115,9 +130,7 @@ export default function CashPage() {
         </div>
       </div>
 
-      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>
-        + Novo lançamento
-      </button>
+      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportCashCSV(entries,month,year)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportCashPDF(entries,data.income,data.expense,data.profit,month,year)}>PDF</button></div><button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lancamento</button>
 
       <div className="card-wrap">
         <div className="card-head-row">

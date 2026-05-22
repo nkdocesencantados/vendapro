@@ -4,6 +4,18 @@ import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
+
+function exportRepCSV(products: any[], from: string, to: string) {
+  vpCSV(['Produto','Qtd','Receita','Lucro Est.'],
+    products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
+    'relatorio-'+from+'-'+to);
+}
+function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+  const margin=revenue>0?Math.round((profit/revenue)*100):0;
+  const kpis='<div style="display:flex;gap:10px;margin-bottom:16px;"><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Faturamento</div><div style="font-size:14px;font-weight:700;color:#1D9E75">R$ '+revenue.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Lucro</div><div style="font-size:14px;font-weight:700">R$ '+profit.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Margem</div><div style="font-size:14px;font-weight:700">'+margin+'%</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Vendas</div><div style="font-size:14px;font-weight:700">'+totalSales+'</div></div></div>';
+  const tbl=vpTable('Relatorio - '+from+' a '+to,['Produto','Qtd','Receita','Lucro'],products.map((p:any)=>[p.name,String(p.quantity),'R$ '+Number(p.revenue).toFixed(2),'R$ '+(Number(p.revenue)*0.263).toFixed(2)]));
+  vpPDF(tbl.replace('<table',kpis+'<table'));
+}
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Crédito",debit_card:"Débito"}
 
@@ -75,7 +87,7 @@ export default function ReportsPage() {
 
       <div className="date-row">
         <input className="vp-input" type="date" value={from} onChange={e=>setFrom(e.target.value)} style={{flex:1,minWidth:130}}/>
-        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/>
+        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepCSV(products,from,to)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepPDF(products,revenue,profit,totalSales,from,to)}>PDF</button>
       </div>
 
       <div className="kpi-grid">

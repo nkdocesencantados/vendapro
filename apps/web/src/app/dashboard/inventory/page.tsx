@@ -3,6 +3,16 @@ import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+
+function exportInvCSV(products: any[], threshold: number) {
+  vpCSV(['Produto','Preco','Estoque','Minimo','Status'],
+    products.map((p:any) => [p.name,Number(p.price).toFixed(2),p.stock,p.minStock||threshold||5,p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK']),
+    'estoque');
+}
+function exportInvPDF(products: any[], threshold: number) {
+  vpPDF(vpTable('Relatorio de Estoque',['Produto','Preco','Estoque','Minimo','Status'],
+    products.map((p:any) => [p.name,'R$ '+Number(p.price).toFixed(2),String(p.stock),String(p.minStock||threshold||5),p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK'])));
+}
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
 export default function StockPage() {
@@ -104,7 +114,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      <button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
+      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Total produtos</div><div className="val">{products.length}</div></div>

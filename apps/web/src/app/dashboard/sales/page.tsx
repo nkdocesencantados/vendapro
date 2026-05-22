@@ -5,6 +5,36 @@ import { api } from "@/lib/api"
 const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
+
+function vpCSV(headers: string[], rows: any[][], filename: string) {
+  const lines = [headers, ...rows].map(r => r.map(c => String(c).replace(/;/g,',')).join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + lines], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+function vpPDF(html: string) {
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 600); }
+}
+function vpTable(title: string, headers: string[], rows: string[][]) {
+  const th = headers.map(h => '<th style="background:#1D9E75;color:white;padding:8px;font-size:11px;">' + h + '</th>').join('');
+  const tr = rows.map(r => '<tr>' + r.map(c => '<td style="padding:7px;border-bottom:1px solid #eee;font-size:11px;">' + c + '</td>').join('') + '</tr>').join('');
+  return '<html><head><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}.f{margin-top:16px;font-size:10px;color:#999;text-align:center;}</style></head><body><h2>' + title + '</h2><p style="color:#666;font-size:11px;">Gerado em ' + new Date().toLocaleString('pt-BR') + ' - VendaPro</p><table><thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table><div class="f">VendaPro - vendapro.com.br</div></body></html>';
+}
+
+function exportSalesCSV(sales: any[]) {
+  const PAY2: Record<string,string> = {cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito'};
+  vpCSV(['Cliente','Vendedor','Pagamento','Status','Total','Data'],
+    sales.map((s:any) => [s.customerName||'Avulso',s.sellerName||'-',PAY2[s.paymentMethod]||s.paymentMethod,s.status==='completed'?'Concluida':'Cancelada',Number(s.total).toFixed(2),new Date(s.createdAt).toLocaleDateString('pt-BR')]),
+    'vendas');
+}
+function exportSalesPDF(sales: any[]) {
+  const PAY2: Record<string,string> = {cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito'};
+  vpPDF(vpTable('Relatorio de Vendas',['Cliente','Vendedor','Pagamento','Status','Total','Data'],
+    sales.map((s:any) => [s.customerName||'Avulso',s.sellerName||'-',PAY2[s.paymentMethod]||s.paymentMethod,s.status==='completed'?'Concluida':'Cancelada','R$ '+Number(s.total).toFixed(2),new Date(s.createdAt).toLocaleDateString('pt-BR')])));
+}
 const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
 const emptyForm = () => ({ customerName:"", paymentMethod:"pix", discount:0, installments:1, saleDate:new Date().toISOString().split("T")[0], items:[emptyItem()] })
 
@@ -119,9 +149,7 @@ export default function SalesPage() {
             {completed} vendas - {BRL(totalRev)} faturados
           </div>
         </div>
-        <button className="vp-btn vp-btn-primary" onClick={()=>{setForm(emptyForm());setShowForm(true)}}>
-          + Nova venda
-        </button>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportSalesCSV(filtered)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportSalesPDF(filtered)}>PDF</button><button className="vp-btn vp-btn-primary" onClick={()=>{setForm(emptyForm());setShowForm(true)}}>+ Nova venda</button></div>
       </div>
 
       {/* KPIs */}
