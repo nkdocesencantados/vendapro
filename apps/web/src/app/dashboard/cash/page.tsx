@@ -102,7 +102,7 @@ export default function CashPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:24,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Caixa</h1>
-          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>Controle financeiro Â· {MONTHS[month-1]} de {year}</div>
+          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>Controle financeiro - {MONTHS[month-1]} de {year}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
           <select className="vp-select" style={{width:"auto"}} value={month} onChange={e=>setMonth(+e.target.value)}>
@@ -145,8 +145,8 @@ export default function CashPage() {
                     <td style={{fontWeight:500}}>{e.description||CAT_MAP[e.category]||e.category}</td>
                     <td><span className="vp-pill vp-pill-grey">{CAT_MAP[e.category]||e.category}</span></td>
                     <td>
-                      {e.type==="income"
-                        ? <span className="vp-pill vp-pill-in">â†‘ Receita</span>
+                        ? <span className="vp-pill vp-pill-in">+ Receita</span>
+                        : <span className="vp-pill vp-pill-out">- Despesa</span>}
                         : <span className="vp-pill vp-pill-out">â†“ Despesa</span>}
                     </td>
                     <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:600,color:e.type==="income"?"var(--success)":"var(--text)"}}>
@@ -235,4 +235,5 @@ export default function CashPage() {
     </div>
   )
 }
+
 
