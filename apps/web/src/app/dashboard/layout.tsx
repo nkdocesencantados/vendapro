@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { api } from "@/lib/api"
@@ -33,15 +33,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const u = localStorage.getItem("user")
-    const s = localStorage.getItem("store")
+    const s = localStorage.getItem("storeConfig") || localStorage.getItem("store")
     if (!u) { router.push("/login"); return }
     const parsed = JSON.parse(u)
     setUser(parsed)
-    if (s) setStore(JSON.parse(s))
+    if (s) { try { setStore(JSON.parse(s)) } catch {} }
     else {
       api.get("/stores/me").then(r => {
         setStore(r.data)
-        localStorage.setItem("store", JSON.stringify(r.data))
+        localStorage.setItem("storeConfig", JSON.stringify(r.data))
       }).catch(() => router.push("/login"))
     }
   }, [])
@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const storeName = store?.name || "Minha Loja"
   const storeInitials = storeName.slice(0, 2).toUpperCase()
   const primaryColor = store?.primaryColor || "#1D9E75"
-  const userName = user?.name || "Usuário"
+  const userName = user?.name || "Usuario"
   const userInitials = userName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
 
   const navItems = NAV_ALL.filter(n => {
@@ -164,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <strong>{storeName}</strong>
                 <small>
                   <span className={`plan-tag plan-${plan}`}>{PLAN_LABEL[plan] || plan}</span>
-                  {role === "seller" && <span style={{ marginLeft: 4 }}>· Vendedor</span>}
+                  {role === "seller" && <span style={{ marginLeft: 4 }}>Â· Vendedor</span>}
                 </small>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
               <div className="user-meta">
                 <strong>{userName}</strong>
-                <small>{role === "seller" ? "Vendedor" : role === "super_admin" ? "Super Admin" : "Proprietário"}</small>
+                <small>{role === "seller" ? "Vendedor" : role === "super_admin" ? "Super Admin" : "ProprietÃ¡rio"}</small>
               </div>
               <IconLogout style={{ width: 15, height: 15, color: "var(--text-subtle)", flexShrink: 0 }} />
             </div>
@@ -225,7 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   )
 }
 
-// ── Icons ──────────────────────────────────────────────────────
+// â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function IconDashboard({ className }: any) {
   return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/>
@@ -280,3 +280,4 @@ function IconMenu({ style }: any) {
     <path d="M3 6h18M3 12h18M3 18h18"/>
   </svg>
 }
+
