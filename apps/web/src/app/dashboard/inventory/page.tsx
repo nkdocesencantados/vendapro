@@ -1,14 +1,14 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
-function BRL(v:number){ return v?.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})||"R$ 0,00" }
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
 export default function StockPage() {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("all")
-  const [view, setView] = useState<"grid"|"list">("grid")
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [saving, setSaving] = useState(false)
@@ -55,147 +55,108 @@ export default function StockPage() {
   const totalVal = products.reduce((a,p)=>a+p.stock*p.price,0)
 
   return (
-    <div style={{padding:28,maxWidth:1440,margin:"0 auto"}}>
+    <div style={{padding:"clamp(12px,3vw,28px)",maxWidth:1440,margin:"0 auto"}}>
       <style>{`
-        .vp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;}
-        .vp-card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
-        .vp-card-head h3{margin:0;font-size:14px;font-weight:600;}
-        .vp-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
-        .vp-tbl th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-subtle);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);}
-        .vp-tbl td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
-        .vp-tbl tr:last-child td{border-bottom:0;}
-        .vp-tbl tr:hover td{background:var(--surface-2);}
-        .vp-pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:500;}
-        .vp-pill-ok{background:var(--success-bg);color:var(--success);}
-        .vp-pill-warn{background:var(--warning-bg);color:var(--warning);}
-        .vp-pill-bad{background:var(--danger-bg);color:var(--danger);}
-        .vp-pill-grey{background:var(--surface-3);color:var(--text-muted);}
         .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
-        .vp-btn-primary{background:var(--brand);color:white;} .vp-btn-primary:hover{background:#178A65;}
+        .vp-btn-primary{background:var(--brand,#1D9E75);color:white;} .vp-btn-primary:hover{background:#178A65;}
         .vp-btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text);} .vp-btn-secondary:hover{background:var(--surface-2);}
         .vp-btn-ghost{color:var(--text-muted);} .vp-btn-ghost:hover{background:var(--surface-2);color:var(--text);}
-        .vp-btn-danger{background:var(--danger-bg);color:var(--danger);} .vp-btn-danger:hover{background:var(--danger);color:white;}
+        .vp-btn-danger{background:var(--danger-bg);color:var(--danger);}
         .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
-        .vp-icon-btn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;border:1px solid transparent;color:var(--text-muted);cursor:pointer;transition:all .12s;}
-        .vp-icon-btn:hover{background:var(--surface-2);border-color:var(--border);color:var(--text);}
-        .vp-modal-bg{position:fixed;inset:0;background:rgba(12,10,9,0.5);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:100;}
-        .vp-modal{width:min(480px,94vw);background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);}
-        .vp-modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-        .vp-modal-head h2{margin:0;font-size:17px;font-weight:600;}
-        .vp-modal-body{padding:22px;display:flex;flex-direction:column;gap:14px;}
-        .vp-modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
+        .vp-pill{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:500;}
+        .vp-pill-ok{background:rgba(29,158,117,0.15);color:#1D9E75;}
+        .vp-pill-warn{background:rgba(180,83,9,0.2);color:#f59e0b;}
+        .vp-pill-bad{background:var(--danger-bg);color:var(--danger);}
+        .vp-pill-grey{background:var(--surface-3);color:var(--text-muted);}
+        .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s,box-shadow .12s;}
+        .vp-input:focus{border-color:var(--brand,#1D9E75);box-shadow:0 0 0 3px rgba(29,158,117,0.12);}
         .vp-field{display:flex;flex-direction:column;gap:6px;}
         .vp-field label{font-size:12px;font-weight:500;color:var(--text-muted);}
-        .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s,box-shadow .12s;}
-        .vp-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
-        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-        .kpi{padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:14px;}
-        .kpi .lbl{font-size:12px;color:var(--text-subtle);font-weight:500;margin-bottom:10px;}
-        .kpi .val{font-size:22px;font-weight:600;letter-spacing:-.02em;font-family:var(--font-mono,"Geist Mono",monospace);}
-        .prod-grid{padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-        .prod-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .12s,box-shadow .12s;}
-        .prod-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);}
-        .prod-thumb{height:100px;background:var(--surface-2);display:grid;place-items:center;position:relative;font-size:36px;}
-        .prod-body{padding:12px;}
-        @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        .vp-modal-bg{position:fixed;inset:0;background:rgba(12,10,9,0.6);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:100;padding:16px;}
+        .vp-modal{width:min(480px,100%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);}
+        .vp-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .vp-modal-head h2{margin:0;font-size:16px;font-weight:600;}
+        .vp-modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+        .vp-modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
+        .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .kpi .lbl{font-size:11px;color:var(--text-subtle);margin-bottom:4px;}
+        .kpi .val{font-size:clamp(15px,4vw,20px);font-weight:600;letter-spacing:-.02em;}
+        .prod-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+        .prod-icon{width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0;font-size:18px;}
+        .prod-info{flex:1;min-width:0;}
+        .prod-name{font-size:13px;font-weight:500;color:var(--text);}
+        .prod-price{font-size:12px;color:var(--text-subtle);margin-top:2px;}
+        .prod-actions{display:flex;gap:5px;flex-shrink:0;}
+        .icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;display:grid;place-items:center;font-size:13px;}
+        .filter-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+        .fbtn{font-size:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:500;}
+        .fbtn-on{background:var(--brand,#1D9E75);color:white;}
+        .fbtn-off{background:var(--surface-2);color:var(--text-muted);}
+        .nbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--brand,#1D9E75);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;width:100%;margin-bottom:14px;cursor:pointer;}
       `}</style>
 
-      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:24,flexWrap:"wrap"}}>
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:14,flexWrap:"wrap"}}>
         <div>
-          <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Estoque</h1>
-          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>{products.length} produtos · valor em estoque: {BRL(totalVal)}</div>
+          <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Estoque</h1>
+          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>{products.length} produtos - valor: {BRLshort(totalVal)}</div>
         </div>
-        <button className="vp-btn vp-btn-primary" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",description:""});setShowForm(true)}}>+ Novo produto</button>
       </div>
 
+      <button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",description:""});setShowForm(true)}}>+ Novo produto</button>
+
       <div className="kpi-grid">
-        <div className="kpi"><div className="lbl">Produtos cadastrados</div><div className="val">{products.length}</div></div>
-        <div className="kpi"><div className="lbl">Valor em estoque</div><div className="val">{BRL(totalVal)}</div></div>
-        <div className="kpi"><div className="lbl">Estoque baixo</div><div className="val" style={{color:"var(--warning)"}}>{lowCount}</div></div>
+        <div className="kpi"><div className="lbl">Total produtos</div><div className="val">{products.length}</div></div>
+        <div className="kpi"><div className="lbl">Valor estoque</div><div className="val">{BRLshort(totalVal)}</div></div>
+        <div className="kpi"><div className="lbl">Estoque baixo</div><div className="val" style={{color:"#f59e0b"}}>{lowCount}</div></div>
         <div className="kpi"><div className="lbl">Esgotados</div><div className="val" style={{color:"var(--danger)"}}>{outCount}</div></div>
       </div>
 
-      <div className="vp-card">
-        <div className="vp-card-head">
-          <div style={{display:"flex",gap:4}}>
-            {[["all","Todos"],["low","Estoque baixo"],["out","Esgotados"]].map(([v,l])=>(
-              <button key={v} className={`vp-btn vp-btn-sm ${filter===v?"vp-btn-primary":"vp-btn-ghost"}`} onClick={()=>setFilter(v)}>{l}</button>
-            ))}
+      <div className="filter-row">
+        {[["all","Todos"],["low","Baixo"],["out","Esgotados"]].map(([v,l])=>(
+          <div key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</div>
+        ))}
+      </div>
+
+      {loading ? (
+        <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
+      ) : filtered.length === 0 ? (
+        <div style={{textAlign:"center",padding:48,color:"var(--text-subtle)"}}>Nenhum produto encontrado.</div>
+      ) : filtered.map((p:any)=>(
+        <div key={p.id} className="prod-card">
+          <div className="prod-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8M12 3v18M3 8l9-5 9 5"/></svg>
           </div>
-          <div style={{display:"flex",gap:4}}>
-            {(["grid","list"] as const).map(v=>(
-              <button key={v} className="vp-icon-btn" onClick={()=>setView(v)} style={{background:view===v?"var(--surface-2)":"transparent"}}>
-                {v==="grid"?"▦":"☰"}
-              </button>
-            ))}
+          <div className="prod-info">
+            <div className="prod-name">{p.name}</div>
+            <div className="prod-price">{BRL(p.price)} por unidade</div>
+            <div style={{marginTop:5}}>
+              {p.stock===0 ? <span className="vp-pill vp-pill-bad">Esgotado</span>
+              : p.stock<=5 ? <span className="vp-pill vp-pill-warn">{p.stock} un - Baixo</span>
+              : <span className="vp-pill vp-pill-ok">{p.stock} un</span>}
+            </div>
+          </div>
+          <div className="prod-actions">
+            <button className="icon-btn" onClick={()=>openEdit(p)} title="Editar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button className="icon-btn" style={{color:"var(--danger)"}} onClick={()=>remove(p.id)} title="Excluir">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
           </div>
         </div>
-
-        {loading ? (
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{textAlign:"center",padding:48,color:"var(--text-subtle)"}}>Nenhum produto encontrado.</div>
-        ) : view === "grid" ? (
-          <div className="prod-grid">
-            {filtered.map((p:any)=>(
-              <div key={p.id} className="prod-card">
-                <div className="prod-thumb">
-                  📦
-                  <div style={{position:"absolute",top:8,right:8}}>
-                    {p.stock===0 ? <span className="vp-pill vp-pill-bad">Esgotado</span>
-                    : p.stock<=5 ? <span className="vp-pill vp-pill-warn">{p.stock} un</span>
-                    : <span className="vp-pill vp-pill-ok">{p.stock} un</span>}
-                  </div>
-                </div>
-                <div className="prod-body">
-                  <div style={{fontSize:13,fontWeight:500,marginBottom:8}}>{p.name}</div>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <span style={{fontFamily:"var(--font-mono)",fontSize:15,fontWeight:600}}>{BRL(p.price)}</span>
-                    <div style={{display:"flex",gap:4}}>
-                      <button className="vp-icon-btn" onClick={()=>openEdit(p)} title="Editar">✎</button>
-                      <button className="vp-icon-btn vp-btn-danger" onClick={()=>remove(p.id)} title="Excluir">✕</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <table className="vp-tbl">
-            <thead><tr><th>Produto</th><th style={{textAlign:"right"}}>Preco</th><th style={{textAlign:"right"}}>Estoque</th><th></th></tr></thead>
-            <tbody>
-              {filtered.map((p:any)=>(
-                <tr key={p.id}>
-                  <td style={{fontWeight:500}}>{p.name}</td>
-                  <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:500}}>{BRL(p.price)}</td>
-                  <td style={{textAlign:"right"}}>
-                    {p.stock===0 ? <span className="vp-pill vp-pill-bad">Esgotado</span>
-                    : p.stock<=5 ? <span className="vp-pill vp-pill-warn">{p.stock} un</span>
-                    : <span className="vp-pill vp-pill-ok">{p.stock} un</span>}
-                  </td>
-                  <td>
-                    <div style={{display:"flex",gap:4,justifyContent:"flex-end"}}>
-                      <button className="vp-icon-btn" onClick={()=>openEdit(p)}>✎</button>
-                      <button className="vp-icon-btn" onClick={()=>remove(p.id)} style={{color:"var(--danger)"}}>✕</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      ))}
 
       {showForm && (
         <div className="vp-modal-bg" onClick={()=>setShowForm(false)}>
           <div className="vp-modal" onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head">
               <h2>{editing?"Editar produto":"Novo produto"}</h2>
-              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>✕</button>
+              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
             </div>
             <div className="vp-modal-body">
               <div className="vp-field"><label>Nome *</label><input className="vp-input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Nome do produto" /></div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div className="vp-field"><label>Preco (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
               </div>
