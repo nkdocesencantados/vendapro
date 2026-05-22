@@ -49,7 +49,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div style={{display:"flex",alignItems:"center",gap:10,position:"relative"}}>
           <div style={{width:52,height:52,borderRadius:12,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
-            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/>
               <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="8" x2="12" y2="16"/><line x1="16" y1="8" x2="12" y2="16"/>
             </svg>
