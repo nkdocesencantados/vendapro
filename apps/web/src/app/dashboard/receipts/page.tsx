@@ -120,7 +120,7 @@ export default function ReceiptsPage() {
                 <hr className="rdiv"/>
                 <div style={{fontWeight:700,fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>ITENS</div>
                 {selected.items?.length > 0 ? selected.items.map((item:any,i:number)=>(
-                  <div key={i} className="rr"><span>{item.quantity}x {item.name||"Produto"}</span><span>{BRL(item.quantity*item.unitPrice)}</span></div>
+                  <div key={i} className="rr"><span>{item.quantity}x {item.productName||item.name||item.manualDescription||"Produto"}</span><span>{BRL(item.quantity*item.unitPrice)}</span></div>
                 )) : <div className="rr"><span>Venda</span><span>{BRL(selected.total)}</span></div>}
                 <hr className="rdiv"/>
                 <div className="rr" style={{fontWeight:700,fontSize:14}}><span>TOTAL</span><span>{BRL(selected.total)}</span></div>
@@ -135,4 +135,5 @@ export default function ReceiptsPage() {
     </div>
   )
 }
+
 

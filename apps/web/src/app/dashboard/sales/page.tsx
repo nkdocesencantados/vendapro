@@ -164,7 +164,7 @@ export default function SalesPage() {
                 </div>
                 <div className="sc-pills">
                   {s.items?.slice(0,2).map((it:any,i:number)=>(
-                    <span key={i} className="vp-pill vp-pill-grey">{it.quantity}x {it.name||"Produto"}</span>
+                    <span key={i} className="vp-pill vp-pill-grey">{it.quantity}x {it.productName||it.name||it.manualDescription||"Produto"}</span>
                   ))}
                   {s.items?.length>2 && <span className="vp-pill vp-pill-grey">+{s.items.length-2}</span>}
                   <span className="vp-pill vp-pill-grey">{PAY[s.paymentMethod]||s.paymentMethod}</span>
@@ -264,4 +264,5 @@ export default function SalesPage() {
     </div>
   )
 }
+
 
