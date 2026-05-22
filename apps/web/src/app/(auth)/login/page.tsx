@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/contexts/auth.store"
@@ -41,14 +41,14 @@ export default function LoginPage() {
         }
       `}</style>
 
-      {/* LADO ESQUERDO — arte */}
+      {/* LADO ESQUERDO â€” arte */}
       <div className="login-art" style={{background:"#04130F",color:"#E5F2EC",padding:48,flexDirection:"column",position:"relative",overflow:"hidden"}}>
         {/* Glow */}
         <div style={{position:"absolute",inset:"-40% -20% 30% 30%",background:"radial-gradient(circle,rgba(29,158,117,0.4),transparent 60%)",filter:"blur(20px)",pointerEvents:"none"}} />
 
         {/* Logo */}
         <div style={{display:"flex",alignItems:"center",gap:10,position:"relative"}}>
-          <div style={{width:36,height:36,borderRadius:9,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
+          <div style={{width:52,height:52,borderRadius:12,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
             <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/>
               <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="8" x2="12" y2="16"/><line x1="16" y1="8" x2="12" y2="16"/>
@@ -64,7 +64,7 @@ export default function LoginPage() {
             <span style={{color:"#34D399"}}>um so lugar</span>.
           </h2>
           <p style={{fontSize:15,lineHeight:1.6,color:"#B2C9C0",margin:0,maxWidth:380}}>
-            Vendas, estoque, caixa e equipe — pensado para o pequeno comercio brasileiro.
+            Vendas, estoque, caixa e equipe â€” pensado para o pequeno comercio brasileiro.
           </p>
 
           {/* Stats */}
@@ -90,7 +90,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* LADO DIREITO — form */}
+      {/* LADO DIREITO â€” form */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#FAFAF9"}}>
         <div style={{width:"100%",maxWidth:360}}>
           {/* Mobile logo */}
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>Senha</label>
               <div style={{position:"relative"}}>
-                <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:42}} />
+                <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required style={{paddingRight:42}} />
                 <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#78716C",fontSize:13}}>
                   {show?"Ocultar":"Ver"}
                 </button>
@@ -137,7 +137,7 @@ export default function LoginPage() {
           </form>
 
           <div style={{marginTop:24,paddingTop:18,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,color:"#78716C"}}>
-            <span>VendaPro — Gestao para varejo</span>
+            <span>VendaPro â€” Gestao para varejo</span>
             <span>v2.0</span>
           </div>
         </div>
