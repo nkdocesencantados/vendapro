@@ -170,10 +170,10 @@ export default function DashboardPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:22,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:28,fontWeight:600,letterSpacing:"-.025em"}}>
-            Ola, {firstName} ðŸ‘‹
+            Ola, {firstName}!
           </h1>
           <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
-            Visao geral da {storeName} â€” {monthLabel} de {year}
+          Visao geral da {storeName} - {monthLabel} de {year}
           </div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
