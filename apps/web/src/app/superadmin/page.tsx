@@ -1,188 +1,236 @@
-﻿"use client"
-import { VendaProLogo } from "@/components/logo"
+"use client"
 import { useEffect, useState } from "react"
-import { api } from "@/lib/api"
-import { useAuthStore } from "@/contexts/auth.store"
 import { useRouter } from "next/navigation"
+import { api } from "@/lib/api"
+
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+
+const PLAN_LABEL: Record<string,string> = { trial:"Trial", basic:"Basic", starter:"Basic", pro:"Pro", business:"Business" }
+const PLAN_COLOR: Record<string,string> = {
+  trial:"#1E40AF", basic:"#57534E", starter:"#57534E", pro:"#1D9E75", business:"#04342C"
+}
+const PLAN_BG: Record<string,string> = {
+  trial:"#DBEAFE", basic:"#F5F5F4", starter:"#F5F5F4", pro:"#E7F5EF", business:"linear-gradient(135deg,#04342C,#1D9E75)"
+}
 
 export default function SuperAdminPage() {
-  const { user, isAuthenticated, loadUser, logout } = useAuthStore()
   const router = useRouter()
-  const [tab, setTab] = useState("empresas")
   const [companies, setCompanies] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name:"", email:"", phone:"", document:"", plan:"basic", password:"" })
-  const [stats, setStats] = useState({ total:0, active:0, blocked:0, trial:0 })
-  const [resetModal, setResetModal] = useState<{companyId:string, name:string}|null>(null)
-  const [planModal, setPlanModal] = useState<{companyId:string, name:string, plan:string}|null>(null)
-  const [newPassword, setNewPassword] = useState("")
-  const [resetting, setResetting] = useState(false)
+  const [loading, setLoading]     = useState(true)
+  const [tab, setTab]             = useState("empresas")
+  const [filter, setFilter]       = useState("all")
+  const [planModal, setPlanModal] = useState<any>(null)
+  const [pwdModal, setPwdModal]   = useState<any>(null)
+  const [newPwd, setNewPwd]       = useState("")
+  const [saving, setSaving]       = useState(false)
+  const [toast, setToast]         = useState("")
 
-  useEffect(() => { if (!isAuthenticated) loadUser(); loadCompanies() }, [])
+  useEffect(() => { load() }, [])
 
-  async function loadCompanies() {
-    try {
-      const r = await api.get("/companies")
-      setCompanies(r.data)
-      setStats({
-        total: r.data.length,
-        active: r.data.filter((c:any) => c.status==="active").length,
-        blocked: r.data.filter((c:any) => c.status==="blocked").length,
-        trial: r.data.filter((c:any) => c.plan==="trial").length,
-      })
-    } catch {} finally { setLoading(false) }
+  async function load() {
+    try { const r = await api.get("/companies"); setCompanies(r.data) }
+    catch(e){ console.error(e) } finally { setLoading(false) }
   }
 
-  async function createCompany() {
-    if (!form.name || !form.email || !form.password) return alert("Preencha nome, email e senha")
+  function showToast(msg:string) { setToast(msg); setTimeout(()=>setToast(""),3000) }
+
+  async function toggleStatus(c:any) {
+    const next = c.status==="active" ? "blocked" : "active"
     try {
-      await api.post("/companies", form)
-      setShowForm(false)
-      setForm({ name:"", email:"", phone:"", document:"", plan:"basic", password:"" })
-      loadCompanies()
-      alert("Empresa criada! O cliente ja pode fazer login.")
-    } catch (e:any) { alert("Erro: " + (e?.response?.data?.message || "verifique o console")) }
+      await api.patch(`/companies/${c.id}/status`, { status: next })
+      setCompanies(prev => prev.map(x => x.id===c.id ? {...x,status:next} : x))
+      showToast(next==="active" ? "Empresa reativada" : "Empresa bloqueada")
+    } catch(e){ console.error(e) }
   }
 
-  async function changePlan(plan: string) {
-    if (!planModal) return
+  async function deleteCompany(c:any) {
+    if(!confirm(`Excluir "${c.name}"? Esta acao nao pode ser desfeita.`)) return
     try {
-      await api.patch(`/companies/${planModal.companyId}/plan`, { plan }); alert("Plano alterado com sucesso!")
-      setPlanModal(null)
-      loadCompanies()
-    } catch { alert("Erro ao alterar plano") }
+      await api.delete(`/companies/${c.id}`)
+      setCompanies(prev => prev.filter(x => x.id!==c.id))
+      showToast("Empresa excluida")
+    } catch(e){ console.error(e) }
+  }
+
+  async function savePlan(companyId:string, plan:string) {
+    try {
+      await api.patch(`/companies/${companyId}/plan`, { plan })
+      setCompanies(prev => prev.map(x => x.id===companyId ? {...x,plan} : x))
+      setPlanModal(null); showToast("Plano atualizado")
+    } catch(e){ console.error(e) }
   }
 
   async function resetPassword() {
-    if (!newPassword || newPassword.length < 6) return alert("Senha deve ter ao menos 6 caracteres")
-    if (!resetModal) return
-    setResetting(true)
+    if(!newPwd||newPwd.length<6) return alert("Senha deve ter ao menos 6 caracteres")
+    setSaving(true)
     try {
-      await api.patch(`/companies/${resetModal.companyId}/reset-password`, { password: newPassword })
-      alert("Senha redefinida com sucesso!")
-      setResetModal(null)
-      setNewPassword("")
-    } catch { alert("Erro ao redefinir senha") }
-    finally { setResetting(false) }
+      await api.patch(`/companies/${pwdModal.id}/reset-password`, { password: newPwd })
+      setPwdModal(null); setNewPwd(""); showToast("Senha redefinida")
+    } catch(e){ console.error(e) }
+    finally { setSaving(false) }
   }
 
-  async function toggleStatus(id: string, status: string) {
-    const newStatus = status==="active" ? "blocked" : "active"
-    if (!confirm(newStatus==="blocked" ? "Bloquear esta empresa?" : "Reativar esta empresa?")) return
-    try { await api.patch(`/companies/${id}/plan`, { status: newStatus }); loadCompanies() } catch { alert("Erro") }
+  const filtered = companies.filter(c => {
+    if(filter==="active")  return c.status==="active"
+    if(filter==="trial")   return c.plan==="trial"
+    if(filter==="blocked") return c.status==="blocked"
+    return true
+  })
+
+  const stats = {
+    total:   companies.length,
+    active:  companies.filter(c=>c.status==="active").length,
+    trial:   companies.filter(c=>c.plan==="trial").length,
+    blocked: companies.filter(c=>c.status==="blocked").length,
   }
 
-  async function deleteCompany(id: string, name: string) {
-    if (!confirm(`Excluir a empresa "${name}"? Esta acao nao pode ser desfeita.`)) return
-    try { await api.delete(`/companies/${id}`); loadCompanies() } catch { alert("Erro ao excluir") }
-  }
-
-  const planLabel: any = { trial:"Trial", basic:"Basic", starter:"Starter", pro:"Pro", business:"Business", enterprise:"Enterprise" }
-  const planColor: any = { trial:"#f59e0b", basic:"#6b7280", starter:"#3b82f6", pro:"#8b5cf6", business:"#1D9E75", enterprise:"#1D9E75" }
-  const navItems = ["Empresas","Assinaturas","Relatorios"]
+  const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:100,starter:100,pro:150,business:200}[c.plan]||0),0)
 
   return (
-    <div style={{display:"flex",height:"100vh",fontFamily:"DM Sans, sans-serif",background:"#f5f4f0"}}>
-      <aside style={{width:"220px",background:"#04342C",display:"flex",flexDirection:"column",flexShrink:0}}>
-        <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:"10px"}}>
-          <VendaProLogo size={44} />
-        </div>
-        <nav style={{flex:1,padding:"12px 8px"}}>
-          {navItems.map(item => (
-            <div key={item} onClick={() => setTab(item.toLowerCase())} style={{padding:"9px 12px",borderRadius:"8px",color:tab===item.toLowerCase()?"white":"rgba(255,255,255,0.5)",fontSize:"13px",cursor:"pointer",background:tab===item.toLowerCase()?"#1D9E75":"transparent",marginBottom:"2px",fontWeight:tab===item.toLowerCase()?500:400}}>{item}</div>
-          ))}
-        </nav>
-        <div style={{padding:"12px 14px",borderTop:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:"8px"}}>
-          <div style={{width:"30px",height:"30px",background:"#1D9E75",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"12px",fontWeight:600}}>{user?.name?.charAt(0)||"A"}</div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:"12px",fontWeight:500,color:"white"}}>{user?.name}</div>
-            <div style={{fontSize:"10px",color:"#9FE1CB",opacity:0.6}}>Super Admin</div>
-          </div>
-          <button onClick={()=>{logout();router.push("/login")}} style={{background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:"12px"}}>sair</button>
-        </div>
-      </aside>
+    <div style={{minHeight:"100vh",background:"#04130F",color:"#E5F2EC",fontFamily:'"Geist",ui-sans-serif,system-ui,sans-serif'}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+        *{box-sizing:border-box;}
+        .sa-card{background:#0F1B18;border:1px solid #1F3A33;border-radius:14px;}
+        .sa-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+        .sa-tbl th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#7A8480;padding:10px 16px;border-bottom:1px solid #1F3A33;background:#0A1412;}
+        .sa-tbl td{padding:13px 16px;border-bottom:1px solid #1F3A33;vertical-align:middle;color:#E5F2EC;}
+        .sa-tbl tr:last-child td{border-bottom:0;}
+        .sa-tbl tr:hover td{background:rgba(29,158,117,0.04);}
+        .sa-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;font-family:inherit;}
+        .sa-btn-primary{background:#1D9E75;color:white;border-color:#1D9E75;}
+        .sa-btn-primary:hover{background:#178A65;}
+        .sa-btn-ghost{background:transparent;color:#A8B3AF;border-color:#1F3A33;}
+        .sa-btn-ghost:hover{background:#142421;color:#E5F2EC;}
+        .sa-btn-danger{background:rgba(185,28,28,0.15);color:#EF4444;border-color:rgba(185,28,28,0.2);}
+        .sa-btn-danger:hover{background:#B91C1C;color:white;}
+        .sa-btn-warn{background:rgba(180,83,9,0.15);color:#F59E0B;border-color:rgba(180,83,9,0.2);}
+        .sa-btn-warn:hover{background:#B45309;color:white;}
+        .sa-btn-sm{padding:4px 10px;font-size:11px;border-radius:6px;}
+        .sa-input{background:#0A1412;border:1px solid #1F3A33;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;color:#E5F2EC;width:100%;font-family:inherit;transition:border-color .12s;}
+        .sa-input:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.1);}
+        .sa-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:100;}
+        .sa-modal{width:min(560px,94vw);background:#0F1B18;border:1px solid #1F3A33;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
+        .sa-modal-head{padding:18px 22px;border-bottom:1px solid #1F3A33;display:flex;align-items:center;justify-content:space-between;}
+        .sa-modal-head h2{margin:0;font-size:17px;font-weight:600;color:#F0F7F4;}
+        .sa-modal-body{padding:22px;}
+        .sa-modal-foot{padding:14px 22px;border-top:1px solid #1F3A33;display:flex;gap:8px;justify-content:flex-end;background:#0A1412;border-radius:0 0 16px 16px;}
+        .sa-tabs{display:flex;gap:2px;border-bottom:1px solid #1F3A33;margin-bottom:24px;}
+        .sa-tab{padding:10px 18px;font-size:13px;color:#7A8480;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .12s;}
+        .sa-tab.active{color:#F0F7F4;border-bottom-color:#1D9E75;font-weight:500;}
+        .sa-tab:hover{color:#E5F2EC;}
+        .plan-card{padding:16px;border:2px solid #1F3A33;border-radius:12px;cursor:pointer;transition:all .15s;background:#0A1412;}
+        .plan-card:hover{border-color:#1D9E75;background:rgba(29,158,117,0.05);}
+        .plan-card.selected{border-color:#1D9E75;background:rgba(29,158,117,0.1);}
+      `}</style>
 
-      <main style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-        <div style={{background:"white",borderBottom:"0.5px solid #e5e7eb",padding:"0 24px",height:"54px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
-          <div>
-            <div style={{fontSize:"15px",fontWeight:500}}>Painel Administrativo</div>
-            <div style={{fontSize:"11px",color:"#888"}}>Gestao de empresas e assinaturas</div>
-          </div>
-          {tab==="empresas" && <button onClick={()=>setShowForm(true)} style={{background:"#1D9E75",color:"white",border:"none",borderRadius:"8px",padding:"8px 16px",fontSize:"13px",cursor:"pointer",fontWeight:500}}>+ Liberar Empresa</button>}
+      {/* TOAST */}
+      {toast && (
+        <div style={{position:"fixed",top:16,right:16,zIndex:999,background:"#0F1B18",border:"1px solid #1D9E75",borderRadius:10,padding:"12px 18px",fontSize:13,color:"#34D399",fontWeight:500,boxShadow:"0 8px 24px rgba(0,0,0,0.4)"}}>
+          ✓ {toast}
         </div>
+      )}
 
-        <div style={{flex:1,overflowY:"auto",padding:"24px"}}>
-
-          {/* ABA EMPRESAS */}
-          {tab==="empresas" && <>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px",marginBottom:"24px"}}>
-              {[
-                { label:"Total de Empresas", value:stats.total, color:"#3b82f6" },
-                { label:"Empresas Ativas", value:stats.active, color:"#1D9E75" },
-                { label:"Em Trial", value:stats.trial, color:"#f59e0b" },
-                { label:"Bloqueadas", value:stats.blocked, color:"#ef4444" },
-              ].map(s => (
-                <div key={s.label} style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"16px 20px"}}>
-                  <div style={{fontSize:"11px",color:"#888",marginBottom:"10px"}}>{s.label}</div>
-                  <div style={{fontSize:"32px",fontWeight:700,color:s.color}}>{s.value}</div>
-                </div>
-              ))}
+      {/* SIDEBAR */}
+      <div style={{display:"flex",height:"100vh"}}>
+        <aside style={{width:240,background:"#04130F",borderRight:"1px solid #1F3A33",display:"flex",flexDirection:"column",flexShrink:0}}>
+          <div style={{padding:"18px 16px 14px",borderBottom:"1px solid #1F3A33"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,background:"#0E2620",border:"1px solid #1F3A33"}}>
+              <div style={{width:32,height:32,borderRadius:8,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
+                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:"#F0F7F4"}}>VendaPro</div>
+                <div style={{fontSize:11,color:"#7A9990"}}>Super Admin</div>
+              </div>
             </div>
-
-            {showForm && (
-              <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"20px",marginBottom:"20px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
-                  <h3 style={{fontWeight:500,fontSize:"15px",margin:0}}>Liberar Nova Empresa</h3>
-                  <button onClick={()=>setShowForm(false)} style={{background:"none",border:"none",cursor:"pointer",color:"#888",fontSize:"20px"}}>x</button>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}}>
-                  {[["Nome da Empresa *","name","text"],["Email *","email","email"],["Senha *","password","password"],["Telefone","phone","text"],["CNPJ/CPF","document","text"]].map(([label,field,type]) => (
-                    <div key={field}><label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>{label}</label><input type={type} value={(form as any)[field]} onChange={e=>setForm({...form,[field]:e.target.value})} style={{width:"100%",padding:"9px",border:"1px solid #e5e7eb",borderRadius:"7px",fontSize:"13px",boxSizing:"border-box"}} /></div>
-                  ))}
-                  <div><label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>Plano</label><select value={form.plan} onChange={e=>setForm({...form,plan:e.target.value})} style={{width:"100%",padding:"9px",border:"1px solid #e5e7eb",borderRadius:"7px",fontSize:"13px"}}><option value="trial">Trial (15 dias)</option><option value="basic">Basic</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
-                </div>
-                <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-                  <button onClick={()=>setShowForm(false)} style={{padding:"9px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
-                  <button onClick={createCompany} style={{padding:"9px 20px",background:"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Liberar Acesso</button>
-                </div>
+          </div>
+          <nav style={{padding:"10px 8px",flex:1}}>
+            {[["empresas","Empresas","🏢"],["assinaturas","Assinaturas","💳"],["relatorios","Relatorios","📊"]].map(([id,lbl,ico])=>(
+              <div key={id} onClick={()=>setTab(id)}
+                style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,fontSize:13.5,color:tab===id?"#fff":"#8DA39A",cursor:"pointer",background:tab===id?"rgba(29,158,117,0.18)":"transparent",fontWeight:tab===id?500:400,marginBottom:1,transition:"all .12s"}}>
+                <span>{ico}</span><span>{lbl}</span>
               </div>
-            )}
+            ))}
+          </nav>
+          <div style={{padding:"10px 12px",borderTop:"1px solid #1F3A33"}}>
+            <div onClick={()=>router.push("/login")}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,fontSize:13,color:"#8DA39A",cursor:"pointer",transition:"all .12s"}}
+              onMouseEnter={e=>(e.currentTarget.style.background="#0E2620")}
+              onMouseLeave={e=>(e.currentTarget.style.background="transparent")}>
+              <span>↩</span><span>Sair</span>
+            </div>
+          </div>
+        </aside>
 
-            <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",overflow:"hidden"}}>
-              <div style={{padding:"16px 20px",borderBottom:"0.5px solid #e5e7eb",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:"14px",fontWeight:500}}>Empresas Cadastradas</div>
-                <div style={{fontSize:"12px",color:"#888"}}>{companies.length} empresa(s)</div>
+        {/* MAIN */}
+        <div style={{flex:1,overflowY:"auto",padding:28}}>
+          {/* STATS */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
+            {[
+              {lbl:"Total de empresas",val:stats.total,col:"#E5F2EC"},
+              {lbl:"Empresas ativas",val:stats.active,col:"#34D399"},
+              {lbl:"Em trial",val:stats.trial,col:"#60A5FA"},
+              {lbl:"Bloqueadas",val:stats.blocked,col:"#EF4444"},
+            ].map(s=>(
+              <div key={s.lbl} className="sa-card" style={{padding:18}}>
+                <div style={{fontSize:12,color:"#7A8480",fontWeight:500,marginBottom:8}}>{s.lbl}</div>
+                <div style={{fontSize:28,fontWeight:600,letterSpacing:"-0.02em",color:s.col}}>{s.val}</div>
               </div>
+            ))}
+          </div>
+
+          {/* TABS */}
+          <div className="sa-tabs">
+            {[["empresas","Empresas"],["assinaturas","Assinaturas"],["relatorios","Relatorios"]].map(([id,lbl])=>(
+              <div key={id} className={`sa-tab${tab===id?" active":""}`} onClick={()=>setTab(id)}>{lbl}</div>
+            ))}
+          </div>
+
+          {tab === "empresas" && (
+            <div className="sa-card">
+              {/* FILTROS */}
+              <div style={{padding:"14px 18px",borderBottom:"1px solid #1F3A33",display:"flex",gap:6}}>
+                {[["all","Todas"],["active","Ativas"],["trial","Trial"],["blocked","Bloqueadas"]].map(([v,l])=>(
+                  <button key={v} className={`sa-btn sa-btn-sm ${filter===v?"sa-btn-primary":"sa-btn-ghost"}`} onClick={()=>setFilter(v)}>{l}</button>
+                ))}
+              </div>
+
               {loading ? (
-                <div style={{padding:"60px",textAlign:"center",color:"#888"}}>Carregando...</div>
-              ) : companies.length===0 ? (
-                <div style={{padding:"60px",textAlign:"center",color:"#888"}}>Nenhuma empresa cadastrada</div>
+                <div style={{textAlign:"center",padding:48,color:"#7A8480"}}>Carregando...</div>
               ) : (
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <table className="sa-tbl">
                   <thead>
-                    <tr style={{background:"#f9fafb"}}>
-                      {["Empresa","Email","Telefone","Plano","Status","Cadastro","Acoes"].map(h => (
-                        <th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:"11px",color:"#888",fontWeight:500,borderBottom:"0.5px solid #e5e7eb"}}>{h}</th>
-                      ))}
-                    </tr>
+                    <tr><th>Empresa</th><th>Email</th><th>Plano</th><th>Status</th><th>Cadastro</th><th>Acoes</th></tr>
                   </thead>
                   <tbody>
-                    {companies.map((co:any) => (
-                      <tr key={co.id} style={{borderBottom:"0.5px solid #f3f4f6"}}>
-                        <td style={{padding:"14px 16px",fontSize:"14px",fontWeight:500}}>{co.name}</td>
-                        <td style={{padding:"14px 16px",fontSize:"13px",color:"#666"}}>{co.email||"-"}</td>
-                        <td style={{padding:"14px 16px",fontSize:"13px",color:"#666"}}>{co.phone||"-"}</td>
-                        <td style={{padding:"14px 16px"}}><span style={{background:planColor[co.plan]+"22",color:planColor[co.plan],padding:"3px 10px",borderRadius:"20px",fontSize:"12px",fontWeight:500}}>{planLabel[co.plan]||co.plan}</span></td>
-                        <td style={{padding:"14px 16px"}}><span style={{background:co.status==="active"?"#E1F5EE":"#fee2e2",color:co.status==="active"?"#1D9E75":"#ef4444",padding:"3px 10px",borderRadius:"20px",fontSize:"12px",fontWeight:500}}>{co.status==="active"?"Ativa":"Bloqueada"}</span></td>
-                        <td style={{padding:"14px 16px",fontSize:"12px",color:"#888"}}>{new Date(co.createdAt).toLocaleDateString("pt-BR")}</td>
-                        <td style={{padding:"14px 16px",display:"flex",gap:"6px"}}>
-                          <button onClick={()=>toggleStatus(co.id,co.status)} style={{padding:"6px 12px",border:"1px solid",borderColor:co.status==="active"?"#ef4444":"#1D9E75",color:co.status==="active"?"#ef4444":"#1D9E75",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>
-                            {co.status==="active"?"Bloquear":"Reativar"}
-                          </button>
-                          <button onClick={()=>deleteCompany(co.id,co.name)} style={{padding:"6px 12px",border:"1px solid #ef4444",color:"white",background:"#ef4444",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Excluir</button>
-                          <button onClick={()=>{setResetModal({companyId:co.id,name:co.name});setNewPassword("")}} style={{padding:"6px 12px",border:"1px solid #f59e0b",color:"#f59e0b",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Senha</button>
-                          <button onClick={()=>setPlanModal({companyId:co.id,name:co.name,plan:co.plan||"basic"})} style={{padding:"6px 12px",border:"1px solid #3b82f6",color:"#3b82f6",background:"white",borderRadius:"7px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>Plano</button>
+                    {filtered.map((c:any)=>(
+                      <tr key={c.id}>
+                        <td style={{fontWeight:500}}>{c.name}</td>
+                        <td style={{color:"#A8B3AF",fontSize:12}}>{c.email||"—"}</td>
+                        <td>
+                          <span style={{display:"inline-flex",alignItems:"center",padding:"3px 9px",borderRadius:999,fontSize:11,fontWeight:500,background:PLAN_BG[c.plan]||"#F5F5F4",color:PLAN_COLOR[c.plan]||"#57534E"}}>
+                            {PLAN_LABEL[c.plan]||c.plan}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{display:"inline-flex",alignItems:"center",gap:5,padding:"3px 9px",borderRadius:999,fontSize:11,fontWeight:500,background:c.status==="active"?"rgba(29,158,117,0.14)":"rgba(185,28,28,0.14)",color:c.status==="active"?"#34D399":"#EF4444"}}>
+                            <span style={{width:5,height:5,borderRadius:"50%",background:"currentColor",display:"inline-block"}}/>
+                            {c.status==="active"?"Ativa":"Bloqueada"}
+                          </span>
+                        </td>
+                        <td style={{color:"#7A8480",fontSize:12}}>{c.createdAt?new Date(c.createdAt).toLocaleDateString("pt-BR"):"—"}</td>
+                        <td>
+                          <div style={{display:"flex",gap:4}}>
+                            <button className="sa-btn sa-btn-ghost sa-btn-sm" onClick={()=>setPlanModal(c)}>Plano</button>
+                            <button className="sa-btn sa-btn-ghost sa-btn-sm" onClick={()=>{setPwdModal(c);setNewPwd("")}}>Senha</button>
+                            <button className={`sa-btn sa-btn-sm ${c.status==="active"?"sa-btn-warn":"sa-btn-primary"}`} onClick={()=>toggleStatus(c)}>
+                              {c.status==="active"?"Bloquear":"Ativar"}
+                            </button>
+                            <button className="sa-btn sa-btn-danger sa-btn-sm" onClick={()=>deleteCompany(c)}>✕</button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -190,93 +238,117 @@ export default function SuperAdminPage() {
                 </table>
               )}
             </div>
-          </>}
+          )}
 
-          {/* ABA ASSINATURAS */}
-          {tab==="assinaturas" && (
-            <div style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",overflow:"hidden"}}>
-              <div style={{padding:"16px 20px",borderBottom:"0.5px solid #e5e7eb"}}>
-                <div style={{fontSize:"14px",fontWeight:500}}>Assinaturas</div>
+          {tab === "assinaturas" && (
+            <div style={{display:"grid",gap:16}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
+                {[
+                  {lbl:"MRR",val:BRL(mrr),col:"#34D399"},
+                  {lbl:"ARR projetado",val:BRL(mrr*12),col:"#E5F2EC"},
+                  {lbl:"Ticket medio",val:BRL(stats.active?mrr/stats.active:0),col:"#E5F2EC"},
+                  {lbl:"Empresas pagas",val:String(stats.active),col:"#E5F2EC"},
+                ].map(s=>(
+                  <div key={s.lbl} className="sa-card" style={{padding:18}}>
+                    <div style={{fontSize:12,color:"#7A8480",fontWeight:500,marginBottom:8}}>{s.lbl}</div>
+                    <div style={{fontSize:22,fontWeight:600,letterSpacing:"-0.02em",color:s.col,fontFamily:'"Geist Mono",monospace'}}>{s.val}</div>
+                  </div>
+                ))}
               </div>
-              <table style={{width:"100%",borderCollapse:"collapse"}}>
-                <thead>
-                  <tr style={{background:"#f9fafb"}}>
-                    {["Empresa","Plano","Status","Cadastro"].map(h => (
-                      <th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:"11px",color:"#888",fontWeight:500,borderBottom:"0.5px solid #e5e7eb"}}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {companies.map((co:any) => (
-                    <tr key={co.id} style={{borderBottom:"0.5px solid #f3f4f6"}}>
-                      <td style={{padding:"14px 16px",fontSize:"14px",fontWeight:500}}>{co.name}</td>
-                      <td style={{padding:"14px 16px"}}><span style={{background:planColor[co.plan]+"22",color:planColor[co.plan],padding:"3px 10px",borderRadius:"20px",fontSize:"12px",fontWeight:500}}>{planLabel[co.plan]||co.plan}</span></td>
-                      <td style={{padding:"14px 16px"}}><span style={{background:co.status==="active"?"#E1F5EE":"#fee2e2",color:co.status==="active"?"#1D9E75":"#ef4444",padding:"3px 10px",borderRadius:"20px",fontSize:"12px",fontWeight:500}}>{co.status==="active"?"Ativa":"Bloqueada"}</span></td>
-                      <td style={{padding:"14px 16px",fontSize:"12px",color:"#888"}}>{new Date(co.createdAt).toLocaleDateString("pt-BR")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* ABA RELATORIOS */}
-          {tab==="relatorios" && (
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"12px"}}>
-              {[
-                { label:"Total de Empresas", value:stats.total, color:"#3b82f6" },
-                { label:"Ativas", value:stats.active, color:"#1D9E75" },
-                { label:"Bloqueadas", value:stats.blocked, color:"#ef4444" },
-                { label:"Em Trial", value:stats.trial, color:"#f59e0b" },
-                { label:"Plano Basic", value:companies.filter(c=>c.plan==="basic").length, color:"#3b82f6" },
-                { label:"Plano Pro", value:companies.filter(c=>c.plan==="pro").length, color:"#8b5cf6" },
-              ].map(s => (
-                <div key={s.label} style={{background:"white",border:"0.5px solid #e5e7eb",borderRadius:"12px",padding:"20px"}}>
-                  <div style={{fontSize:"12px",color:"#888",marginBottom:"10px"}}>{s.label}</div>
-                  <div style={{fontSize:"36px",fontWeight:700,color:s.color}}>{s.value}</div>
+              <div className="sa-card">
+                <div style={{padding:"14px 18px",borderBottom:"1px solid #1F3A33",fontSize:14,fontWeight:600,color:"#F0F7F4"}}>Distribuicao por plano</div>
+                <div style={{padding:18,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
+                  {["basic","pro","business","trial"].map(p=>{
+                    const count = companies.filter(c=>c.plan===p||c.plan==="starter"&&p==="basic").length
+                    return (
+                      <div key={p} style={{padding:14,background:"#0A1412",borderRadius:10,border:"1px solid #1F3A33"}}>
+                        <span style={{display:"inline-flex",padding:"3px 9px",borderRadius:999,fontSize:11,fontWeight:500,background:PLAN_BG[p],color:PLAN_COLOR[p]}}>{PLAN_LABEL[p]}</span>
+                        <div style={{fontSize:24,fontWeight:600,marginTop:8,color:"#E5F2EC"}}>{count}</div>
+                        <div style={{fontSize:11,color:"#7A8480"}}>empresas</div>
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
+              </div>
             </div>
           )}
 
+          {tab === "relatorios" && (
+            <div className="sa-card" style={{padding:24}}>
+              <h3 style={{margin:"0 0 16px",fontSize:14,fontWeight:600,color:"#F0F7F4"}}>Resumo geral</h3>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}}>
+                {[
+                  ["Total empresas",stats.total],
+                  ["Empresas ativas",stats.active],
+                  ["Em trial",stats.trial],
+                  ["Bloqueadas",stats.blocked],
+                  ["MRR",BRL(mrr)],
+                  ["ARR projetado",BRL(mrr*12)],
+                ].map(([lbl,val])=>(
+                  <div key={lbl} style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderBottom:"1px solid #1F3A33",fontSize:13}}>
+                    <span style={{color:"#A8B3AF"}}>{lbl}</span>
+                    <strong style={{color:"#E5F2EC",fontFamily:'"Geist Mono",monospace'}}>{val}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
 
+      {/* MODAL PLANO */}
       {planModal && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"380px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
-            <h3 style={{fontWeight:500,marginBottom:"8px"}}>Alterar Plano</h3>
-            <p style={{fontSize:"13px",color:"#888",marginBottom:"20px"}}>Empresa: <strong>{planModal.name}</strong></p>
-            <div style={{display:"flex",flexDirection:"column",gap:"10px",marginBottom:"20px"}}>
-              {[
-                {value:"trial",label:"Trial — 7 dias gratis",desc:"Acesso completo por 7 dias",color:"#f59e0b"},{value:"basic",label:"Basic — R$ 100/mes",desc:"Funcionalidades essenciais",color:"#6b7280"},
-                
-                {value:"pro",label:"Pro — R$ 150/mes",desc:"Ate 5 vendedores, ranking e metas",color:"#8b5cf6"},
-                {value:"business",label:"Business — R$ 200/mes",desc:"Vendedores ilimitados, tudo liberado",color:"#1D9E75"},
-              ].map(p => (
-                <div key={p.value} onClick={()=>setPlanModal({...planModal,plan:p.value})} style={{padding:"12px 16px",border:`2px solid ${planModal.plan===p.value?p.color:"#e5e7eb"}`,borderRadius:"10px",cursor:"pointer",background:planModal.plan===p.value?"#f9fafb":"white"}}>
-                  <div style={{fontWeight:500,fontSize:"14px",color:p.color}}>{p.label}</div>
-                  <div style={{fontSize:"12px",color:"#888",marginTop:"2px"}}>{p.desc}</div>
-                </div>
-              ))}
+        <div className="sa-modal-bg" onClick={()=>setPlanModal(null)}>
+          <div className="sa-modal" onClick={e=>e.stopPropagation()}>
+            <div className="sa-modal-head">
+              <h2>Alterar plano — {planModal.name}</h2>
+              <button className="sa-btn sa-btn-ghost sa-btn-sm" onClick={()=>setPlanModal(null)}>✕</button>
             </div>
-            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-              <button onClick={()=>setPlanModal(null)} style={{padding:"9px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
-              <button onClick={()=>changePlan(planModal.plan)} style={{padding:"9px 16px",background:"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>Salvar Plano</button>
+            <div className="sa-modal-body">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                {[
+                  {id:"trial",name:"Trial",price:"Gratis",sub:"7 dias"},
+                  {id:"basic",name:"Basic",price:"R$ 100",sub:"/mes"},
+                  {id:"pro",name:"Pro",price:"R$ 150",sub:"/mes"},
+                  {id:"business",name:"Business",price:"R$ 200",sub:"/mes"},
+                ].map(p=>(
+                  <div key={p.id} className={`plan-card${planModal.plan===p.id?" selected":""}`} onClick={()=>savePlan(planModal.id,p.id)}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                      <div>
+                        <div style={{fontWeight:600,fontSize:14,color:"#F0F7F4"}}>{p.name}</div>
+                        <div style={{marginTop:4}}>
+                          <span style={{fontSize:20,fontWeight:600,letterSpacing:"-0.02em",color:"#F0F7F4",fontFamily:'"Geist Mono",monospace'}}>{p.price}</span>
+                          <span style={{fontSize:12,color:"#7A8480"}}>{p.sub}</span>
+                        </div>
+                      </div>
+                      <span style={{display:"inline-flex",padding:"3px 9px",borderRadius:999,fontSize:11,fontWeight:500,background:PLAN_BG[p.id],color:PLAN_COLOR[p.id]}}>{p.name}</span>
+                    </div>
+                    {planModal.plan===p.id && <div style={{marginTop:8,fontSize:11,color:"#1D9E75",fontWeight:500}}>✓ Plano atual</div>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
-      {resetModal && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div style={{background:"white",borderRadius:"12px",padding:"24px",width:"360px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
-            <h3 style={{fontWeight:500,marginBottom:"8px"}}>Redefinir Senha</h3>
-            <p style={{fontSize:"13px",color:"#888",marginBottom:"16px"}}>Empresa: <strong>{resetModal.name}</strong></p>
-            <label style={{fontSize:"12px",color:"#666",display:"block",marginBottom:"4px"}}>Nova senha</label>
-            <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Minimo 6 caracteres" style={{width:"100%",padding:"10px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",marginBottom:"16px",boxSizing:"border-box"}} />
-            <div style={{display:"flex",justifyContent:"flex-end",gap:"8px"}}>
-              <button onClick={()=>{setResetModal(null);setNewPassword("")}} style={{padding:"9px 16px",border:"1px solid #e5e7eb",borderRadius:"8px",background:"white",cursor:"pointer",fontSize:"13px"}}>Cancelar</button>
-              <button onClick={resetPassword} disabled={resetting} style={{padding:"9px 16px",background:resetting?"#9ca3af":"#1D9E75",color:"white",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"13px",fontWeight:500}}>{resetting?"Salvando...":"Redefinir"}</button>
+
+      {/* MODAL SENHA */}
+      {pwdModal && (
+        <div className="sa-modal-bg" onClick={()=>setPwdModal(null)}>
+          <div className="sa-modal" onClick={e=>e.stopPropagation()}>
+            <div className="sa-modal-head">
+              <h2>Redefinir senha — {pwdModal.name}</h2>
+              <button className="sa-btn sa-btn-ghost sa-btn-sm" onClick={()=>setPwdModal(null)}>✕</button>
+            </div>
+            <div className="sa-modal-body">
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                <label style={{fontSize:12,fontWeight:500,color:"#A8B3AF"}}>Nova senha</label>
+                <input className="sa-input" type="password" value={newPwd} onChange={e=>setNewPwd(e.target.value)} placeholder="Min. 6 caracteres" />
+              </div>
+            </div>
+            <div className="sa-modal-foot">
+              <button className="sa-btn sa-btn-ghost" onClick={()=>setPwdModal(null)}>Cancelar</button>
+              <button className="sa-btn sa-btn-primary" onClick={resetPassword} disabled={saving}>{saving?"Salvando...":"Redefinir"}</button>
             </div>
           </div>
         </div>
@@ -284,8 +356,3 @@ export default function SuperAdminPage() {
     </div>
   )
 }
-
-
-
-
-
