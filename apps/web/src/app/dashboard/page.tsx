@@ -1,146 +1,150 @@
 "use client"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
-import { fmt, fmtDate } from "@/lib/utils"
 import Link from "next/link"
+import { useAuthStore } from "@/contexts/auth.store"
 
-const MONTH_NAMES = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
+const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Credito", debit_card:"Debito" }
 
-function BRL(v: number) {
-  return v?.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) || "R$ 0,00"
-}
-function BRLshort(v: number) {
-  if (v >= 1000) return "R$ " + (v/1000).toFixed(1) + "k"
-  return BRL(v)
-}
-
-function Icon({ name, size=16 }: { name:string, size?:number }) {
-  const icons: Record<string,string> = {
-    cash:    "M3 6h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM12 12m-2.5 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0",
-    chart:   "M3 3v18h18M7 12h3v6H7zM12 8h3v10h-3zM17 5h3v13h-3z",
-    receipt: "M6 2v20l3-2 3 2 3-2 3 2V2zM9 8h6M9 12h6M9 16h4",
-    users:   "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-    target:  "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
-    arrow_up:"M18 15l-6-6-6 6",
-    plus:    "M12 5v14M5 12h14",
-    chevron: "M9 18l6-6-6-6",
-    flame:   "M12 2c0 6-8 8-8 14a8 8 0 0 0 16 0c0-6-4-8-4-14",
-    info:    "M12 9h.01M11 13h2v4h-2zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
-    package: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10",
-  }
+function Spark({ data, color="#1D9E75" }: { data:number[], color?:string }) {
+  if(!data.length) return null
+  const max = Math.max(...data,1)
+  const w=80, h=32, pad=2
+  const pts = data.map((v,i) => {
+    const x = pad + (i/(data.length-1||1))*(w-pad*2)
+    const y = h-pad-(v/max)*(h-pad*2)
+    return `${x},${y}`
+  }).join(" ")
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d={icons[name] || ""} />
+    <svg width={w} height={h} style={{position:"absolute",bottom:0,right:0,opacity:0.4}}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }
 
-function KPI({ label, icon, value, delta, deltaDir="up", mono=true }: any) {
+function KPI({ label, icon, value, delta, deltaDir="up", spark, mono=true }: any) {
   return (
     <div style={{ padding:18, background:"var(--surface)", border:"1px solid var(--border)", borderRadius:14, position:"relative", overflow:"hidden" }}>
       <div style={{ display:"flex", alignItems:"center", gap:7, fontSize:12, color:"var(--text-subtle)", fontWeight:500, marginBottom:10 }}>
-        <Icon name={icon} size={14} />
-        {label}
+        {icon} {label}
       </div>
-      <div style={{ fontSize:26, fontWeight:600, letterSpacing:"-0.02em", fontFamily: mono ? "var(--font-mono)" : "var(--font)", color:"var(--text)" }}>
+      <div style={{ fontSize:26, fontWeight:600, letterSpacing:"-0.02em", fontFamily: mono?"var(--font-mono)":"var(--font)", color:"var(--text)", position:"relative", zIndex:1 }}>
         {value}
       </div>
       {delta && (
-        <div style={{ marginTop:6, fontSize:12, display:"inline-flex", alignItems:"center", gap:4, color: deltaDir==="up" ? "var(--success)" : "var(--danger)" }}>
-          <Icon name="arrow_up" size={11} />
-          {delta}
+        <div style={{ marginTop:6, fontSize:12, display:"inline-flex", alignItems:"center", gap:4, color: deltaDir==="up"?"var(--success)":"var(--danger)", position:"relative", zIndex:1 }}>
+          {deltaDir==="up" ? "↑" : "↓"} {delta}
         </div>
       )}
+      {spark}
     </div>
   )
 }
 
 function BarChart({ data, labels }: { data:number[], labels?:string[] }) {
-  const max = Math.max(...data, 1)
+  const max = Math.max(...data,1)
   return (
     <div>
-      <div style={{ display:"flex", alignItems:"flex-end", gap:6, height:180, padding:"12px 0" }}>
+      <div style={{ display:"flex", alignItems:"flex-end", gap:5, height:160 }}>
         {data.map((v,i) => (
-          <div key={i} style={{ flex:1, background:"linear-gradient(to top, var(--brand), var(--brand-soft))", borderRadius:"6px 6px 2px 2px", height:`${(v/max)*100}%`, minHeight:6, position:"relative", transition:"opacity 0.15s", cursor:"default" }}
-            title={BRL(v)}>
-            {labels && <span style={{ position:"absolute", bottom:-20, left:0, right:0, textAlign:"center", fontSize:10, color:"var(--text-subtle)" }}>{labels[i]}</span>}
+          <div key={i} title={BRL(v)} style={{ flex:1, background:"linear-gradient(to top,var(--brand),#34D399)", borderRadius:"4px 4px 2px 2px", height:`${Math.max((v/max)*100,2)}%`, minHeight:3, transition:"opacity .15s", cursor:"default", position:"relative" }}>
+            {labels && <span style={{ position:"absolute", bottom:-18, left:"50%", transform:"translateX(-50%)", fontSize:9, color:"var(--text-subtle)", whiteSpace:"nowrap" }}>{labels[i]}</span>}
           </div>
         ))}
       </div>
-      {labels && <div style={{ height:24 }} />}
+      {labels && <div style={{ height:20 }} />}
     </div>
   )
 }
 
+function Icon({ name }: { name:string }) {
+  const icons: Record<string,string> = {
+    cash:    "M3 6h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM12 12m-2.5 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 0 0-5 0",
+    chart:   "M3 3v18h18M7 12h3v6H7zM12 8h3v10h-3zM17 5h3v13h-3z",
+    sparkle: "M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z",
+    receipt: "M6 2v20l3-2 3 2 3-2 3 2V2zM9 8h6M9 12h6M9 16h4",
+    target:  "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+    flame:   "M12 2c0 6-8 8-8 14a8 8 0 0 0 16 0c0-6-4-8-4-14",
+    chevron: "M9 18l6-6-6-6",
+    info:    "M12 9h.01M11 13h2v4h-2zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
+    plus:    "M12 5v14M5 12h14",
+    download:"M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 3v13",
+    calendar:"M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+  }
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+      <path d={icons[name]||""} />
+    </svg>
+  )
+}
+
 export default function DashboardPage() {
-  const router = useRouter()
-  const [data, setData] = useState<any>(null)
+  const { user: authUser } = useAuthStore()
+  const [data, setData]   = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState<"month"|"custom">("month")
-  const [user, setUser] = useState<any>(null)
   const [store, setStore] = useState<any>(null)
   const [primary, setPrimary] = useState("#1D9E75")
 
   const now = new Date()
-  const monthLabel = MONTH_NAMES[now.getMonth()]
+  const monthLabel = MONTHS[now.getMonth()]
   const year = now.getFullYear()
 
   useEffect(() => {
     try {
-      const u = localStorage.getItem("user")
       const sc = localStorage.getItem("storeConfig")
-      if (u) setUser(JSON.parse(u))
-      if (sc) {
-        const s = JSON.parse(sc)
-        setStore(s)
-        if (s.primaryColor) setPrimary(s.primaryColor)
-      }
-    } catch {}
+      if(sc){ const s=JSON.parse(sc); setStore(s); if(s.primaryColor)setPrimary(s.primaryColor) }
+    } catch{}
+    api.get("/stores").then(r=>{ const s=Array.isArray(r.data)?r.data[0]:r.data; if(s){setStore(s);if(s.primaryColor)setPrimary(s.primaryColor)} }).catch(()=>{})
     load()
   }, [])
 
   async function load() {
     setLoading(true)
-    try {
-      const r = await api.get("/reports/dashboard")
-      setData(r.data)
-    } catch(e) { console.error(e) }
-    finally { setLoading(false) }
+    try { const r = await api.get("/reports/dashboard"); setData(r.data) }
+    catch(e){ console.error(e) } finally { setLoading(false) }
   }
 
-  const storeName = store?.name || user?.storeName || "Minha Loja"
-  const userName = user?.name || "Voce"
-  const firstName = userName.split(" ")[0]
-
-  const fat = data?.monthSales || 0
-  const lucro = data?.profit || 0
-  const margem = fat > 0 ? Math.round((lucro/fat)*100) : 0
-  const ticket = data?.avgTicket || 0
-  const totalVendas = data?.monthSalesCount || 0
-  const meta = data?.monthGoal || 0
-  const metaPct = meta > 0 ? Math.min(Math.round((fat/meta)*100),100) : 0
-  const chartData: number[] = (data?.weeklyChart || []).map((d: any) => d.value)
-  const chartLabels: string[] = (data?.weeklyChart || []).map((d: any) => d.day)
-  const sellers: any[] = data?.topSellers || []
-  const products: any[] = data?.topProducts || []
-  const recentSales: any[] = data?.recentSales || []
+  const storeName  = store?.name || "Minha Loja"
+  const userName   = authUser?.name || "Voce"
+  const firstName  = userName.split(" ")[0]
+  const fat        = data?.monthSales    || 0
+  const today      = data?.todaySales    || 0
+  const lucro      = data?.profit        || 0
+  const margem     = fat>0 ? Math.round((lucro/fat)*100) : 0
+  const ticket     = data?.avgTicket     || 0
+  const totalV     = data?.monthSalesCount || 0
+  const meta       = store?.monthlyGoal  || data?.monthGoal || 0
+  const metaPct    = meta>0 ? Math.min(Math.round((fat/meta)*100),100) : 0
+  const chartData  = (data?.weeklyChart||[]).map((d:any)=>d.value)
+  const chartLabels= (data?.weeklyChart||[]).map((d:any)=>d.day)
+  const sellers: any[]      = data?.topSellers  || []
+  const products: any[]     = data?.topProducts || []
+  const recentSales: any[]  = data?.recentSales || []
+  const lowStock: any[]     = data?.lowStock    || []
 
   return (
-    <div style={{ padding:28, maxWidth:1440, margin:"0 auto" }}>
+    <div style={{padding:28,maxWidth:1440,margin:"0 auto"}}>
       <style>{`
-        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+        @font-face { font-family: "Geist Mono"; font-feature-settings: "zero" off; }
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
+        .dash-left{display:flex;flex-direction:column;gap:18px;}
+        .dash-right{display:flex;flex-direction:column;gap:18px;}
         .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;}
         .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;}
         .card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
-        .card-head h3{margin:0;font-size:14px;font-weight:600;letter-spacing:-0.005em;}
+        .card-head h3{margin:0;font-size:14px;font-weight:600;}
         .card-head .sub{font-size:12px;color:var(--text-subtle);margin-top:2px;}
         .tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
-        .tbl th{text-align:left;font-weight:500;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-subtle);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);}
+        .tbl th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-subtle);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface-2);}
         .tbl td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
         .tbl tr:last-child td{border-bottom:0;}
         .tbl tr:hover td{background:var(--surface-2);}
+        .tbl .num{font-family:var(--font-mono);text-align:right;}
         .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:500;background:var(--surface-3);color:var(--text-muted);}
+        .pill-brand{background:var(--brand-tint);color:var(--brand-deep);}
         .list-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
         .list-item:last-child{border-bottom:0;}
         .list-meta{flex:1;min-width:0;}
@@ -148,72 +152,86 @@ export default function DashboardPage() {
         .list-meta small{font-size:11px;color:var(--text-subtle);}
         .mini-bar{height:4px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin-top:4px;}
         .mini-bar span{display:block;height:100%;background:var(--brand);border-radius:999px;}
-        .avatar-sm{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:600;flex-shrink:0;}
-        .avatar-md{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;flex-shrink:0;}
+        .av-sm{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:600;flex-shrink:0;}
+        .av-md{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;flex-shrink:0;}
         .progress{height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden;}
         .progress span{display:block;height:100%;border-radius:999px;}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn-primary{background:var(--brand);color:white;} .vp-btn-primary:hover{background:#178A65;}
+        .vp-btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text);} .vp-btn-secondary:hover{background:var(--surface-2);}
+        .vp-btn-ghost{color:var(--text-muted);} .vp-btn-ghost:hover{background:var(--surface-2);color:var(--text);}
+        .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
         @media(max-width:1100px){.dash-grid{grid-template-columns:1fr!important;}}
         @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
         @media(max-width:540px){.kpi-grid{grid-template-columns:1fr;}}
       `}</style>
 
       {/* PAGE HEAD */}
-      <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:16, marginBottom:24, flexWrap:"wrap" }}>
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:22,flexWrap:"wrap"}}>
         <div>
-          <h1 style={{ margin:0, fontSize:26, fontWeight:600, letterSpacing:"-0.02em" }}>
+          <h1 style={{margin:0,fontSize:28,fontWeight:600,letterSpacing:"-.025em"}}>
             Ola, {firstName} 👋
           </h1>
-          <div style={{ color:"var(--text-subtle)", fontSize:14, marginTop:4 }}>
+          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>
             Visao geral da {storeName} — {monthLabel} de {year}
           </div>
         </div>
-        <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-          <div style={{ display:"flex", gap:4, background:"var(--surface-2)", padding:3, borderRadius:10, border:"1px solid var(--border)" }}>
-            {(["month","custom"] as const).map(v => (
-              <button key={v} onClick={()=>setPeriod(v)}
-                style={{ padding:"6px 14px", fontSize:13, borderRadius:8, border:"none", cursor:"pointer", fontWeight: period===v ? 500 : 400,
-                  background: period===v ? "var(--surface)" : "transparent",
-                  color: period===v ? "var(--text)" : "var(--text-muted)",
-                  boxShadow: period===v ? "var(--shadow-sm)" : "none" }}>
-                {v==="month" ? "Este mes" : "Personalizado"}
-              </button>
-            ))}
-          </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <button className="vp-btn vp-btn-secondary" style={{gap:6}}>
+            <Icon name="calendar"/> Este mes
+          </button>
           <Link href="/dashboard/sales">
-            <button style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"8px 14px", fontSize:13, fontWeight:500, background:primary, color:"white", border:"none", borderRadius:10, cursor:"pointer" }}>
-              <Icon name="plus" size={14} /> Nova venda
+            <button className="vp-btn vp-btn-primary">
+              <Icon name="plus"/> Nova venda
             </button>
           </Link>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign:"center", padding:60, color:"var(--text-subtle)" }}>Carregando...</div>
+        <div style={{textAlign:"center",padding:60,color:"var(--text-subtle)"}}>Carregando...</div>
       ) : (
         <>
           {/* KPIs */}
           <div className="kpi-grid">
-            <KPI label="Faturamento do mes" icon="cash" value={BRL(fat)} delta={`${totalVendas} vendas`} />
-            <KPI label="Lucro estimado" icon="chart" value={BRL(lucro)} delta={`${margem}% margem`} />
-            <KPI label="Ticket medio" icon="receipt" value={BRL(ticket)} delta="Por venda" />
-            <KPI label="Total de vendas" icon="package" value={String(totalVendas)} delta="No periodo" mono={false} />
+            <KPI label="Faturamento hoje" icon={<Icon name="cash"/>}
+              value={BRL(today)}
+              delta={today>0?"Hoje":"Sem vendas hoje"}
+              spark={<Spark data={chartData.slice(-7)} color={primary}/>} />
+            <KPI label="Faturamento do mes" icon={<Icon name="chart"/>}
+              value={BRL(fat)}
+              delta={`${totalV} vendas`}
+              spark={<Spark data={chartData} color={primary}/>} />
+            <KPI label="Lucro estimado" icon={<Icon name="sparkle"/>}
+              value={BRL(lucro)}
+              delta={`${margem}% margem`} />
+            <KPI label="Ticket medio" icon={<Icon name="receipt"/>}
+              value={BRL(ticket)}
+              delta="Por venda" />
           </div>
 
           {/* META */}
           {meta > 0 && (
-            <div className="card" style={{ padding:18, marginBottom:18 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8, fontSize:13, fontWeight:600 }}>
-                  <Icon name="target" size={15} /> Meta mensal
+            <div className="card" style={{padding:18,marginBottom:18}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,fontWeight:600}}>
+                    <Icon name="target"/> Meta mensal
+                  </div>
+                  <div style={{fontSize:12,color:"var(--text-subtle)",marginTop:2}}>
+                    {meta>fat?`Faltam ${BRL(meta-fat)} para a meta`:"Meta atingida! 🎉"}
+                  </div>
                 </div>
-                <div style={{ textAlign:"right" }}>
-                  <span style={{ fontSize:15, fontWeight:600, fontFamily:"var(--font-mono)" }}>{BRL(fat)}</span>
-                  <span style={{ fontSize:13, color:"var(--text-subtle)", fontFamily:"var(--font-mono)" }}> / {BRL(meta)}</span>
-                  <span style={{ marginLeft:8, fontSize:12, color:primary, fontWeight:500 }}>{metaPct}%</span>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:20,fontWeight:600,fontFamily:"var(--font-mono)",letterSpacing:"-.02em"}}>
+                    {BRL(fat)} <span style={{color:"var(--text-subtle)",fontSize:13}}>/ {BRL(meta)}</span>
+                  </div>
+                  <div style={{fontSize:12,color:primary,fontWeight:500,marginTop:2}}>{metaPct}% atingido</div>
                 </div>
               </div>
-              <div className="progress">
-                <span style={{ width:`${metaPct}%`, background:primary }} />
+              <div className="progress"><span style={{width:`${metaPct}%`,background:primary}}/></div>
+              <div style={{marginTop:8,display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text-subtle)",fontFamily:"var(--font-mono)"}}>
+                <span>0</span><span>{BRL(meta/2)}</span><span>{BRL(meta)}</span>
               </div>
             </div>
           )}
@@ -221,61 +239,68 @@ export default function DashboardPage() {
           {/* MAIN GRID */}
           <div className="dash-grid">
             {/* ESQUERDA */}
-            <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
-              {/* GRAFICO */}
-              {chartData.length > 0 && (
-                <div className="card">
-                  <div className="card-head">
-                    <div>
-                      <h3>Vendas por dia</h3>
-                      <div className="sub">Ultimos {chartData.length} dias</div>
-                    </div>
-                  </div>
-                  <div style={{ padding:"22px 18px 16px" }}>
-                    <BarChart data={chartData} labels={chartLabels} />
+            <div className="dash-left">
+
+              {/* GRÁFICO */}
+              <div className="card">
+                <div className="card-head">
+                  <div>
+                    <h3>Vendas por dia</h3>
+                    <div className="sub">Ultimos {chartData.length} dias</div>
                   </div>
                 </div>
-              )}
+                <div style={{padding:"22px 18px 8px"}}>
+                  {chartData.length > 0 ? (
+                    <BarChart data={chartData} labels={chartLabels} />
+                  ) : (
+                    <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>
+                      Sem dados de vendas no periodo.
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              {/* ULTIMAS VENDAS */}
+              {/* ÚLTIMAS VENDAS */}
               {recentSales.length > 0 && (
                 <div className="card">
                   <div className="card-head">
                     <div>
                       <h3>Ultimas vendas</h3>
-                      <div className="sub">{totalVendas} no periodo</div>
+                      <div className="sub">{totalV} no periodo</div>
                     </div>
                     <Link href="/dashboard/sales">
-                      <button style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"5px 10px", fontSize:12, color:"var(--text-muted)", background:"none", border:"1px solid var(--border)", borderRadius:8, cursor:"pointer" }}>
-                        Ver todas <Icon name="chevron" size={11} />
+                      <button className="vp-btn vp-btn-ghost vp-btn-sm">
+                        Ver todas <Icon name="chevron"/>
                       </button>
                     </Link>
                   </div>
                   <table className="tbl">
                     <thead>
                       <tr>
+                        <th style={{width:80}}>ID</th>
                         <th>Cliente</th>
                         <th>Vendedor</th>
                         <th>Pagamento</th>
-                        <th style={{ textAlign:"right" }}>Total</th>
+                        <th className="num">Total</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {recentSales.slice(0,5).map((s:any) => (
+                      {recentSales.slice(0,5).map((s:any)=>(
                         <tr key={s.id}>
-                          <td style={{ fontWeight:500 }}>{s.customerName || "Cliente avulso"}</td>
+                          <td style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--text-subtle)"}}>{s.id.slice(-8).toUpperCase()}</td>
+                          <td style={{fontWeight:500}}>{s.customerName||"Avulso"}</td>
                           <td>
                             {s.sellerName ? (
-                              <span style={{ display:"inline-flex", alignItems:"center", gap:6 }}>
-                                <span className="avatar-sm" style={{ background:primary, color:"white" }}>
+                              <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
+                                <span className="av-sm" style={{background:primary,color:"white"}}>
                                   {s.sellerName.split(" ").map((x:string)=>x[0]).slice(0,2).join("")}
                                 </span>
                                 {s.sellerName}
                               </span>
-                            ) : <span style={{ color:"var(--text-subtle)", fontSize:12 }}>—</span>}
+                            ) : <span style={{color:"var(--text-subtle)"}}>—</span>}
                           </td>
-                          <td><span className="pill">{s.paymentMethod === "cash" ? "Dinheiro" : s.paymentMethod === "pix" ? "PIX" : s.paymentMethod === "credit_card" ? "Credito" : "Debito"}</span></td>
-                          <td style={{ textAlign:"right", fontFamily:"var(--font-mono)", fontWeight:600, color:primary }}>{BRL(s.total)}</td>
+                          <td><span className="pill">{PAY[s.paymentMethod]||s.paymentMethod}</span></td>
+                          <td className="num" style={{fontWeight:600,color:primary}}>{BRL(s.total)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -285,32 +310,33 @@ export default function DashboardPage() {
             </div>
 
             {/* DIREITA */}
-            <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
+            <div className="dash-right">
+
               {/* RANKING */}
               <div className="card">
                 <div className="card-head">
                   <h3>Ranking de vendedores</h3>
-                  <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 8px", borderRadius:999, fontSize:11, fontWeight:500, background:"var(--brand-tint)", color:"var(--brand-deep)" }}>
-                    <Icon name="flame" size={11} /> {monthLabel}
+                  <span className="pill pill-brand">
+                    <Icon name="flame"/> {monthLabel}
                   </span>
                 </div>
-                <div style={{ padding:14 }}>
-                  {sellers.length === 0 ? (
-                    <div style={{ color:"var(--text-subtle)", fontSize:13, padding:"8px 0" }}>Sem dados</div>
-                  ) : sellers.map((s:any,i:number) => {
-                    const maxRev = sellers[0]?.revenue || 1
-                    const colors = [primary, "#04342C", "#94A3B8", "#94A3B8", "#94A3B8"]
-                    const initials = (s.sellerName||s.name||"?").split(" ").map((x:string)=>x[0]).slice(0,2).join("")
+                <div style={{padding:14}}>
+                  {sellers.length===0 ? (
+                    <div style={{color:"var(--text-subtle)",fontSize:13,padding:"8px 0"}}>Sem dados de vendas.</div>
+                  ) : sellers.map((s:any,i:number)=>{
+                    const maxRev = sellers[0]?.revenue||1
+                    const colors = [primary,"#04342C","#94A3B8","#94A3B8","#94A3B8"]
+                    const init = (s.sellerName||s.name||"?").split(" ").map((x:string)=>x[0]).slice(0,2).join("")
                     return (
                       <div key={i} className="list-item">
-                        <div style={{ width:18, color:"var(--text-subtle)", fontFamily:"var(--font-mono)", fontSize:11 }}>#{i+1}</div>
-                        <div className="avatar-md" style={{ background:colors[i]||"#94A3B8", color:"white" }}>{initials}</div>
+                        <div style={{width:18,color:"var(--text-subtle)",fontFamily:"var(--font-mono)",fontSize:11}}>#{i+1}</div>
+                        <div className="av-md" style={{background:colors[i]||"#94A3B8",color:"white"}}>{init}</div>
                         <div className="list-meta">
                           <strong>{s.sellerName||s.name}</strong>
                           <small>{s.count} vendas</small>
-                          <div className="mini-bar"><span style={{ width:`${(s.revenue/maxRev)*100}%` }}/></div>
+                          <div className="mini-bar"><span style={{width:`${(s.revenue/maxRev)*100}%`}}/></div>
                         </div>
-                        <div style={{ fontFamily:"var(--font-mono)", fontWeight:600, fontSize:13 }}>{BRLshort(s.revenue)}</div>
+                        <div style={{fontFamily:"var(--font-mono)",fontWeight:600,fontSize:13}}>{BRLshort(s.revenue)}</div>
                       </div>
                     )
                   })}
@@ -321,29 +347,45 @@ export default function DashboardPage() {
               <div className="card">
                 <div className="card-head">
                   <h3>Top produtos</h3>
-                  <Link href="/dashboard/stock">
-                    <button style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"5px 10px", fontSize:12, color:"var(--text-muted)", background:"none", border:"1px solid var(--border)", borderRadius:8, cursor:"pointer" }}>
-                      Estoque <Icon name="chevron" size={11} />
+                  <Link href="/dashboard/inventory">
+                    <button className="vp-btn vp-btn-ghost vp-btn-sm">
+                      Estoque <Icon name="chevron"/>
                     </button>
                   </Link>
                 </div>
-                <div style={{ padding:14 }}>
-                  {products.length === 0 ? (
-                    <div style={{ color:"var(--text-subtle)", fontSize:13, padding:"8px 0" }}>Sem dados</div>
-                  ) : products.slice(0,5).map((p:any,i:number) => (
+                <div style={{padding:14}}>
+                  {products.length===0 ? (
+                    <div style={{color:"var(--text-subtle)",fontSize:13,padding:"8px 0"}}>Sem dados de produtos.</div>
+                  ) : products.slice(0,5).map((p:any,i:number)=>(
                     <div key={i} className="list-item">
-                      <div style={{ width:32, height:32, borderRadius:8, background:"var(--surface-2)", display:"grid", placeItems:"center", fontSize:16, flexShrink:0 }}>
-                        📦
-                      </div>
+                      <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-2)",display:"grid",placeItems:"center",fontSize:16,flexShrink:0}}>📦</div>
                       <div className="list-meta">
                         <strong>{p.name}</strong>
                         <small>{p.quantity} un. vendidas</small>
                       </div>
-                      <div style={{ fontFamily:"var(--font-mono)", fontWeight:600, fontSize:13 }}>{BRLshort(p.revenue)}</div>
+                      <div style={{fontFamily:"var(--font-mono)",fontWeight:600,fontSize:13}}>{BRLshort(p.revenue)}</div>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* ALERTA ESTOQUE BAIXO */}
+              {lowStock.length > 0 && (
+                <div className="card" style={{borderColor:"var(--warning)",background:"var(--warning-bg)",padding:16}}>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                    <Icon name="info"/>
+                    <div>
+                      <div style={{fontWeight:500,fontSize:13,color:"var(--warning)"}}>Atencao: estoque baixo</div>
+                      <div style={{fontSize:12,marginTop:4,color:"var(--text)",lineHeight:1.5}}>
+                        {lowStock.slice(0,3).map((p:any)=><strong key={p.id}>{p.name}</strong>).reduce((a:any,b:any)=>[a,", ",b])} {lowStock.length>1?"estao":"esta"} com estoque baixo.
+                      </div>
+                      <Link href="/dashboard/inventory">
+                        <button className="vp-btn vp-btn-secondary vp-btn-sm" style={{marginTop:10}}>Ir ao estoque</button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>
