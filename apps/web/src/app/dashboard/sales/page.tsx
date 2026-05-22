@@ -154,7 +154,7 @@ export default function SalesPage() {
         ) : filtered.length === 0 ? (
           <div style={{textAlign:"center",padding:48,color:"var(--text-subtle)"}}>Nenhuma venda encontrada.</div>
         ) : (
-          <table className="vp-tbl">
+          <div className="tbl-wrap"><table className="vp-tbl">
             <thead>
               <tr><th>Cliente</th><th>Vendedor</th><th>Produtos</th><th>Pagamento</th><th>Status</th><th style={{textAlign:"right"}}>Total</th><th></th></tr>
             </thead>
@@ -195,7 +195,7 @@ export default function SalesPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 
