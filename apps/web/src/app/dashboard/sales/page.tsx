@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Credito", debit_card:"Debito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
@@ -126,16 +126,16 @@ export default function SalesPage() {
 
       {/* KPIs */}
       <div className="kpi-grid">
-        <div className="kpi"><div className="lbl">Fat. do mes</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
-        <div className="kpi"><div className="lbl">Concluidas</div><div className="val">{completed}</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Concluídas</div><div className="val">{completed}</div></div>
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
-        <div className="kpi"><div className="lbl">Ticket medio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
       </div>
 
       {/* LISTA */}
       <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,overflow:"hidden"}}>
         <div className="filter-row">
-          {[["active","Concluidas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+          {[["active","Concluídas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
             <button key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</button>
           ))}
         </div>
@@ -169,7 +169,7 @@ export default function SalesPage() {
                   {s.items?.length>2 && <span className="vp-pill vp-pill-grey">+{s.items.length-2}</span>}
                   <span className="vp-pill vp-pill-grey">{PAY[s.paymentMethod]||s.paymentMethod}</span>
                   <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
-                    {s.status==="completed"?"Concluida":"Cancelada"}
+                    {s.status==="completed"?"Concluída":"Cancelada"}
                   </span>
                 </div>
                 {s.status!=="cancelled" && (
@@ -202,8 +202,8 @@ export default function SalesPage() {
                   <select className="vp-select" value={form.paymentMethod} onChange={e=>setForm({...form,paymentMethod:e.target.value})}>
                     <option value="pix">PIX</option>
                     <option value="cash">Dinheiro</option>
-                    <option value="credit_card">Cartao Credito</option>
-                    <option value="debit_card">Cartao Debito</option>
+                    <option value="credit_card">Cartão Crédito</option>
+                    <option value="debit_card">Cartão Débito</option>
                   </select>
                 </div>
                 <div className="vp-field">
@@ -252,7 +252,7 @@ export default function SalesPage() {
           <div className="vp-modal" style={{maxWidth:320}} onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head"><h2>Cancelar venda?</h2></div>
             <div className="vp-modal-body">
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta acao nao pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta ação não pode ser desfeita.</p>
             </div>
             <div className="vp-modal-foot">
               <button className="vp-btn vp-btn-ghost" onClick={()=>setCancelId(null)}>Voltar</button>
@@ -264,3 +264,4 @@ export default function SalesPage() {
     </div>
   )
 }
+

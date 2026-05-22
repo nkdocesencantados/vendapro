@@ -19,7 +19,7 @@ export default function LoginPage() {
       await login(email, password)
       router.push("/dashboard")
     } catch(err: any) {
-      setError(err?.response?.data?.message || "Credenciais invalidas")
+      setError(err?.response?.data?.message || "Credenciais inválidas")
     } finally { setLoading(false) }
   }
 
@@ -73,11 +73,11 @@ export default function LoginPage() {
           {/* Headline */}
           <div>
             <h2 style={{fontSize:30,fontWeight:600,color:"white",lineHeight:1.1,letterSpacing:"-0.025em",marginBottom:10}}>
-              Toda a gestao da sua loja em{" "}
+              Toda a gestão da sua loja em{" "}
               <span style={{color:"#34D399"}}>um so lugar</span>.
             </h2>
             <p style={{fontSize:14,color:"#8DA39A",lineHeight:1.6}}>
-              Vendas, estoque, caixa e equipe - pensado para o pequeno comercio brasileiro.
+              Vendas, estoque, caixa e equipe - pensado para o pequeno comércio brasileiro.
             </p>
           </div>
           {/* Stats */}
@@ -118,7 +118,7 @@ export default function LoginPage() {
             </div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
               <span style={{color:"#78716C"}}>Esqueceu a senha?</span>
-              <a href="https://wa.me/5511958924764?text=Ola,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
+              <a href="https://wa.me/5511958924764?text=Olá,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
             </div>
             <button className="login-btn" type="submit" disabled={loading} style={{marginTop:4}}>
               {loading ? "Entrando..." : "Entrar"}
@@ -137,7 +137,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,color:"#A8A29E"}}>
-            VendaPro - Gestao para varejo
+            VendaPro - Gestão para varejo
             <span>v2.0</span>
           </div>
         </div>
@@ -155,11 +155,11 @@ export default function LoginPage() {
           </div>
           <div style={{marginTop:"auto",position:"relative"}}>
             <h2 style={{fontSize:38,fontWeight:600,lineHeight:1.05,letterSpacing:"-0.025em",margin:"0 0 16px",color:"white"}}>
-              Toda a gestao da sua loja em{" "}
+              Toda a gestão da sua loja em{" "}
               <span style={{color:"#34D399"}}>um so lugar</span>.
             </h2>
             <p style={{fontSize:15,lineHeight:1.6,color:"#B2C9C0",margin:0,maxWidth:380}}>
-              Vendas, estoque, caixa e equipe - pensado para o pequeno comercio brasileiro.
+              Vendas, estoque, caixa e equipe - pensado para o pequeno comércio brasileiro.
             </p>
             <div style={{display:"flex",gap:24,marginTop:32,paddingTop:24,borderTop:"1px solid #1F3A33"}}>
               {[["7 dias","trial gratis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
@@ -207,14 +207,14 @@ export default function LoginPage() {
               </div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
                 <span style={{color:"#78716C"}}>Esqueceu a senha?</span>
-                <a href="https://wa.me/5511958924764?text=Ola,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
+                <a href="https://wa.me/5511958924764?text=Olá,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
               </div>
               <button className="login-btn" type="submit" disabled={loading} style={{marginTop:4}}>
                 {loading ? "Entrando..." : "Entrar"}
               </button>
             </form>
             <div style={{marginTop:24,paddingTop:18,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,color:"#78716C"}}>
-              VendaPro - Gestao para varejo
+              VendaPro - Gestão para varejo
               <span>v2.0</span>
             </div>
           </div>
@@ -223,3 +223,4 @@ export default function LoginPage() {
     </>
   )
 }
+

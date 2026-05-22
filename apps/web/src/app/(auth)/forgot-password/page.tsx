@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
           <div style={{ textAlign:"center" }}>
             <div style={{ fontSize:"48px", marginBottom:"16px" }}>??</div>
             <h2 style={{ fontSize:"22px", fontWeight:500, marginBottom:"8px" }}>Verifique seu e-mail</h2>
-            <p style={{ color:"#888", fontSize:"14px", marginBottom:"24px" }}>Se o e-mail existir voce recebera as instrucoes.</p>
+            <p style={{ color:"#888", fontSize:"14px", marginBottom:"24px" }}>Se o e-mail existir você recebera as instrucoes.</p>
             <a href="/login" style={{ color:"#0F6E56", fontSize:"14px" }}>? Voltar ao login</a>
           </div>
         ) : (
@@ -55,3 +55,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

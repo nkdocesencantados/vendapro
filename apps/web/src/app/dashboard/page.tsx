@@ -7,7 +7,7 @@ import { useAuthStore } from "@/contexts/auth.store"
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Credito", debit_card:"Debito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
 function Spark({ data, color="#1D9E75" }: { data:number[], color?:string }) {
   if(!data.length) return null
@@ -104,7 +104,7 @@ export default function DashboardPage() {
   }
 
   const storeName  = store?.name || "Minha Loja"
-  const userName   = authUser?.name || "Voce"
+  const userName   = authUser?.name || "Você"
   const firstName  = userName.split(" ")[0]
   const fat        = data?.monthSales    || 0
   const today      = data?.todaySales    || 0
@@ -175,7 +175,7 @@ export default function DashboardPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:18,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:"clamp(20px,5vw,28px)",fontWeight:600,letterSpacing:"-.025em"}}>
-            Ola, {firstName}!
+            Olá, {firstName}!
           </h1>
           <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>
             {storeName} - {monthLabel} de {year}
@@ -183,7 +183,7 @@ export default function DashboardPage() {
         </div>
         <div className="page-head-actions" style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
           <button className="vp-btn vp-btn-secondary">
-            <Icon name="calendar"/> Este mes
+            <Icon name="calendar"/> Este mês
           </button>
           <Link href="/dashboard/sales">
             <button className="vp-btn vp-btn-primary">
@@ -200,9 +200,9 @@ export default function DashboardPage() {
           {/* KPIs */}
           <div className="kpi-grid">
             <KPI label="Fat. hoje" value={BRLshort(today)} delta={today>0?"Hoje":"Sem vendas"} spark={<Spark data={chartData.slice(-7)} color={primary}/>}/>
-            <KPI label="Fat. do mes" value={BRLshort(fat)} delta={`${totalV} vendas`} spark={<Spark data={chartData} color={primary}/>}/>
+            <KPI label="Fat. do mês" value={BRLshort(fat)} delta={`${totalV} vendas`} spark={<Spark data={chartData} color={primary}/>}/>
             <KPI label="Lucro est." value={BRLshort(lucro)} delta={`${margem}% margem`}/>
-            <KPI label="Ticket medio" value={BRLshort(ticket)} delta="Por venda"/>
+            <KPI label="Ticket médio" value={BRLshort(ticket)} delta="Por venda"/>
           </div>
 
           {/* META */}
@@ -240,7 +240,7 @@ export default function DashboardPage() {
                 <div className="card-head">
                   <div>
                     <h3>Vendas por dia</h3>
-                    <div className="sub">Ultimos {chartData.length} dias</div>
+                    <div className="sub">Últimos {chartData.length} dias</div>
                   </div>
                 </div>
                 <div style={{padding:"16px 14px 10px"}}>
@@ -248,7 +248,7 @@ export default function DashboardPage() {
                     <BarChart data={chartData} labels={chartLabels}/>
                   ) : (
                     <div style={{textAlign:"center",padding:24,color:"var(--text-subtle)",fontSize:13}}>
-                      Sem dados no periodo.
+                      Sem dados no período.
                     </div>
                   )}
                 </div>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                   <div className="card-head">
                     <div>
                       <h3>Ultimas vendas</h3>
-                      <div className="sub">{totalV} no periodo</div>
+                      <div className="sub">{totalV} no período</div>
                     </div>
                     <Link href="/dashboard/sales">
                       <button className="vp-btn vp-btn-ghost vp-btn-sm">
@@ -370,3 +370,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

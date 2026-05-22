@@ -97,14 +97,14 @@ export default function TeamPage() {
       {atLimit && maxSellers > 0 && (
         <div style={{marginBottom:14,padding:14,background:"var(--info-bg)",border:"1px solid var(--info)",borderRadius:12}}>
           <div style={{fontWeight:500,fontSize:13}}>Limite atingido - plano {planLabel[plan]}</div>
-          <div style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>Faca upgrade para Business para ate 10 vendedores.</div>
+          <div style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>Faca upgrade para Business para até 10 vendedores.</div>
         </div>
       )}
 
       {maxSellers === 0 && (
         <div style={{marginBottom:14,padding:14,background:"var(--warning-bg)",border:"1px solid var(--warning)",borderRadius:12}}>
-          <div style={{fontWeight:500,fontSize:13,color:"var(--warning)"}}>Plano Basic nao inclui vendedores.</div>
-          <div style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>Faca upgrade para Pro e adicione ate 2 vendedores.</div>
+          <div style={{fontWeight:500,fontSize:13,color:"var(--warning)"}}>Plano Basic não inclui vendedores.</div>
+          <div style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>Faca upgrade para Pro e adicione até 2 vendedores.</div>
         </div>
       )}
 
@@ -126,12 +126,12 @@ export default function TeamPage() {
               <div className="mc-top">
                 <div className="mc-av" style={{background:primary}}>{(owner.name||"P").split(" ").map((x:string)=>x[0]).slice(0,2).join("")}</div>
                 <div className="mc-info">
-                  <div className="mc-name">{owner.name||"Proprietario"}</div>
+                  <div className="mc-name">{owner.name||"Proprietário"}</div>
                   <div className="mc-email">{owner.email}</div>
                 </div>
               </div>
               <div className="mc-pills">
-                <span className="pill pill-brand">Proprietario</span>
+                <span className="pill pill-brand">Proprietário</span>
                 <span className={`pill ${owner.status==="active"?"pill-ok":"pill-grey"}`}>{owner.status==="active"?"Ativo":"Inativo"}</span>
               </div>
             </div>
@@ -181,3 +181,4 @@ export default function TeamPage() {
     </div>
   )
 }
+

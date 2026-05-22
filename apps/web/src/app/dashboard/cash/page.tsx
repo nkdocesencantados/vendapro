@@ -5,7 +5,7 @@ import { api } from "@/lib/api"
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const CAT_MAP: Record<string,string> = { sale:"Venda", service:"Servico", rent:"Aluguel", salary:"Salario", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
+const CAT_MAP: Record<string,string> = { sale:"Venda", service:"Serviço", rent:"Aluguel", salary:"Salário", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
 export default function CashPage() {
   const now = new Date()
@@ -109,25 +109,25 @@ export default function CashPage() {
         <div className="kpi"><div className="kpi-lbl">Entradas</div><div className="kpi-val" style={{color:"#1D9E75"}}>{BRLshort(data.income)}</div></div>
         <div className="kpi"><div className="kpi-lbl">Saidas</div><div className="kpi-val" style={{color:"var(--danger)"}}>{BRLshort(data.expense)}</div></div>
         <div className="kpi" style={{gridColumn:"span 2"}}>
-          <div className="kpi-lbl">Saldo do mes</div>
+          <div className="kpi-lbl">Saldo do mês</div>
           <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
           <div className="kpi-dlt">{margin}% margem</div>
         </div>
       </div>
 
       <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>
-        + Novo lancamento
+        + Novo lançamento
       </button>
 
       <div className="card-wrap">
         <div className="card-head-row">
-          <div className="card-head-title">Lancamentos</div>
+          <div className="card-head-title">Lançamentos</div>
           <div className="card-head-sub">{entries.length} registros</div>
         </div>
         {loading ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
         ) : entries.length===0 ? (
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lancamento neste periodo.</div>
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lançamento neste período.</div>
         ) : entries.map((e:any)=>(
           <div key={e.id} className="entry-card">
             <div className="entry-icon" style={{background:e.type==="income"?"rgba(29,158,117,0.15)":"rgba(185,28,28,0.15)"}}>
@@ -169,7 +169,7 @@ export default function CashPage() {
         <div className="vp-modal-bg" onClick={()=>setShowForm(false)}>
           <div className="vp-modal" onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head">
-              <h2>Novo lancamento</h2>
+              <h2>Novo lançamento</h2>
               <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
             </div>
             <div className="vp-modal-body">
@@ -186,16 +186,16 @@ export default function CashPage() {
                   <select className="vp-select" value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
                     <option value="">Selecione...</option>
                     {form.type==="income"?(
-                      <><option value="sale">Venda</option><option value="service">Servico</option><option value="other">Outros</option></>
+                      <><option value="sale">Venda</option><option value="service">Serviço</option><option value="other">Outros</option></>
                     ):(
-                      <><option value="rent">Aluguel</option><option value="salary">Salario</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
+                      <><option value="rent">Aluguel</option><option value="salary">Salário</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
                     )}
                   </select>
                 </div>
               </div>
               <div className="vp-field">
                 <label>Descricao</label>
-                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mes" />
+                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mês" />
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div className="vp-field"><label>Valor (R$)</label><input className="vp-input" type="number" value={form.amount||""} onChange={e=>setForm({...form,amount:+e.target.value})} placeholder="0,00" /></div>
@@ -212,3 +212,4 @@ export default function CashPage() {
     </div>
   )
 }
+

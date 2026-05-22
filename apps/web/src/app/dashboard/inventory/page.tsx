@@ -26,7 +26,7 @@ export default function StockPage() {
   }
 
   async function save() {
-    if(!form.name||!form.price) return alert("Nome e preco sao obrigatorios")
+    if(!form.name||!form.price) return alert("Nome e preço sao obrigatórios")
     setSaving(true)
     try {
       if(editing) await api.patch(`/products/${editing.id}`, { name:form.name, price:+form.price, stock:+form.stock||0 })
@@ -157,7 +157,7 @@ export default function StockPage() {
             <div className="vp-modal-body">
               <div className="vp-field"><label>Nome *</label><input className="vp-input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Nome do produto" /></div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-                <div className="vp-field"><label>Preco (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
+                <div className="vp-field"><label>Preço (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
               </div>
             </div>
@@ -171,3 +171,4 @@ export default function StockPage() {
     </div>
   )
 }
+

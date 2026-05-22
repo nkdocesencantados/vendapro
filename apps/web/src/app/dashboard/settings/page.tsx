@@ -86,7 +86,7 @@ export default function SettingsPage() {
       `}</style>
 
       <div style={{marginBottom:16}}>
-        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Configuracoes</h1>
+        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Configurações</h1>
         <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>Personalize sua loja e perfil</div>
       </div>
 
@@ -108,7 +108,7 @@ export default function SettingsPage() {
               <div style={{width:52,height:52,borderRadius:12,background:color,display:"grid",placeItems:"center",fontSize:16,fontWeight:700,color:"white",flexShrink:0}}>{initials}</div>
               <div>
                 <div style={{fontSize:15,fontWeight:600,color:"var(--text)"}}>{name||"Minha Loja"}</div>
-                <div style={{fontSize:12,color:"var(--text-subtle)",marginTop:2}}>Proprietario</div>
+                <div style={{fontSize:12,color:"var(--text-subtle)",marginTop:2}}>Proprietário</div>
               </div>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:12}}>
@@ -140,7 +140,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <button className="save-btn" onClick={saveStore} disabled={saving}>{saving?"Salvando...":"Salvar alteracoes"}</button>
+          <button className="save-btn" onClick={saveStore} disabled={saving}>{saving?"Salvando...":"Salvar alterações"}</button>
         </>
       )}
 
@@ -149,14 +149,14 @@ export default function SettingsPage() {
           <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:20}}>
             <div style={{width:56,height:56,borderRadius:"50%",background:color,color:"white",display:"grid",placeItems:"center",fontSize:18,fontWeight:700}}>{userInit}</div>
             <div>
-              <div style={{fontWeight:600,fontSize:15,color:"var(--text)"}}>{userName||"Usuario"}</div>
-              <div style={{fontSize:12,color:"var(--text-subtle)"}}>Proprietario</div>
+              <div style={{fontWeight:600,fontSize:15,color:"var(--text)"}}>{userName||"Usuário"}</div>
+              <div style={{fontSize:12,color:"var(--text-subtle)"}}>Proprietário</div>
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             <div className="vp-field"><label>Nome completo</label><input className="vp-input" value={userName} onChange={e=>setUserName(e.target.value)} /></div>
             <div className="vp-field"><label>E-mail</label><input className="vp-input" value={userEmail} disabled style={{opacity:0.6}} /></div>
-            <div className="vp-field"><label>Nova senha</label><input className="vp-input" type="password" value={newPwd} onChange={e=>setNewPwd(e.target.value)} placeholder="Deixe em branco para nao alterar" /></div>
+            <div className="vp-field"><label>Nova senha</label><input className="vp-input" type="password" value={newPwd} onChange={e=>setNewPwd(e.target.value)} placeholder="Deixe em branco para não alterar" /></div>
           </div>
           <button className="save-btn" onClick={saveProfile} disabled={saving}>{saving?"Salvando...":"Salvar"}</button>
         </div>
@@ -164,3 +164,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

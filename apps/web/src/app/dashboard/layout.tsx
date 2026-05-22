@@ -11,16 +11,16 @@ const NAV_ALL = [
   { id:"estoque",    href:"/dashboard/inventory",    label:"Estoque",    icon:"box" },
   { id:"recibos",    href:"/dashboard/receipts", label:"Recibos",    icon:"receipt" },
   { id:"caixa",      href:"/dashboard/cash",     label:"Caixa",      icon:"cash",    premium:true },
-  { id:"relatorios", href:"/dashboard/reports",  label:"Relatorios", icon:"chart",   premium:true },
+  { id:"relatórios", href:"/dashboard/reports",  label:"Relatórios", icon:"chart",   premium:true },
   { id:"equipe",     href:"/dashboard/team",     label:"Equipe",     icon:"users",   premium:true },
   { id:"config",     href:"/dashboard/settings", label:"Config",     icon:"settings" },
 ]
 
 const PLAN_MENU: Record<string,string[]> = {
-  trial:    ["dashboard","vendas","estoque","recibos","caixa","relatorios","equipe","config"],
+  trial:    ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
   basic:    ["dashboard","vendas","estoque","recibos","config"],
-  pro:      ["dashboard","vendas","estoque","recibos","caixa","relatorios","equipe","config"],
-  business: ["dashboard","vendas","estoque","recibos","caixa","relatorios","equipe","config"],
+  pro:      ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
+  business: ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
 }
 const PLAN_LABEL: Record<string,string> = { trial:"Trial", basic:"Basic", pro:"Pro", business:"Business" }
 
@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const storeName   = store?.name || "Minha Loja"
   const storeInit   = storeName.slice(0,2).toUpperCase()
   const color       = store?.primaryColor || "#1D9E75"
-  const userName    = authUser?.name || "Usuario"
+  const userName    = authUser?.name || "Usuário"
   const userInit    = userName.split(" ").map((n:string)=>n[0]).join("").slice(0,2).toUpperCase()
 
   const allowed  = PLAN_MENU[plan] || PLAN_MENU.basic
@@ -257,7 +257,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="vp-avatar" style={{background:color}}>{userInit}</div>
               <div className="vp-user-meta">
                 <strong>{userName}</strong>
-                <small>{role==="seller"?"Vendedor":role==="super_admin"?"Super Admin":"Proprietario"}</small>
+                <small>{role==="seller"?"Vendedor":role==="super_admin"?"Super Admin":"Proprietário"}</small>
               </div>
               <Icon name="logout" size={14}/>
             </div>
@@ -287,5 +287,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </>
   )
 }
+
 
 

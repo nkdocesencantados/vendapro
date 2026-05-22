@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
@@ -44,7 +44,7 @@ export default function SuperAdminPage() {
   }
 
   async function deleteCompany(c:any) {
-    if(!confirm(`Excluir "${c.name}"? Esta acao nao pode ser desfeita.`)) return
+    if(!confirm(`Excluir "${c.name}"? Esta ação não pode ser desfeita.`)) return
     try {
       await api.delete(`/companies/${c.id}`)
       setCompanies(prev => prev.filter(x => x.id!==c.id))
@@ -148,7 +148,7 @@ export default function SuperAdminPage() {
             </div>
           </div>
           <nav style={{padding:"10px 8px",flex:1}}>
-            {[["empresas","Empresas","🏢"],["assinaturas","Assinaturas","💳"],["relatorios","Relatorios","📊"]].map(([id,lbl,ico])=>(
+            {[["empresas","Empresas","🏢"],["assinaturas","Assinaturas","💳"],["relatórios","Relatórios","📊"]].map(([id,lbl,ico])=>(
               <div key={id} onClick={()=>setTab(id)}
                 style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,fontSize:13.5,color:tab===id?"#fff":"#8DA39A",cursor:"pointer",background:tab===id?"rgba(29,158,117,0.18)":"transparent",fontWeight:tab===id?500:400,marginBottom:1,transition:"all .12s"}}>
                 <span>{ico}</span><span>{lbl}</span>
@@ -184,7 +184,7 @@ export default function SuperAdminPage() {
 
           {/* TABS */}
           <div className="sa-tabs">
-            {[["empresas","Empresas"],["assinaturas","Assinaturas"],["relatorios","Relatorios"]].map(([id,lbl])=>(
+            {[["empresas","Empresas"],["assinaturas","Assinaturas"],["relatórios","Relatórios"]].map(([id,lbl])=>(
               <div key={id} className={`sa-tab${tab===id?" active":""}`} onClick={()=>setTab(id)}>{lbl}</div>
             ))}
           </div>
@@ -203,7 +203,7 @@ export default function SuperAdminPage() {
               ) : (
                 <table className="sa-tbl">
                   <thead>
-                    <tr><th>Empresa</th><th>Email</th><th>Plano</th><th>Status</th><th>Cadastro</th><th>Acoes</th></tr>
+                    <tr><th>Empresa</th><th>Email</th><th>Plano</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr>
                   </thead>
                   <tbody>
                     {filtered.map((c:any)=>(
@@ -246,7 +246,7 @@ export default function SuperAdminPage() {
                 {[
                   {lbl:"MRR",val:BRL(mrr),col:"#34D399"},
                   {lbl:"ARR projetado",val:BRL(mrr*12),col:"#E5F2EC"},
-                  {lbl:"Ticket medio",val:BRL(stats.active?mrr/stats.active:0),col:"#E5F2EC"},
+                  {lbl:"Ticket médio",val:BRL(stats.active?mrr/stats.active:0),col:"#E5F2EC"},
                   {lbl:"Empresas pagas",val:String(stats.active),col:"#E5F2EC"},
                 ].map(s=>(
                   <div key={s.lbl} className="sa-card" style={{padding:18}}>
@@ -273,7 +273,7 @@ export default function SuperAdminPage() {
             </div>
           )}
 
-          {tab === "relatorios" && (
+          {tab === "relatórios" && (
             <div className="sa-card" style={{padding:24}}>
               <h3 style={{margin:"0 0 16px",fontSize:14,fontWeight:600,color:"#F0F7F4"}}>Resumo geral</h3>
               <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:14}}>
@@ -308,9 +308,9 @@ export default function SuperAdminPage() {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 {[
                   {id:"trial",name:"Trial",price:"Gratis",sub:"7 dias"},
-                  {id:"basic",name:"Basic",price:"R$ 100",sub:"/mes"},
-                  {id:"pro",name:"Pro",price:"R$ 150",sub:"/mes"},
-                  {id:"business",name:"Business",price:"R$ 200",sub:"/mes"},
+                  {id:"basic",name:"Basic",price:"R$ 100",sub:"/mês"},
+                  {id:"pro",name:"Pro",price:"R$ 150",sub:"/mês"},
+                  {id:"business",name:"Business",price:"R$ 200",sub:"/mês"},
                 ].map(p=>(
                   <div key={p.id} className={`plan-card${planModal.plan===p.id?" selected":""}`} onClick={()=>savePlan(planModal.id,p.id)}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -356,3 +356,4 @@ export default function SuperAdminPage() {
     </div>
   )
 }
+

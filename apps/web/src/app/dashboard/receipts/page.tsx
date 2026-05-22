@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Credito", debit_card:"Debito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
 export default function ReceiptsPage() {
   const [sales, setSales] = useState<any[]>([])
@@ -114,7 +114,7 @@ export default function ReceiptsPage() {
                 <hr className="rdiv"/>
                 <div className="rr"><span>Pedido:</span><span>{receiptNum}</span></div>
                 <div className="rr"><span>Data:</span><span>{new Date(selected.createdAt).toLocaleDateString("pt-BR")}</span></div>
-                <div className="rr"><span>Cliente:</span><span>{selected.customerName||"Nao informado"}</span></div>
+                <div className="rr"><span>Cliente:</span><span>{selected.customerName||"Não informado"}</span></div>
                 {selected.sellerName && <div className="rr"><span>Vendedor:</span><span>{selected.sellerName}</span></div>}
                 <div className="rr"><span>Pagamento:</span><span>{PAY[selected.paymentMethod]||selected.paymentMethod}</span></div>
                 <hr className="rdiv"/>
@@ -135,3 +135,4 @@ export default function ReceiptsPage() {
     </div>
   )
 }
+
