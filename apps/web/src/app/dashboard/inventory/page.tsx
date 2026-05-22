@@ -104,7 +104,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      <button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",description:""});setShowForm(true)}}>+ Novo produto</button>
+      <button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Total produtos</div><div className="val">{products.length}</div></div>
@@ -173,6 +173,7 @@ export default function StockPage() {
     </div>
   )
 }
+
 
 
 
