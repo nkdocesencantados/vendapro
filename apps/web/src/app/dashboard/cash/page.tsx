@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
@@ -31,7 +31,7 @@ export default function CashPage() {
   async function load(){
     setLoading(true)
     try{
-      const r = await api.get(`/financial?month=${month}&year=${year}`).catch(() => api.get('/financial'))
+      const r = await api.get(`/financial/summary?month=${month}&year=${year}`).catch(() => api.get('/financial'))
       setData(r.data)
     }catch(e){console.error(e)}finally{setLoading(false)}
   }
@@ -102,7 +102,7 @@ export default function CashPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:24,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Caixa</h1>
-          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>Controle financeiro · {MONTHS[month-1]} de {year}</div>
+          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>Controle financeiro Â· {MONTHS[month-1]} de {year}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
           <select className="vp-select" style={{width:"auto"}} value={month} onChange={e=>setMonth(+e.target.value)}>
@@ -126,7 +126,7 @@ export default function CashPage() {
       </div>
 
       <div className="cash-grid" style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:18,marginBottom:18}}>
-        {/* LANÇAMENTOS */}
+        {/* LANÃ‡AMENTOS */}
         <div className="vp-card">
           <div className="vp-card-head">
             <div><h3>Lancamentos</h3><div className="sub">{MONTHS[month-1]} {year}</div></div>
@@ -146,11 +146,11 @@ export default function CashPage() {
                     <td><span className="vp-pill vp-pill-grey">{CAT_MAP[e.category]||e.category}</span></td>
                     <td>
                       {e.type==="income"
-                        ? <span className="vp-pill vp-pill-in">↑ Receita</span>
-                        : <span className="vp-pill vp-pill-out">↓ Despesa</span>}
+                        ? <span className="vp-pill vp-pill-in">â†‘ Receita</span>
+                        : <span className="vp-pill vp-pill-out">â†“ Despesa</span>}
                     </td>
                     <td style={{textAlign:"right",fontFamily:"var(--font-mono)",fontWeight:600,color:e.type==="income"?"var(--success)":"var(--text)"}}>
-                      {e.type==="income"?"+":"−"} {BRL(Number(e.amount))}
+                      {e.type==="income"?"+":"âˆ’"} {BRL(Number(e.amount))}
                     </td>
                   </tr>
                 ))}
@@ -187,7 +187,7 @@ export default function CashPage() {
           <div className="vp-modal" onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head">
               <h2>Novo lancamento</h2>
-              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>✕</button>
+              <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>âœ•</button>
             </div>
             <div className="vp-modal-body">
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
@@ -235,3 +235,4 @@ export default function CashPage() {
     </div>
   )
 }
+
