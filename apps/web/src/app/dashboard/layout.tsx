@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/contexts/auth.store"
 import Link from "next/link"
 
 const NAV_ALL = [
@@ -50,7 +51,7 @@ function Icon({ name, size=18 }: { name:string, size?:number }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
+  const { user: authUser, logout: authLogout } = useAuthStore()
   const [store, setStore] = useState<any>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dark, setDark] = useState(false)
@@ -63,31 +64,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   useEffect(() => {
-    const u = localStorage.getItem("user")
-    if (!u) { router.push("/login"); return }
-    const parsed = JSON.parse(u)
-    setUser(parsed)
+    if (!authUser) { router.push("/login"); return }
     const savedTheme = localStorage.getItem("theme")
     if (savedTheme === "dark") {
       setDark(true)
       document.documentElement.setAttribute("data-theme", "dark")
     }
-    const sc = localStorage.getItem("storeConfig")
-    if (sc) { try { setStore(JSON.parse(sc)) } catch {} }
     api.get("/stores").then(r => {
-      setStore(r.data)
-      localStorage.setItem("storeConfig", JSON.stringify(r.data))
+      const s = Array.isArray(r.data) ? r.data[0] : r.data
+      setStore(s)
     }).catch(() => {})
-  }, [])
+  }, [authUser])
 
-  function logout() { localStorage.clear(); router.push("/login") }
+  function logout() { authLogout(); router.push("/login") }
 
   const plan = store?.plan || "basic"
-  const role = user?.role || "store_owner"
+  const role = authUser?.role || "store_owner"
   const storeName = store?.name || "Minha Loja"
   const storeInitials = storeName.slice(0,2).toUpperCase()
   const primaryColor = store?.primaryColor || "#1D9E75"
-  const userName = user?.name || "Usuario"
+  const userName = authUser?.name || "Usuario"
   const userInitials = userName.split(" ").map((n:string) => n[0]).join("").slice(0,2).toUpperCase()
   const allowed = PLAN_MENU[plan] || PLAN_MENU.basic
   const navItems = NAV_ALL.filter(n => {
