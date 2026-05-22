@@ -12,7 +12,7 @@ export default function StockPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({ name:"", price:"", stock:"", description:"" })
+  const [form, setForm] = useState({ name:"", price:"", stock:"", minStock:"5", description:"" })
   const [primary, setPrimary] = useState("#1D9E75")
   const [threshold, setThreshold] = useState(5)
 
@@ -30,9 +30,9 @@ export default function StockPage() {
     if(!form.name||!form.price) return alert("Nome e preço sao obrigatórios")
     setSaving(true)
     try {
-      if(editing) await api.patch(`/products/${editing.id}`, { name:form.name, price:+form.price, stock:+form.stock||0 })
-      else await api.post("/products", { name:form.name, price:+form.price, stock:+form.stock||0 })
-      setShowForm(false); setEditing(null); setForm({name:"",price:"",stock:"",description:""}); load()
+      if(editing) await api.patch(`/products/${editing.id}`, { name:form.name, price:+form.price, stock:+form.stock||0, minStock:+form.minStock||5 })
+      else await api.post("/products", { name:form.name, price:+form.price, stock:+form.stock||0, minStock:+form.minStock||5 })
+      setShowForm(false); setEditing(null); setForm({name:"",price:"",stock:"",minStock:"5",description:""}); load()
     } catch(e:any){ alert(e?.response?.data?.message||"Erro") }
     finally { setSaving(false) }
   }
@@ -43,15 +43,15 @@ export default function StockPage() {
   }
 
   function openEdit(p:any) {
-    setEditing(p); setForm({name:p.name,price:String(p.price),stock:String(p.stock),description:p.description||""}); setShowForm(true)
+    setEditing(p); setForm({name:p.name,price:String(p.price),stock:String(p.stock),minStock:String(p.minStock||5),description:p.description||""}); setShowForm(true)
   }
 
   const filtered = products.filter(p => {
-    if(filter==="low") return p.stock > 0 && p.stock <= threshold
+    if(filter==="low") return p.stock > 0 && p.stock <= (p.minStock||threshold)
     if(filter==="out") return p.stock === 0
     return true
   })
-  const lowCount = products.filter(p=>p.stock>0&&p.stock<=threshold).length
+  const lowCount = products.filter(p=>p.stock>0&&p.stock<=(p.minStock||threshold)).length
   const outCount = products.filter(p=>p.stock===0).length
   const totalVal = products.reduce((a,p)=>a+p.stock*p.price,0)
 
@@ -133,7 +133,7 @@ export default function StockPage() {
             <div className="prod-price">{BRL(p.price)} por unidade</div>
             <div style={{marginTop:5}}>
               {p.stock===0 ? <span className="vp-pill vp-pill-bad">Esgotado</span>
-              : p.stock<=threshold ? <span className="vp-pill vp-pill-warn">{p.stock} un - Baixo</span>
+              : p.stock<=(p.minStock||threshold) ? <span className="vp-pill vp-pill-warn">{p.stock} un - Baixo</span>
               : <span className="vp-pill vp-pill-ok">{p.stock} un</span>}
             </div>
           </div>
@@ -160,6 +160,7 @@ export default function StockPage() {
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div className="vp-field"><label>Preço (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
+                <div className="vp-field"><label>Estoque mínimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse número</span></div>
               </div>
             </div>
             <div className="vp-modal-foot">
@@ -172,5 +173,6 @@ export default function StockPage() {
     </div>
   )
 }
+
 
 
