@@ -1,169 +1,180 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { fmt, fmtDate } from "@/lib/utils"
+
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Credito", debit_card:"Debito" }
 
 export default function ReceiptsPage() {
-  const [sales, setSales] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [sales, setSales]       = useState<any[]>([])
   const [selected, setSelected] = useState<any>(null)
-  const [search, setSearch] = useState("")
-  const [showReceipt, setShowReceipt] = useState(false)
-  const [storeName, setStoreName] = useState(() => { try { const c = localStorage.getItem("storeConfig"); if (c) { const p = JSON.parse(c); if (p.name) return p.name } } catch {} return "VendaPro" })
+  const [loading, setLoading]   = useState(true)
+  const [search, setSearch]     = useState("")
+  const [storeName, setStoreName] = useState("Minha Loja")
+  const [primary, setPrimary]   = useState("#1D9E75")
 
-  useEffect(() => { loadSales() }, [])
+  useEffect(() => {
+    try {
+      const sc = localStorage.getItem("storeConfig")
+      if(sc){ const p=JSON.parse(sc); if(p.primaryColor)setPrimary(p.primaryColor); if(p.name)setStoreName(p.name) }
+    } catch{}
+    load()
+  }, [])
 
-  async function loadSales() {
-    try { const r = await api.get("/sales"); setSales(r.data) }
-    catch (e) { console.error(e) }
-    finally { setLoading(false) }
-  }
-
-  async function openReceipt(sale: any) {
-    try { const r = await api.get(`/sales/${sale.id}`); setSelected(r.data) }
-    catch { setSelected(sale) }
-    setShowReceipt(true)
-  }
-
-  async function exportPdf() {
-    if (!selected) return
-    const { jsPDF: JP } = await import("jspdf")
-    const W = 80; const M = 6
-    const doc = new JP({ unit: "mm", format: [W, 200] })
-    const mid = W / 2
-    let y = 8
-    doc.setFontSize(13); doc.setFont("helvetica","bold")
-    doc.text(storeName, mid, y, { align: "center" }); y += 6
-    doc.setFontSize(8); doc.setFont("helvetica","normal")
-    doc.text("Comprovante de Venda", mid, y, { align: "center" }); y += 5
-    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
-    const row2 = (label: string, value: string) => {
-      doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.text(label, M, y)
-      doc.setFont("helvetica","normal"); doc.text(value, W-M, y, { align: "right" }); y += 5
-    }
-    row2("N. Pedido:", "#" + selected.id.slice(0,8).toUpperCase())
-    row2("Data:", fmtDate(selected.createdAt))
-    row2("Cliente:", selected.customerName || "Nao informado")
-    row2("Pagamento:", payLabel[selected.paymentMethod] || selected.paymentMethod)
-    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
-    doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.text("ITENS", M, y); y += 5
-    doc.setFont("helvetica","normal")
-    ;(selected.items || []).forEach((item: any) => {
-      doc.text(`${item.quantity}x ${item.productName || item.name}`, M, y)
-      doc.text(fmt(item.total), W-M, y, { align: "right" }); y += 5
-    })
-    doc.setLineDashPattern([1,1], 0); doc.line(M, y, W-M, y); y += 5
-    doc.setFont("helvetica","bold"); doc.setFontSize(9)
-    doc.text("TOTAL", M, y); doc.text(fmt(selected.total), W-M, y, { align: "right" }); y += 8
-    doc.setFont("helvetica","normal"); doc.setFontSize(7)
-    doc.text("Obrigado pela preferencia!", mid, y, { align: "center" })
-    doc.save(`recibo-${selected.id.slice(0,8).toUpperCase()}.pdf`)
+  async function load() {
+    try {
+      const r = await api.get("/sales")
+      const completed = r.data.filter((s:any) => s.status === "completed")
+      setSales(completed)
+      if(completed.length > 0) setSelected(completed[0])
+    } catch(e){ console.error(e) } finally { setLoading(false) }
   }
 
   function printReceipt() {
-    const content = document.getElementById("receipt-content")
-    if (!content) return
-    const win = window.open("", "_blank")
-    if (!win) return
-    win.document.write(`<html><head><title>Recibo</title><style>body{font-family:Arial,sans-serif;max-width:400px;margin:20px auto;font-size:13px;}</style></head><body>${content.innerHTML}</body></html>`)
-    win.document.close()
-    win.print()
+    window.print()
   }
 
-  const filtered = sales.filter(s => !search || s.customerName?.toLowerCase().includes(search.toLowerCase()) || s.id?.includes(search)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  const payLabel: any = { cash: "Dinheiro", pix: "PIX", credit_card: "Cartao Credito", debit_card: "Cartao Debito" }
+  const filtered = sales.filter((s:any) => {
+    if(!search) return true
+    const q = search.toLowerCase()
+    return (s.customerName||"").toLowerCase().includes(q) || (s.id||"").toLowerCase().includes(q)
+  })
+
+  const receiptNum = selected ? "#"+selected.id.slice(-8).toUpperCase() : ""
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div style={{padding:28,maxWidth:1440,margin:"0 auto"}}>
       <style>{`
-        .receipts-layout { display: flex; height: 100%; }
-        .receipts-list { width: 340px; border-right: 0.5px solid #e5e7eb; display: flex; flex-direction: column; flex-shrink: 0; }
-        .receipts-detail { flex: 1; overflow-y: auto; padding: 24px; background: #f5f4f0; }
-        @media (max-width: 767px) {
-          .receipts-layout { flex-direction: column; }
-          .receipts-list { width: 100%; border-right: none; border-bottom: 0.5px solid #e5e7eb; max-height: ${showReceipt ? "0" : "100%"}; overflow: hidden; }
-          .receipts-detail { padding: 16px; }
+        .vp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;}
+        .vp-card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+        .vp-card-head h3{margin:0;font-size:14px;font-weight:600;}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn-primary{background:var(--brand);color:white;} .vp-btn-primary:hover{background:#178A65;}
+        .vp-btn-secondary{background:var(--surface);border-color:var(--border);color:var(--text);} .vp-btn-secondary:hover{background:var(--surface-2);}
+        .vp-btn-sm{padding:5px 10px;font-size:12px;border-radius:8px;}
+        .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s;}
+        .vp-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+        .receipt-item{padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-left:3px solid transparent;}
+        .receipt-item:hover{background:var(--surface-2);}
+        .receipt-item.active{background:var(--brand-tint);border-left-color:var(--brand);}
+        .receipt-paper{font-family:"Geist Mono",monospace;background:var(--surface);border:1px dashed var(--border-strong);border-radius:10px;padding:24px;font-size:12px;line-height:1.7;max-width:360px;margin:0 auto;}
+        .receipt-paper h4{margin:0 0 4px;font-family:var(--font);font-size:16px;text-align:center;font-weight:600;}
+        .receipt-center{text-align:center;color:var(--text-subtle);}
+        .receipt-row{display:flex;justify-content:space-between;gap:8px;}
+        .receipt-divider{border:0;border-top:1px dashed var(--border-strong);margin:10px 0;}
+        .receipts-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px;}
+        @media(max-width:900px){.receipts-grid{grid-template-columns:1fr!important;}}
+        @media print{
+          body > *:not(#receipt-print){display:none!important;}
+          #receipt-print{display:block!important;padding:0;margin:0;}
+          .receipt-paper{border:none;max-width:100%;box-shadow:none;}
         }
       `}</style>
-      <div className="receipts-layout">
-        <div className="receipts-list">
-          <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 16px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ fontSize: "14px", fontWeight: 500 }}>Recibos</div>
-          </div>
-          <div style={{ padding: "12px 16px", borderBottom: "0.5px solid #e5e7eb" }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por cliente ou ID..." style={{ width: "100%", padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", boxSizing: "border-box" }} />
-          </div>
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {loading ? <div style={{ padding: "20px", color: "#888", textAlign: "center" }}>Carregando...</div> :
-              filtered.map(s => (
-                <div key={s.id} onClick={() => openReceipt(s)} style={{ padding: "12px 16px", borderBottom: "0.5px solid #f3f4f6", cursor: "pointer", background: selected?.id === s.id ? "#f0faf6" : "white" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <div style={{ fontWeight: 500, fontSize: "13px" }}>{s.customerName || "Cliente nao informado"}</div>
-                    <div style={{ fontWeight: 600, color: s.status === "cancelled" ? "#9ca3af" : "#1D9E75", fontSize: "13px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>#{s.id.slice(0, 8).toUpperCase()} - {fmtDate(s.createdAt)}</div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-        <div className="receipts-detail">
-          {!selected ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#888" }}>Selecione uma venda para ver o recibo</div>
-          ) : (
-            <div style={{ maxWidth: "480px", margin: "0 auto" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                <button onClick={() => { setShowReceipt(false); setSelected(null) }} style={{ padding: "8px 12px", background: "white", color: "#666", border: "1px solid #e5e7eb", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>← Voltar</button>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={exportPdf} style={{ padding: "8px 12px", background: "white", color: "#1D9E75", border: "1px solid #1D9E75", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>PDF</button>
-                  <button onClick={printReceipt} style={{ padding: "8px 12px", background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px" }}>Imprimir</button>
-                </div>
-              </div>
-              <div id="receipt-content" style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "24px" }}>
-                <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                  <div style={{ fontWeight: 700, fontSize: "18px" }}>{storeName}</div>
-                  <div style={{ fontSize: "12px", color: "#888" }}>Comprovante de Venda</div>
-                </div>
-                <div style={{ borderTop: "1px dashed #e5e7eb", borderBottom: "1px dashed #e5e7eb", padding: "12px 0", marginBottom: "12px" }}>
-                  {[["N. Pedido","#"+selected.id.slice(0,8).toUpperCase()],["Data",fmtDate(selected.createdAt)],["Cliente",selected.customerName||"Nao informado"],["Pagamento",payLabel[selected.paymentMethod]||selected.paymentMethod]].map(([l,v]) => (
-                    <div key={l} style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "12px", color: "#888" }}>{l}</span>
-                      <span style={{ fontSize: "12px", fontWeight: 500 }}>{v}</span>
-                    </div>
-                  ))}
-                </div>
-                {selected.items && selected.items.length > 0 && (
-                  <div style={{ marginBottom: "12px" }}>
-                    <div style={{ fontSize: "12px", fontWeight: 500, marginBottom: "8px" }}>Itens</div>
-                    {selected.items.map((item: any) => (
-                      <div key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                        <div>
-                          <div style={{ fontSize: "12px" }}>{item.productName || item.name || "Item"}</div>
-                          <div style={{ fontSize: "11px", color: "#888" }}>{item.quantity}x {fmt(item.unitPrice)}</div>
-                        </div>
-                        <div style={{ fontSize: "12px", fontWeight: 500 }}>{fmt(item.total)}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div style={{ borderTop: "1px dashed #e5e7eb", paddingTop: "12px" }}>
-                  {Number(selected.discount) > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "12px", color: "#888" }}>Desconto</span>
-                      <span style={{ fontSize: "12px", color: "#ef4444" }}>-{fmt(selected.discount)}</span>
-                    </div>
-                  )}
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: "15px", fontWeight: 700 }}>TOTAL</span>
-                    <span style={{ fontSize: "15px", fontWeight: 700, color: "#1D9E75" }}>{fmt(selected.total)}</span>
-                  </div>
-                </div>
-                <div style={{ textAlign: "center", marginTop: "20px", fontSize: "11px", color: "#aaa" }}>Obrigado pela preferencia!</div>
-              </div>
-            </div>
-          )}
+
+      {/* HEADER */}
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:16,marginBottom:24,flexWrap:"wrap"}}>
+        <div>
+          <h1 style={{margin:0,fontSize:26,fontWeight:600,letterSpacing:"-.02em"}}>Recibos</h1>
+          <div style={{color:"var(--text-subtle)",fontSize:14,marginTop:4}}>{sales.length} recibos emitidos</div>
         </div>
       </div>
+
+      {loading ? (
+        <div style={{textAlign:"center",padding:60,color:"var(--text-subtle)"}}>Carregando...</div>
+      ) : sales.length === 0 ? (
+        <div style={{textAlign:"center",padding:60,color:"var(--text-subtle)"}}>Nenhum recibo emitido ainda.</div>
+      ) : (
+        <div className="receipts-grid">
+          {/* LISTA */}
+          <div className="vp-card">
+            <div className="vp-card-head">
+              <h3>Recibos emitidos</h3>
+              <div style={{display:"flex",alignItems:"center",gap:6,background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:8,padding:"6px 10px",width:180}}>
+                <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,color:"var(--text-subtle)"}}><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input style={{border:"none",background:"transparent",outline:"none",fontSize:12,color:"var(--text)",width:"100%"}} placeholder="Buscar..." value={search} onChange={e=>setSearch(e.target.value)} />
+              </div>
+            </div>
+            <div style={{maxHeight:560,overflowY:"auto"}}>
+              {filtered.map((s:any) => (
+                <div key={s.id}
+                  className={`receipt-item${selected?.id===s.id?" active":""}`}
+                  onClick={()=>setSelected(s)}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <div style={{fontWeight:500,fontSize:13}}>{s.customerName||"Cliente avulso"}</div>
+                      <div style={{fontSize:11,color:"var(--text-subtle)",marginTop:2}}>
+                        #{s.id.slice(-8).toUpperCase()} · {new Date(s.createdAt).toLocaleDateString("pt-BR")}
+                      </div>
+                    </div>
+                    <div style={{fontFamily:"var(--font-mono)",fontWeight:600,fontSize:13}}>{BRL(s.total)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* VISUALIZAÇÃO */}
+          <div className="vp-card">
+            <div className="vp-card-head">
+              <h3>Visualizacao do recibo</h3>
+              {selected && (
+                <div style={{display:"flex",gap:6}}>
+                  <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={printReceipt}>🖨 Imprimir</button>
+                </div>
+              )}
+            </div>
+            <div style={{padding:24,background:"var(--surface-2)",minHeight:400,display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
+              {selected ? (
+                <div id="receipt-print" className="receipt-paper">
+                  {/* Logo / Loja */}
+                  <div className="receipt-center" style={{marginBottom:12}}>
+                    <div style={{width:36,height:36,borderRadius:8,background:primary,color:"white",display:"inline-grid",placeItems:"center",fontSize:13,fontWeight:700,fontFamily:"var(--font-mono)"}}>
+                      {storeName.slice(0,2).toUpperCase()}
+                    </div>
+                  </div>
+                  <h4>{storeName}</h4>
+                  <div className="receipt-center">Comprovante de Venda</div>
+                  <hr className="receipt-divider" />
+
+                  <div className="receipt-row"><span>N. Pedido:</span><span>{receiptNum}</span></div>
+                  <div className="receipt-row"><span>Data:</span><span>{new Date(selected.createdAt).toLocaleDateString("pt-BR")}</span></div>
+                  <div className="receipt-row"><span>Cliente:</span><span>{selected.customerName||"Nao informado"}</span></div>
+                  {selected.sellerName && <div className="receipt-row"><span>Vendedor:</span><span>{selected.sellerName}</span></div>}
+                  <div className="receipt-row"><span>Pagamento:</span><span>{PAY[selected.paymentMethod]||selected.paymentMethod}</span></div>
+
+                  <hr className="receipt-divider" />
+
+                  <div style={{fontWeight:700,fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>ITENS</div>
+                  {selected.items && selected.items.length > 0 ? (
+                    selected.items.map((item:any, i:number) => (
+                      <div key={i} className="receipt-row">
+                        <span>{item.quantity}x {item.name||"Produto"}</span>
+                        <span>{BRL(item.quantity * item.unitPrice)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="receipt-row"><span>Venda</span><span>{BRL(selected.total)}</span></div>
+                  )}
+
+                  <hr className="receipt-divider" />
+
+                  <div className="receipt-row" style={{fontWeight:700,fontSize:14}}>
+                    <span>TOTAL</span>
+                    <span>{BRL(selected.total)}</span>
+                  </div>
+
+                  <hr className="receipt-divider" />
+
+                  <div className="receipt-center" style={{marginTop:8}}>Obrigado pela preferencia! 💚</div>
+                  <div className="receipt-center" style={{marginTop:4,fontSize:11}}>VendaPro · vendapro.com.br</div>
+                </div>
+              ) : (
+                <div style={{color:"var(--text-subtle)",fontSize:13,padding:40}}>Selecione um recibo para visualizar.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
