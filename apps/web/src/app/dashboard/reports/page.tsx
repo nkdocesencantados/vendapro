@@ -161,7 +161,7 @@ export default function ReportsPage() {
 
         .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
 
-        .kpi .lbl{font-size:11px;color:var(--text-subtle);margin-bottom:4px;}
+        .kpi .lbl{font-size:clamp(11px,1vw,13px);color:var(--text-subtle);margin-bottom:4px;}
 
         .kpi .val{font-size:clamp(14px,4vw,20px);font-weight:600;letter-spacing:-.02em;}
 

@@ -264,13 +264,13 @@ export default function SalesPage() {
 
         .sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
 
-        .sc-name{font-size:14px;font-weight:600;color:var(--text);}
+        .sc-name{font-size:clamp(14px,1.5vw,18px);font-weight:600;color:var(--text);}
 
         .sc-seller{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-subtle);margin-top:3px;}
 
         .sc-av{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;flex-shrink:0;}
 
-        .sc-val{font-size:16px;font-weight:700;color:var(--brand,#1D9E75);}
+        .sc-val{font-size:clamp(16px,2vw,22px);font-weight:700;color:var(--brand,#1D9E75);}
 
         .sc-pills{display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center;}
 
