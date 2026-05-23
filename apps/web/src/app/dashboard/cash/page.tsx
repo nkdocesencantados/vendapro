@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -78,7 +78,7 @@ function exportCashPDF(entries: any[], income: number, expense: number, profit: 
 
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
-const CAT_MAP: Record<string,string> = { sale:"Venda", service:"ServiÃƒÂ§o", rent:"Aluguel", salary:"SalÃƒÂ¡rio", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
+const CAT_MAP: Record<string,string> = { sale:"Venda", service:"ServiÃƒÆ’Ã‚Â§o", rent:"Aluguel", salary:"SalÃƒÆ’Ã‚Â¡rio", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
 
 
@@ -294,7 +294,7 @@ export default function CashPage() {
 
         <div className="kpi" style={{gridColumn:"span 2"}}>
 
-          <div className="kpi-lbl">Saldo do mÃƒÂªs</div>
+          <div className="kpi-lbl">Saldo do mÃƒÆ’Ã‚Âªs</div>
 
           <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
 
@@ -314,7 +314,7 @@ export default function CashPage() {
 
         <div className="card-head-row">
 
-          <div className="card-head-title">LanÃƒÂ§amentos</div>
+          <div className="card-head-title">LanÃƒÆ’Ã‚Â§amentos</div>
 
           <div className="card-head-sub">{entries.length} registros</div>
 
@@ -326,7 +326,7 @@ export default function CashPage() {
 
         ) : entries.length===0 ? (
 
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lanÃƒÂ§amento neste perÃƒÂ­odo.</div>
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lanÃƒÆ’Ã‚Â§amento neste perÃƒÆ’Ã‚Â­odo.</div>
 
         ) : entries.map((e:any)=>(
 
@@ -336,7 +336,7 @@ export default function CashPage() {
 
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={e.type==="income"?"#1D9E75":"#f87171"} strokeWidth="2.5" strokeLinecap="round">
 
-      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lanÃ§amento</button>
+      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lanÃƒÂ§amento</button>
 
               </svg>
 
@@ -410,7 +410,7 @@ export default function CashPage() {
 
             <div className="vp-modal-head">
 
-              <h2>Novo lanÃƒÂ§amento</h2>
+              <h2>Novo lanÃƒÆ’Ã‚Â§amento</h2>
 
               <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
 
@@ -444,11 +444,11 @@ export default function CashPage() {
 
                     {form.type==="income"?(
 
-                      <><option value="sale">Venda</option><option value="service">ServiÃƒÂ§o</option><option value="other">Outros</option></>
+                      <><option value="sale">Venda</option><option value="service">ServiÃƒÆ’Ã‚Â§o</option><option value="other">Outros</option></>
 
                     ):(
 
-                      <><option value="rent">Aluguel</option><option value="salary">SalÃƒÂ¡rio</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
+                      <><option value="rent">Aluguel</option><option value="salary">SalÃƒÆ’Ã‚Â¡rio</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
 
                     )}
 
@@ -462,7 +462,7 @@ export default function CashPage() {
 
                 <label>Descricao</label>
 
-                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mÃƒÂªs" />
+                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mÃƒÆ’Ã‚Âªs" />
 
               </div>
 
