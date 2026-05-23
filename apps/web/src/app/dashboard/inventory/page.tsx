@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -124,7 +124,7 @@ export default function StockPage() {
 
   async function save() {
 
-    if(!form.name||!form.price) return alert("Nome e preÃƒÆ’Ã‚Â§o sao obrigatÃƒÆ’Ã‚Â³rios")
+    if(!form.name||!form.price) return alert("Nome e preÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o sao obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rios")
 
     setSaving(true)
 
@@ -278,7 +278,7 @@ export default function StockPage() {
 
 
 
-      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
+      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvCSV(filtered,threshold)}>Exportar Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvPDF(filtered,threshold)}>Exportar PDF</button></div>
 
 
 
@@ -386,11 +386,11 @@ export default function StockPage() {
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
 
-                <div className="vp-field"><label>PreÃƒÆ’Ã‚Â§o (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
+                <div className="vp-field"><label>PreÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
 
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
 
-                <div className="vp-field"><label>Estoque mÃƒÆ’Ã‚Â­nimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse nÃƒÆ’Ã‚Âºmero</span></div>
+                <div className="vp-field"><label>Estoque mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­nimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºmero</span></div>
 
               </div>
 
@@ -425,6 +425,7 @@ export default function StockPage() {
 
 
  
+
 
 
 
