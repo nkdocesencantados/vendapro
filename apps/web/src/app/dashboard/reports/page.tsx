@@ -225,7 +225,7 @@ export default function ReportsPage() {
 
         <div className="kpi"><div className="lbl">Faturamento</div><div className="val">{BRLshort(revenue)}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket mÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRLshort(avgTicket)}</div></div>
 
         <div className="kpi"><div className="lbl">Lucro est.</div><div className="val">{BRLshort(profit)}<span style={{fontSize:11,color:"#1D9E75",marginLeft:6}}>{margin}%</span></div></div>
 
@@ -461,7 +461,7 @@ export default function ReportsPage() {
 
                 <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Resumo</div>
 
-                {[["Total de vendas",String(totalSales)],["Ticket mÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
+                {[["Total de vendas",String(totalSales)],["Ticket médio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
 
                   <div key={lbl} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"7px 0",borderBottom:"1px solid var(--border)"}}>
 
