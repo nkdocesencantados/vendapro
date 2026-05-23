@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
-﻿function vpCSV(headers: string[], rows: any[][], filename: string) {
+ï»¿function vpCSV(headers: string[], rows: any[][], filename: string) {
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
   const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -28,14 +28,35 @@ function exportRepCSV(products: any[], from: string, to: string) {
     products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
     'relatorio-'+from+'-'+to);
 }
-function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
-  const margin=revenue>0?Math.round((profit/revenue)*100):0;
-  const kpis='<div style="display:flex;gap:10px;margin-bottom:16px;"><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Faturamento</div><div style="font-size:14px;font-weight:700;color:#1D9E75">R$ '+revenue.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Lucro</div><div style="font-size:14px;font-weight:700">R$ '+profit.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Margem</div><div style="font-size:14px;font-weight:700">'+margin+'%</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Vendas</div><div style="font-size:14px;font-weight:700">'+totalSales+'</div></div></div>';
-  const tbl=vpTable('Relatorio - '+from+' a '+to,['Produto','Qtd','Receita','Lucro'],products.map((p:any)=>[p.name,String(p.quantity),'R$ '+Number(p.revenue).toFixed(2),'R$ '+(Number(p.revenue)*0.263).toFixed(2)]));
-  vpPDF(tbl.replace('<table',kpis+'<table'));
+ï»¿function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+  const margin = revenue>0?Math.round((profit/revenue)*100):0;
+  const avgTicket = totalSales>0?(revenue/totalSales).toFixed(2):'0.00';
+  const maxRev = products.length>0?products[0].revenue:1;
+  const prodRows = products.map((p:any,i:number) => {
+    const pct = maxRev>0?Math.round((p.revenue/maxRev)*100):0;
+    const bar = '<div style="flex:1;height:5px;background:#E5EDE9;border-radius:999px;overflow:hidden;margin:0 8px"><div style="height:5px;background:#1D9E75;border-radius:999px;width:'+pct+'%"></div></div>';
+    return '<tr style="background:'+(i%2===0?'white':'#F8FAF9')+'"><td style="padding:10px 14px;color:#888;font-size:11px">'+(i+1)+'</td><td style="padding:10px 14px;font-weight:500">'+p.name+'</td><td style="padding:10px 14px;text-align:center">'+p.quantity+'</td><td style="padding:10px 14px;text-align:right;font-weight:600">R$ '+Number(p.revenue).toFixed(2)+'</td><td style="padding:10px 14px;text-align:right;font-weight:600;color:#1D9E75">R$ '+(Number(p.revenue)*0.263).toFixed(2)+'</td><td style="padding:10px 14px"><div style="display:flex;align-items:center">'+bar+'<span style="font-size:11px;color:#888;width:30px;text-align:right">'+pct+'%</span></div></td></tr>';
+  }).join('');
+  const html = '<html><head><title>Relatorio VendaPro</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;color:#1a1a1a;}</style></head><body>
+<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg></div>
+<div><div style="font-size:16px;font-weight:700;color:white">VendaPro</div><div style="font-size:11px;color:#6B8C82;margin-top:2px">N&K Doces Encantados</div></div></div>
+<div style="text-align:right"><div style="font-size:18px;font-weight:700;color:white">Relatorio de Desempenho</div><div style="font-size:12px;color:#8DA39A;margin-top:3px">Periodo: '+from+' a '+to+'</div><div style="font-size:11px;color:#6B8C82;margin-top:2px">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);background:#F8FAF9;border-bottom:1px solid #E5EDE9">
+<div style="padding:16px 20px;border-right:1px solid #E5EDE9"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Faturamento</div><div style="font-size:22px;font-weight:700;color:#1D9E75">R$ '+revenue.toFixed(2)+'</div></div>
+<div style="padding:16px 20px;border-right:1px solid #E5EDE9"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Lucro estimado</div><div style="font-size:22px;font-weight:700">R$ '+profit.toFixed(2)+'</div></div>
+<div style="padding:16px 20px;border-right:1px solid #E5EDE9"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Margem</div><div style="font-size:22px;font-weight:700">'+margin+'%</div></div>
+<div style="padding:16px 20px"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Total vendas</div><div style="font-size:22px;font-weight:700">'+totalSales+'</div></div></div>
+<div style="padding:20px 32px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:14px;display:flex;align-items:center;gap:8px">Top Produtos <span style="flex:1;height:1px;background:#E5EDE9;display:inline-block"></span></div>
+<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#1D9E75"><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;font-weight:600">Rank</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;font-weight:600">Produto</th><th style="color:white;padding:10px 14px;text-align:center;font-size:11px;font-weight:600">Qtd</th><th style="color:white;padding:10px 14px;text-align:right;font-size:11px;font-weight:600">Receita</th><th style="color:white;padding:10px 14px;text-align:right;font-size:11px;font-weight:600">Lucro</th><th style="color:white;padding:10px 14px;font-size:11px;font-weight:600">Participacao</th></tr></thead><tbody>'+prodRows+'</tbody></table></div>
+<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #E5EDE9"><div style="font-size:11px;color:#888">VendaPro - vendapro.com.br | Documento gerado automaticamente</div><div style="font-size:11px;color:#1D9E75;font-weight:600">N&K Doces Encantados</div></div>
+</body></html>';
+  vpPDF(html);
 }
+
+
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Crédito",debit_card:"Débito"}
+const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃ©dito",debit_card:"DÃ©bito"}
 
 export default function ReportsPage() {
   const now = new Date()
@@ -99,18 +120,22 @@ export default function ReportsPage() {
       `}</style>
 
       <div style={{marginBottom:14}}>
-        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Relatórios</h1>
-        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>Análise completa do negocio</div>
+        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>RelatÃ³rios</h1>
+        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>AnÃ¡lise completa do negocio</div>
       </div>
 
+      <div style={{display:"flex",gap:6,marginBottom:8}}>
+        <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepCSV(products,from,to)}>Exportar Excel</button>
+        <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepPDF(products,revenue,profit,totalSales,from,to)}>Exportar PDF</button>
+      </div>
       <div className="date-row">
         <input className="vp-input" type="date" value={from} onChange={e=>setFrom(e.target.value)} style={{flex:1,minWidth:130}}/>
-        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepCSV(products,from,to)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepPDF(products,revenue,profit,totalSales,from,to)}>PDF</button>
+        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Faturamento</div><div className="val">{BRLshort(revenue)}</div></div>
-        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRLshort(avgTicket)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket mÃ©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
         <div className="kpi"><div className="lbl">Lucro est.</div><div className="val">{BRLshort(profit)}<span style={{fontSize:11,color:"#1D9E75",marginLeft:6}}>{margin}%</span></div></div>
         <div className="kpi"><div className="lbl">Total vendas</div><div className="val">{totalSales}</div></div>
       </div>
@@ -130,7 +155,7 @@ export default function ReportsPage() {
               <div className="card">
                 <div className="card-head"><div className="card-title">Top produtos</div></div>
                 <div style={{padding:"10px 14px"}}>
-                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no período.</div>
+                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃ­odo.</div>
                   : products.map((p:any,i:number)=>{
                     const maxRev = products[0]?.revenue||1
                     return (
@@ -204,7 +229,7 @@ export default function ReportsPage() {
                       <span>{dailyChart[dailyChart.length-1]?.day}</span>
                     </div>
                   </>
-                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no período.</div>}
+                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃ­odo.</div>}
               </div>
             </div>
           )}
@@ -212,7 +237,7 @@ export default function ReportsPage() {
           {tab==="financeiro" && (
             <>
               <div className="card" style={{padding:14,marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do período</div>
+                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃ­odo</div>
                 <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid var(--border)"}}>
                   <span style={{fontSize:13,color:"var(--text-subtle)"}}>Entrada</span>
                   <strong style={{color:"#1D9E75",fontSize:13}}>+ {BRL(revenue)}</strong>
@@ -228,7 +253,7 @@ export default function ReportsPage() {
               </div>
               <div className="card" style={{padding:14}}>
                 <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Resumo</div>
-                {[["Total de vendas",String(totalSales)],["Ticket médio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
+                {[["Total de vendas",String(totalSales)],["Ticket mÃ©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
                   <div key={lbl} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"7px 0",borderBottom:"1px solid var(--border)"}}>
                     <span style={{color:"var(--text-subtle)"}}>{lbl}</span>
                     <strong>{val}</strong>
