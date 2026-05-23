@@ -250,7 +250,7 @@ export default function SalesPage() {
 
         .vp-field label{font-size:12px;font-weight:500;color:var(--text-muted);}
 
-        .kpi .val{font-size:clamp(24px,3vw,42px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+        .kpi .val{font-size:clamp(22px,2.5vw,32px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
 
         .kpi{padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
 
@@ -284,11 +284,11 @@ export default function SalesPage() {
 
         .fbtn-off{background:var(--surface-2);color:var(--text-muted);}
 
-        @media(max-width:900px){.kpi .val{font-size:clamp(24px,3vw,42px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:900px){.kpi .val{font-size:clamp(22px,2.5vw,32px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{grid-template-columns:repeat(2,1fr);}}
 
         @media(max-width:640px){
 
-          .kpi .val{font-size:clamp(24px,3vw,42px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{grid-template-columns:1fr 1fr!important;}
+          .kpi .val{font-size:clamp(22px,2.5vw,32px);font-weight:700;} .kpi .lbl{font-size:clamp(12px,1.2vw,16px);} .kpi-grid{grid-template-columns:1fr 1fr!important;}
 
           .kpi .val{font-size:16px!important;}
 
