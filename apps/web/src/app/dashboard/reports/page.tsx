@@ -1,11 +1,11 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
-Ã¯Â»Â¿function vpCSV(headers: string[], rows: any[][], filename: string) {
+function vpCSV(headers: string[], rows: any[][], filename: string) {
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
   const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -28,7 +28,7 @@ function exportRepCSV(products: any[], from: string, to: string) {
     products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
     'relatorio-'+from+'-'+to);
 }
-Ã¯Â»Â¿function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
   const margin = revenue>0?Math.round((profit/revenue)*100):0;
   const avgTicket = totalSales>0?(revenue/totalSales).toFixed(2):'0.00';
   const maxRev = products.length>0?products[0].revenue:1;
@@ -267,4 +267,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-
