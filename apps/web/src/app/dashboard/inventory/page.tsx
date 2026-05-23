@@ -1,10 +1,10 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
-﻿function vpCSV(headers: string[], rows: any[][], filename: string) {
+ï»¿function vpCSV(headers: string[], rows: any[][], filename: string) {
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
   const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -20,6 +20,16 @@ function vpTable(title: string, headers: string[], rows: string[][]) {
   const th = headers.map((h:string) => '<th>' + h + '</th>').join('');
   const tr = rows.map((r:string[]) => '<tr>' + r.map((c:string) => '<td>' + c + '</td>').join('') + '</tr>').join('');
   return '<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th{background:#1D9E75;color:white;padding:8px;font-size:11px}td{padding:7px;border-bottom:1px solid #eee;font-size:11px}</style></head><body><h2>'+title+'</h2><table><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table></body></html>';
+}
+
+function exportInvCSV(products: any[], threshold: number) {
+  vpCSV(['Produto','Preco','Estoque','Minimo','Status'],
+    products.map((p:any) => [p.name,Number(p.price).toFixed(2),p.stock,p.minStock||threshold||5,p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK']),
+    'estoque');
+}
+function exportInvPDF(products: any[], threshold: number) {
+  vpPDF(vpTable('Relatorio de Estoque',['Produto','Preco','Estoque','Minimo','Status'],
+    products.map((p:any) => [p.name,'R$ '+Number(p.price).toFixed(2),String(p.stock),String(p.minStock||threshold||5),p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK'])));
 }
 
 function exportInvCSV(products: any[], threshold: number) {
@@ -55,7 +65,7 @@ export default function StockPage() {
   }
 
   async function save() {
-    if(!form.name||!form.price) return alert("Nome e preço sao obrigatórios")
+    if(!form.name||!form.price) return alert("Nome e preÃ§o sao obrigatÃ³rios")
     setSaving(true)
     try {
       if(editing) await api.patch(`/products/${editing.id}`, { name:form.name, price:+form.price, stock:+form.stock||0, minStock:+form.minStock||5 })
@@ -132,7 +142,7 @@ export default function StockPage() {
         </div>
       </div>
 
-      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
+      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvCSV(filtered,threshold)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportInvPDF(filtered,threshold)}>PDF</button></div><button className="nbtn" onClick={()=>{setEditing(null);setForm({name:"",price:"",stock:"",minStock:"5",description:""});setShowForm(true)}}>+ Novo produto</button>
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Total produtos</div><div className="val">{products.length}</div></div>
@@ -186,9 +196,9 @@ export default function StockPage() {
             <div className="vp-modal-body">
               <div className="vp-field"><label>Nome *</label><input className="vp-input" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Nome do produto" /></div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-                <div className="vp-field"><label>Preço (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
+                <div className="vp-field"><label>PreÃ§o (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
-                <div className="vp-field"><label>Estoque mínimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse número</span></div>
+                <div className="vp-field"><label>Estoque mÃ­nimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse nÃºmero</span></div>
               </div>
             </div>
             <div className="vp-modal-foot">
