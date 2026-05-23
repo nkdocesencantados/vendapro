@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
@@ -22,15 +22,8 @@ function vpTable(title: string, headers: string[], rows: string[][]) {
   return '<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th{background:#1D9E75;color:white;padding:8px;font-size:11px}td{padding:7px;border-bottom:1px solid #eee;font-size:11px}</style></head><body><h2>'+title+'</h2><table><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table></body></html>';
 }
 
-function exportInvCSV(products: any[], threshold: number) {
-  vpCSV(['Produto','Preco','Estoque','Minimo','Status'],
-    products.map((p:any) => [p.name,Number(p.price).toFixed(2),p.stock,p.minStock||threshold||5,p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK']),
-    'estoque');
-}
-function exportInvPDF(products: any[], threshold: number) {
-  vpPDF(vpTable('Relatorio de Estoque',['Produto','Preco','Estoque','Minimo','Status'],
-    products.map((p:any) => [p.name,'R$ '+Number(p.price).toFixed(2),String(p.stock),String(p.minStock||threshold||5),p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK'])));
-}
+
+
 
 function exportInvCSV(products: any[], threshold: number) {
   vpCSV(['Produto','Preco','Estoque','Minimo','Status'],
