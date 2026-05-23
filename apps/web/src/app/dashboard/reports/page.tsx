@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
-ï»¿function vpCSV(headers: string[], rows: any[][], filename: string) {
+Ã¯Â»Â¿function vpCSV(headers: string[], rows: any[][], filename: string) {
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
   const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -28,7 +28,7 @@ function exportRepCSV(products: any[], from: string, to: string) {
     products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
     'relatorio-'+from+'-'+to);
 }
-ï»¿function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+Ã¯Â»Â¿function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
   const margin = revenue>0?Math.round((profit/revenue)*100):0;
   const avgTicket = totalSales>0?(revenue/totalSales).toFixed(2):'0.00';
   const maxRev = products.length>0?products[0].revenue:1;
@@ -56,7 +56,7 @@ function exportRepCSV(products: any[], from: string, to: string) {
 
 
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃ©dito",debit_card:"DÃ©bito"}
+const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃƒÂ©dito",debit_card:"DÃƒÂ©bito"}
 
 export default function ReportsPage() {
   const now = new Date()
@@ -120,8 +120,8 @@ export default function ReportsPage() {
       `}</style>
 
       <div style={{marginBottom:14}}>
-        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>RelatÃ³rios</h1>
-        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>AnÃ¡lise completa do negocio</div>
+        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>RelatÃƒÂ³rios</h1>
+        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>AnÃƒÂ¡lise completa do negocio</div>
       </div>
 
       <div style={{display:"flex",gap:6,marginBottom:8}}>
@@ -135,7 +135,7 @@ export default function ReportsPage() {
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Faturamento</div><div className="val">{BRLshort(revenue)}</div></div>
-        <div className="kpi"><div className="lbl">Ticket mÃ©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket mÃƒÂ©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
         <div className="kpi"><div className="lbl">Lucro est.</div><div className="val">{BRLshort(profit)}<span style={{fontSize:11,color:"#1D9E75",marginLeft:6}}>{margin}%</span></div></div>
         <div className="kpi"><div className="lbl">Total vendas</div><div className="val">{totalSales}</div></div>
       </div>
@@ -155,7 +155,7 @@ export default function ReportsPage() {
               <div className="card">
                 <div className="card-head"><div className="card-title">Top produtos</div></div>
                 <div style={{padding:"10px 14px"}}>
-                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃ­odo.</div>
+                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂ­odo.</div>
                   : products.map((p:any,i:number)=>{
                     const maxRev = products[0]?.revenue||1
                     return (
@@ -229,7 +229,7 @@ export default function ReportsPage() {
                       <span>{dailyChart[dailyChart.length-1]?.day}</span>
                     </div>
                   </>
-                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃ­odo.</div>}
+                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂ­odo.</div>}
               </div>
             </div>
           )}
@@ -237,7 +237,7 @@ export default function ReportsPage() {
           {tab==="financeiro" && (
             <>
               <div className="card" style={{padding:14,marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃ­odo</div>
+                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃƒÂ­odo</div>
                 <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid var(--border)"}}>
                   <span style={{fontSize:13,color:"var(--text-subtle)"}}>Entrada</span>
                   <strong style={{color:"#1D9E75",fontSize:13}}>+ {BRL(revenue)}</strong>
@@ -253,7 +253,7 @@ export default function ReportsPage() {
               </div>
               <div className="card" style={{padding:14}}>
                 <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Resumo</div>
-                {[["Total de vendas",String(totalSales)],["Ticket mÃ©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
+                {[["Total de vendas",String(totalSales)],["Ticket mÃƒÂ©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
                   <div key={lbl} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"7px 0",borderBottom:"1px solid var(--border)"}}>
                     <span style={{color:"var(--text-subtle)"}}>{lbl}</span>
                     <strong>{val}</strong>
