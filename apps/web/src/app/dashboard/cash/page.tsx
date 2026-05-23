@@ -12,7 +12,7 @@ function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v)
 
 
 
-Ã¯Â»Â¿function vpCSV(headers: string[], rows: any[][], filename: string) {
+function vpCSV(headers: string[], rows: any[][], filename: string) {
 
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
 
