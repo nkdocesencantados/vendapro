@@ -65,29 +65,6 @@ function exportRepPDF(products: any[], revenue: number, profit: number, totalSal
   vpPDF(html);
 }
 
-
-
-
-
-
-
-function exportRepCSV(products: any[], from: string, to: string) {
-
-  vpCSV(['Produto','Qtd','Receita','Lucro Est.'],
-
-    products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
-
-    'relatorio-'+from+'-'+to);
-
-}
-
-function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
-  const margin=revenue>0?Math.round((profit/revenue)*100):0;
-  const rows=products.map((p:any,i:number)=>'<tr><td>'+(i+1)+'</td><td>'+p.name+'</td><td>'+p.quantity+'</td><td>R$ '+Number(p.revenue).toFixed(2)+'</td><td>R$ '+(Number(p.revenue)*0.263).toFixed(2)+'</td></tr>').join('');
-  const html='<html><head><style>body{font-family:Arial;padding:20px}h2{color:#04130F}table{width:100%;border-collapse:collapse}th{background:#1D9E75;color:white;padding:8px;text-align:left}td{padding:8px;border-bottom:1px solid #eee}.kpi{display:inline-block;margin:0 16px 16px 0;padding:12px 20px;border:1px solid #eee;border-radius:8px;min-width:120px}.kv{font-size:22px;font-weight:700;color:#1D9E75}.kl{font-size:11px;color:#888}</style></head><body><div style=background:#04130F;padding:16px;margin-bottom:20px><h2 style=color:white;margin:0>VendaPro - Relatorio de Desempenho</h2><p style=color:#8DA39A;margin:4px 0 0>Periodo: '+from+' a '+to+' | Gerado em '+new Date().toLocaleString('pt-BR')+'</p></div><div><div class=kpi><div class=kl>Faturamento</div><div class=kv>R$ '+revenue.toFixed(2)+'</div></div><div class=kpi><div class=kl>Lucro</div><div class=kv>R$ '+profit.toFixed(2)+'</div></div><div class=kpi><div class=kl>Margem</div><div class=kv>'+margin+'%</div></div><div class=kpi><div class=kl>Vendas</div><div class=kv>'+totalSales+'</div></div></div><h3>Top Produtos</h3><table><thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Receita</th><th>Lucro Est.</th></tr></thead><tbody>'+rows+'</tbody></table><p style=margin-top:20px;font-size:11px;color:#999>VendaPro - vendapro.com.br</p></body></html>';
-  vpPDF(html);
-}
-
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
 const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃÆÃÂ©dito",debit_card:"DÃÆÃÂ©bito"}
