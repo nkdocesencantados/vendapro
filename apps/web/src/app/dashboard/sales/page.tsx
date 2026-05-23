@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -6,7 +6,7 @@ import { api } from "@/lib/api"
 
 
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃƒÂ©dito", debit_card:"DÃƒÂ©bito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -328,13 +328,13 @@ export default function SalesPage() {
 
       <div className="kpi-grid">
 
-        <div className="kpi"><div className="lbl">Fat. do mÃƒÂªs</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
 
-        <div className="kpi"><div className="lbl">ConcluÃƒÂ­das</div><div className="val">{completed}</div></div>
+        <div className="kpi"><div className="lbl">Concluídas</div><div className="val">{completed}</div></div>
 
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket mÃƒÂ©dio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
 
       </div>
 
@@ -346,7 +346,7 @@ export default function SalesPage() {
 
         <div className="filter-row">
 
-          {[["active","ConcluÃƒÂ­das"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+          {[["active","Concluídas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
 
             <button key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</button>
 
@@ -414,7 +414,7 @@ export default function SalesPage() {
 
                   <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
 
-                    {s.status==="completed"?"ConcluÃƒÂ­da":"Cancelada"}
+                    {s.status==="completed"?"Concluída":"Cancelada"}
 
                   </span>
 
@@ -480,9 +480,9 @@ export default function SalesPage() {
 
                     <option value="cash">Dinheiro</option>
 
-                    <option value="credit_card">CartÃƒÂ£o CrÃƒÂ©dito</option>
+                    <option value="credit_card">Cartão Crédito</option>
 
-                    <option value="debit_card">CartÃƒÂ£o DÃƒÂ©bito</option>
+                    <option value="debit_card">CartÃƒÆ’Ã‚Â£o DÃƒÆ’Ã‚Â©bito</option>
 
                   </select>
 
@@ -580,7 +580,7 @@ export default function SalesPage() {
 
             <div className="vp-modal-body">
 
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃƒÂ§ÃƒÂ£o nÃƒÂ£o pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o pode ser desfeita.</p>
 
             </div>
 
@@ -603,6 +603,7 @@ export default function SalesPage() {
   )
 
 }
+
 
 
 
