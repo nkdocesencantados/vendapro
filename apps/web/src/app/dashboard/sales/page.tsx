@@ -272,9 +272,9 @@ export default function SalesPage() {
 
         .sc-val{font-size:16px;font-weight:700;color:var(--brand,#1D9E75);}
 
-        .sc-pills{display:flex;gap:5px;flex-wrap:wrap;}
+        .sc-pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
 
-        .sc-actions{display:flex;justify-content:flex-start;margin-top:4px;}
+        .sc-actions{display:inline-flex;margin-left:8px;vertical-align:middle;}
 
         .filter-row{display:flex;gap:5px;padding:10px 14px;border-bottom:1px solid var(--border);}
 
