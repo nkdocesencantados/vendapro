@@ -294,7 +294,7 @@ export default function CashPage() {
 
         <div className="kpi" style={{gridColumn:"span 2"}}>
 
-          <div className="kpi-lbl">Saldo do mÃƒÆ’Ã‚Âªs</div>
+          <div className="kpi-lbl">Saldo do mês</div>
 
           <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
 
@@ -306,7 +306,7 @@ export default function CashPage() {
 
 
 
-      <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportCashCSV(entries,month,year)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" style={{flex:1}} onClick={()=>exportCashPDF(entries,data.income,data.expense,data.profit,month,year)}>PDF</button></div><button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lancamento</button>
+
 
 
 
@@ -314,7 +314,7 @@ export default function CashPage() {
 
         <div className="card-head-row">
 
-          <div className="card-head-title">LanÃƒÆ’Ã‚Â§amentos</div>
+          <div className="card-head-title">Lançamentos</div>
 
           <div className="card-head-sub">{entries.length} registros</div>
 
@@ -495,6 +495,7 @@ export default function CashPage() {
   )
 
 }
+
 
 
 
