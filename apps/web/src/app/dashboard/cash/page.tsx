@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
 
-ï»¿function vpCSV(headers: string[], rows: any[][], filename: string) {
+Ã¯Â»Â¿function vpCSV(headers: string[], rows: any[][], filename: string) {
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
   const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -38,7 +38,7 @@ function exportCashPDF(entries: any[], income: number, expense: number, profit: 
   vpPDF(tbl.replace('<table',kpis+'<table'));
 }
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const CAT_MAP: Record<string,string> = { sale:"Venda", service:"ServiÃ§o", rent:"Aluguel", salary:"SalÃ¡rio", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
+const CAT_MAP: Record<string,string> = { sale:"Venda", service:"ServiÃƒÂ§o", rent:"Aluguel", salary:"SalÃƒÂ¡rio", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
 export default function CashPage() {
   const now = new Date()
@@ -146,7 +146,7 @@ export default function CashPage() {
         <div className="kpi"><div className="kpi-lbl">Entradas</div><div className="kpi-val" style={{color:"#1D9E75"}}>{BRLshort(data.income)}</div></div>
         <div className="kpi"><div className="kpi-lbl">Saidas</div><div className="kpi-val" style={{color:"var(--danger)"}}>{BRLshort(data.expense)}</div></div>
         <div className="kpi" style={{gridColumn:"span 2"}}>
-          <div className="kpi-lbl">Saldo do mÃªs</div>
+          <div className="kpi-lbl">Saldo do mÃƒÂªs</div>
           <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
           <div className="kpi-dlt">{margin}% margem</div>
         </div>
@@ -156,18 +156,18 @@ export default function CashPage() {
 
       <div className="card-wrap">
         <div className="card-head-row">
-          <div className="card-head-title">LanÃ§amentos</div>
+          <div className="card-head-title">LanÃƒÂ§amentos</div>
           <div className="card-head-sub">{entries.length} registros</div>
         </div>
         {loading ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
         ) : entries.length===0 ? (
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lanÃ§amento neste perÃ­odo.</div>
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lanÃƒÂ§amento neste perÃƒÂ­odo.</div>
         ) : entries.map((e:any)=>(
           <div key={e.id} className="entry-card">
             <div className="entry-icon" style={{background:e.type==="income"?"rgba(29,158,117,0.15)":"rgba(185,28,28,0.15)"}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={e.type==="income"?"#1D9E75":"#f87171"} strokeWidth="2.5" strokeLinecap="round">
-      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lançamento</button>
+      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lanÃ§amento</button>
               </svg>
             </div>
             <div style={{flex:1,minWidth:0}}>
@@ -204,7 +204,7 @@ export default function CashPage() {
         <div className="vp-modal-bg" onClick={()=>setShowForm(false)}>
           <div className="vp-modal" onClick={e=>e.stopPropagation()}>
             <div className="vp-modal-head">
-              <h2>Novo lanÃ§amento</h2>
+              <h2>Novo lanÃƒÂ§amento</h2>
               <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
             </div>
             <div className="vp-modal-body">
@@ -221,16 +221,16 @@ export default function CashPage() {
                   <select className="vp-select" value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
                     <option value="">Selecione...</option>
                     {form.type==="income"?(
-                      <><option value="sale">Venda</option><option value="service">ServiÃ§o</option><option value="other">Outros</option></>
+                      <><option value="sale">Venda</option><option value="service">ServiÃƒÂ§o</option><option value="other">Outros</option></>
                     ):(
-                      <><option value="rent">Aluguel</option><option value="salary">SalÃ¡rio</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
+                      <><option value="rent">Aluguel</option><option value="salary">SalÃƒÂ¡rio</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
                     )}
                   </select>
                 </div>
               </div>
               <div className="vp-field">
                 <label>Descricao</label>
-                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mÃªs" />
+                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mÃƒÂªs" />
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div className="vp-field"><label>Valor (R$)</label><input className="vp-input" type="number" value={form.amount||""} onChange={e=>setForm({...form,amount:+e.target.value})} placeholder="0,00" /></div>
