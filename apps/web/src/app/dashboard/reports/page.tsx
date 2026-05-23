@@ -55,8 +55,20 @@ function exportRepPDF(products: any[], revenue: number, profit: number, totalSal
 }
 
 
+
+function exportRepCSV(products: any[], from: string, to: string) {
+  vpCSV(['Produto','Qtd','Receita','Lucro Est.'],
+    products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*0.263).toFixed(2)]),
+    'relatorio-'+from+'-'+to);
+}
+function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+  const margin=revenue>0?Math.round((profit/revenue)*100):0;
+  const kpis='<div style="display:flex;gap:10px;margin-bottom:16px;"><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Faturamento</div><div style="font-size:14px;font-weight:700;color:#1D9E75">R$ '+revenue.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Lucro</div><div style="font-size:14px;font-weight:700">R$ '+profit.toFixed(2)+'</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Margem</div><div style="font-size:14px;font-weight:700">'+margin+'%</div></div><div style="flex:1;padding:10px;border:1px solid #eee;border-radius:6px;text-align:center;"><div style="font-size:10px;color:#888">Vendas</div><div style="font-size:14px;font-weight:700">'+totalSales+'</div></div></div>';
+  const tbl=vpTable('Relatorio - '+from+' a '+to,['Produto','Qtd','Receita','Lucro'],products.map((p:any)=>[p.name,String(p.quantity),'R$ '+Number(p.revenue).toFixed(2),'R$ '+(Number(p.revenue)*0.263).toFixed(2)]));
+  vpPDF(tbl.replace('<table',kpis+'<table'));
+}
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃƒÂ©dito",debit_card:"DÃƒÂ©bito"}
+const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃÆÃÂ©dito",debit_card:"DÃÆÃÂ©bito"}
 
 export default function ReportsPage() {
   const now = new Date()
@@ -120,8 +132,8 @@ export default function ReportsPage() {
       `}</style>
 
       <div style={{marginBottom:14}}>
-        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>RelatÃƒÂ³rios</h1>
-        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>AnÃƒÂ¡lise completa do negocio</div>
+        <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>RelatÃÆÃÂ³rios</h1>
+        <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>AnÃÆÃÂ¡lise completa do negocio</div>
       </div>
 
       <div style={{display:"flex",gap:6,marginBottom:8}}>
@@ -130,12 +142,12 @@ export default function ReportsPage() {
       </div>
       <div className="date-row">
         <input className="vp-input" type="date" value={from} onChange={e=>setFrom(e.target.value)} style={{flex:1,minWidth:130}}/>
-        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/>
+        <input className="vp-input" type="date" value={to} onChange={e=>setTo(e.target.value)} style={{flex:1,minWidth:130}}/><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepCSV(products,from,to)}>Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportRepPDF(products,revenue,profit,totalSales,from,to)}>PDF</button>
       </div>
 
       <div className="kpi-grid">
         <div className="kpi"><div className="lbl">Faturamento</div><div className="val">{BRLshort(revenue)}</div></div>
-        <div className="kpi"><div className="lbl">Ticket mÃƒÂ©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket mÃÆÃÂ©dio</div><div className="val">{BRLshort(avgTicket)}</div></div>
         <div className="kpi"><div className="lbl">Lucro est.</div><div className="val">{BRLshort(profit)}<span style={{fontSize:11,color:"#1D9E75",marginLeft:6}}>{margin}%</span></div></div>
         <div className="kpi"><div className="lbl">Total vendas</div><div className="val">{totalSales}</div></div>
       </div>
@@ -155,7 +167,7 @@ export default function ReportsPage() {
               <div className="card">
                 <div className="card-head"><div className="card-title">Top produtos</div></div>
                 <div style={{padding:"10px 14px"}}>
-                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂ­odo.</div>
+                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃÆÃÂ­odo.</div>
                   : products.map((p:any,i:number)=>{
                     const maxRev = products[0]?.revenue||1
                     return (
@@ -229,7 +241,7 @@ export default function ReportsPage() {
                       <span>{dailyChart[dailyChart.length-1]?.day}</span>
                     </div>
                   </>
-                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂ­odo.</div>}
+                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃÆÃÂ­odo.</div>}
               </div>
             </div>
           )}
@@ -237,7 +249,7 @@ export default function ReportsPage() {
           {tab==="financeiro" && (
             <>
               <div className="card" style={{padding:14,marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃƒÂ­odo</div>
+                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃÆÃÂ­odo</div>
                 <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid var(--border)"}}>
                   <span style={{fontSize:13,color:"var(--text-subtle)"}}>Entrada</span>
                   <strong style={{color:"#1D9E75",fontSize:13}}>+ {BRL(revenue)}</strong>
@@ -253,7 +265,7 @@ export default function ReportsPage() {
               </div>
               <div className="card" style={{padding:14}}>
                 <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Resumo</div>
-                {[["Total de vendas",String(totalSales)],["Ticket mÃƒÂ©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
+                {[["Total de vendas",String(totalSales)],["Ticket mÃÆÃÂ©dio",BRL(avgTicket)],["Margem estimada",margin+"%"],["Faturamento",BRL(revenue)]].map(([lbl,val])=>(
                   <div key={lbl} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"7px 0",borderBottom:"1px solid var(--border)"}}>
                     <span style={{color:"var(--text-subtle)"}}>{lbl}</span>
                     <strong>{val}</strong>
