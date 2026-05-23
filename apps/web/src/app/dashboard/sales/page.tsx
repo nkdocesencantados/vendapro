@@ -274,7 +274,7 @@ export default function SalesPage() {
 
         .sc-pills{display:flex;gap:5px;flex-wrap:wrap;}
 
-        .sc-actions{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;}
+        .sc-actions{display:flex;justify-content:flex-start;margin-top:4px;}
 
         .filter-row{display:flex;gap:5px;padding:10px 14px;border-bottom:1px solid var(--border);}
 
