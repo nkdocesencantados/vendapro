@@ -62,7 +62,7 @@ function exportInvCSV(products: any[], threshold: number) {
 
 }
 
-ï»¿function exportInvPDF(products: any[], threshold: number) {
+function exportInvPDF(products: any[], threshold: number) {
   const rows=products.map((p:any,i:number)=>{const bg=i%2===0?'#fff':'#F8FAF9';const st=p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK';const col=p.stock===0?'#ef4444':p.stock<=(p.minStock||threshold||5)?'#f59e0b':'#1D9E75';return '<tr style="background:'+bg+';"><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+p.name+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">R$ '+Number(p.price).toFixed(2)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+p.stock+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( p.minStock||threshold||5)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;font-weight:600;color:'+col+';">'+st+'</td></tr>';}).join('');
   const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
   const low=products.filter((p:any)=>p.stock>0&&p.stock<=(p.minStock||threshold||5)).length;
@@ -124,7 +124,7 @@ export default function StockPage() {
 
   async function save() {
 
-    if(!form.name||!form.price) return alert("Nome e preÃƒÂ§o sao obrigatÃƒÂ³rios")
+    if(!form.name||!form.price) return alert("Nome e preÃƒÆ’Ã‚Â§o sao obrigatÃƒÆ’Ã‚Â³rios")
 
     setSaving(true)
 
@@ -386,11 +386,11 @@ export default function StockPage() {
 
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
 
-                <div className="vp-field"><label>PreÃƒÂ§o (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
+                <div className="vp-field"><label>PreÃƒÆ’Ã‚Â§o (R$) *</label><input className="vp-input" type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0,00" /></div>
 
                 <div className="vp-field"><label>Estoque</label><input className="vp-input" type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" /></div>
 
-                <div className="vp-field"><label>Estoque mÃƒÂ­nimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse nÃƒÂºmero</span></div>
+                <div className="vp-field"><label>Estoque mÃƒÆ’Ã‚Â­nimo</label><input className="vp-input" type="number" min="1" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} placeholder="5" /><span style={{fontSize:11,color:"var(--text-subtle)",marginTop:3,display:"block"}}>Alerta de baixo quando chegar nesse nÃƒÆ’Ã‚Âºmero</span></div>
 
               </div>
 
@@ -425,6 +425,7 @@ export default function StockPage() {
 
 
  
+
 
 
 

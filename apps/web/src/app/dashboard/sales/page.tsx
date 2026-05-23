@@ -6,7 +6,7 @@ import { api } from "@/lib/api"
 
 
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃ©dito", debit_card:"DÃ©bito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃƒÂ©dito", debit_card:"DÃƒÂ©bito" }
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -76,7 +76,7 @@ function exportSalesCSV(sales: any[]) {
 
 }
 
-ï»¿function exportSalesPDF(sales: any[]) {
+function exportSalesPDF(sales: any[]) {
   const PAY2: Record<string,string>={cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito'};
   const rows=sales.map((s:any,i:number)=>{const bg=i%2===0?'#fff':'#F8FAF9';return '<tr style="background:'+bg+';"><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+new Date(s.createdAt).toLocaleDateString('pt-BR')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.customerName||'Avulso')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.sellerName||'-')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( PAY2[s.paymentMethod]||s.paymentMethod)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;font-weight:600;color:#1D9E75;">R$ '+Number(s.total).toFixed(2)+'</td></tr>';}).join('');
   const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
@@ -328,13 +328,13 @@ export default function SalesPage() {
 
       <div className="kpi-grid">
 
-        <div className="kpi"><div className="lbl">Fat. do mÃªs</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mÃƒÂªs</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
 
-        <div className="kpi"><div className="lbl">ConcluÃ­das</div><div className="val">{completed}</div></div>
+        <div className="kpi"><div className="lbl">ConcluÃƒÂ­das</div><div className="val">{completed}</div></div>
 
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket mÃ©dio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket mÃƒÂ©dio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
 
       </div>
 
@@ -346,7 +346,7 @@ export default function SalesPage() {
 
         <div className="filter-row">
 
-          {[["active","ConcluÃ­das"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+          {[["active","ConcluÃƒÂ­das"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
 
             <button key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</button>
 
@@ -414,7 +414,7 @@ export default function SalesPage() {
 
                   <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
 
-                    {s.status==="completed"?"ConcluÃ­da":"Cancelada"}
+                    {s.status==="completed"?"ConcluÃƒÂ­da":"Cancelada"}
 
                   </span>
 
@@ -480,9 +480,9 @@ export default function SalesPage() {
 
                     <option value="cash">Dinheiro</option>
 
-                    <option value="credit_card">CartÃ£o CrÃ©dito</option>
+                    <option value="credit_card">CartÃƒÂ£o CrÃƒÂ©dito</option>
 
-                    <option value="debit_card">CartÃ£o DÃ©bito</option>
+                    <option value="debit_card">CartÃƒÂ£o DÃƒÂ©bito</option>
 
                   </select>
 
@@ -580,7 +580,7 @@ export default function SalesPage() {
 
             <div className="vp-modal-body">
 
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃƒÂ§ÃƒÂ£o nÃƒÂ£o pode ser desfeita.</p>
 
             </div>
 
@@ -603,6 +603,7 @@ export default function SalesPage() {
   )
 
 }
+
 
 
 
