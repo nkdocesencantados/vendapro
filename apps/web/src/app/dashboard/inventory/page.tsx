@@ -277,7 +277,7 @@ export default function StockPage() {
       </div>
 
 
-
+      <div style={{display:"flex",gap:8,marginBottom:16,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}><div style={{display:"flex",gap:8}}><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvCSV(filtered,threshold)}>Exportar Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvPDF(filtered,threshold)}>Exportar PDF</button></div><button className="vp-btn vp-btn-primary" onClick={()=>{setEditing(null);setShowForm(true)}}>+ Novo produto</button></div>
       <div style={{display:"flex",gap:6,marginBottom:10}}><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvCSV(filtered,threshold)}>Exportar Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvPDF(filtered,threshold)}>Exportar PDF</button></div>
 
 
@@ -425,6 +425,7 @@ export default function StockPage() {
 
 
  
+
 
 
 
