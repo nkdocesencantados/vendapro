@@ -175,7 +175,7 @@ export default function CashPage() {
 
       <style>{`
 
-        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:var(--transition);}
 
         .vp-btn-primary{background:var(--brand,#1D9E75);color:white;} .vp-btn-primary:hover{background:#178A65;}
 
@@ -209,7 +209,7 @@ export default function CashPage() {
 
         .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 
-        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);}
 
         .kpi-lbl{font-size:11px;color:var(--text-subtle);margin-bottom:4px;}
 
@@ -235,7 +235,7 @@ export default function CashPage() {
 
         .month-sel{display:flex;gap:8px;margin-bottom:14px;}
 
-        .card-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+        .card-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;}
 
         .card-head-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 

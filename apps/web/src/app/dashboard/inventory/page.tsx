@@ -186,7 +186,7 @@ export default function StockPage() {
 
       <style>{`
 
-        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:var(--transition);}
 
         .vp-btn-primary{background:var(--brand,#1D9E75);color:white;} .vp-btn-primary:hover{background:#178A65;}
 
@@ -230,13 +230,13 @@ export default function StockPage() {
 
         .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 
-        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);}
 
         .kpi .lbl{font-size:clamp(11px,1vw,13px);color:var(--text-subtle);margin-bottom:4px;}
 
         .kpi .val{font-size:clamp(15px,4vw,20px);font-weight:600;letter-spacing:-.02em;}
 
-        .prod-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+        .prod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
 
         .prod-icon{width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0;font-size:18px;}
 

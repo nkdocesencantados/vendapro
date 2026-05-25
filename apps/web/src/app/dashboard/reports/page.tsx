@@ -147,7 +147,7 @@ export default function ReportsPage() {
 
       <style>{`
 
-        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .12s;}
+        .vp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:var(--transition);}
 
         .vp-btn-ghost{color:var(--text-muted);} .vp-btn-ghost:hover{background:var(--surface-2);color:var(--text);}
 
@@ -159,7 +159,7 @@ export default function ReportsPage() {
 
         .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 
-        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);}
 
         .kpi .lbl{font-size:clamp(11px,1vw,13px);color:var(--text-subtle);margin-bottom:4px;}
 
@@ -173,7 +173,7 @@ export default function ReportsPage() {
 
         .tab.on{color:var(--text);border-bottom-color:#1D9E75;font-weight:500;}
 
-        .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:10px;}
 
         .card-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 

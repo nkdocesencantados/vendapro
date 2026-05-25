@@ -260,17 +260,17 @@ export default function SalesPage() {
 
         .kpi .dlt{margin-top:4px;font-size:11px;color:var(--success,#1D9E75);}
 
-        .sale-card-m{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+        .sale-card-m{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:10px;transition:var(--transition);} .sale-card-m:hover{border-color:var(--border-strong);transform:translateY(-1px);box-shadow:var(--shadow-md);}
 
         .sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
 
-        .sc-name{font-size:clamp(14px,1.5vw,18px);font-weight:600;color:var(--text);}
+        .sc-name{font-size:clamp(14px,1.5vw,17px);font-weight:600;color:var(--text);}
 
         .sc-seller{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-subtle);margin-top:3px;}
 
         .sc-av{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;flex-shrink:0;}
 
-        .sc-val{font-size:clamp(16px,2vw,22px);font-weight:700;color:var(--brand,#1D9E75);}
+        .sc-val{font-family:var(--font-mono);font-size:clamp(16px,2vw,24px);font-weight:700;color:var(--brand);}
 
         .sc-pills{display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center;}
 
