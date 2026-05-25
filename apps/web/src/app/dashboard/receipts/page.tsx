@@ -100,7 +100,7 @@ export default function ReceiptsPage() {
             <div className="vp-modal-head">
               <h2>Recibo {receiptNum}</h2>
               <div style={{display:"flex",gap:6}}>
-                <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>window.print()}>Imprimir</button>
+                <button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>window.print()}>Exportar PDF</button>
                 <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowPreview(false)}>X</button>
               </div>
             </div>
