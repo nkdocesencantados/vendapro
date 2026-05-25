@@ -59,7 +59,7 @@ export default function ReceiptsPage() {
         .vp-modal{width:min(400px,100%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;max-height:90vh;overflow:auto;}
         .vp-modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
         .vp-modal-head h2{margin:0;font-size:15px;font-weight:600;}
-        @media print{body>*:not(#receipt-print){display:none!important;} #receipt-print{display:block!important;}}
+        @media print{body *{visibility:hidden;} #receipt-print,#receipt-print *{visibility:visible;} #receipt-print{position:fixed;left:0;top:0;width:100%;}}
       `}</style>
 
       <div style={{marginBottom:16}}>
