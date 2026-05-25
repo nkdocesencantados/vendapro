@@ -6,14 +6,14 @@ import { useAuthStore } from "@/contexts/auth.store"
 import Link from "next/link"
 
 const NAV_ALL = [
-  { id:"dashboard",  href:"/dashboard",         label:"Dashboard",  icon:"dashboard" },
-  { id:"vendas",     href:"/dashboard/sales",    label:"Vendas",     icon:"cart" },
-  { id:"estoque",    href:"/dashboard/inventory",    label:"Estoque",    icon:"box" },
-  { id:"recibos",    href:"/dashboard/receipts", label:"Recibos",    icon:"receipt" },
-  { id:"caixa",      href:"/dashboard/cash",     label:"Caixa",      icon:"cash",    premium:true },
-  { id:"relatórios", href:"/dashboard/reports",  label:"Relatórios", icon:"chart",   premium:true },
-  { id:"equipe",     href:"/dashboard/team",     label:"Equipe",     icon:"users",   premium:true },
-  { id:"config",     href:"/dashboard/settings", label:"Config",     icon:"settings" },
+  { id:"dashboard",  href:"/dashboard",          label:"Dashboard",  icon:"dashboard" },
+  { id:"vendas",     href:"/dashboard/sales",     label:"Vendas",     icon:"cart" },
+  { id:"estoque",    href:"/dashboard/inventory", label:"Estoque",    icon:"box" },
+  { id:"recibos",    href:"/dashboard/receipts",  label:"Recibos",    icon:"receipt" },
+  { id:"caixa",      href:"/dashboard/cash",      label:"Caixa",      icon:"cash",    premium:true },
+  { id:"relatórios", href:"/dashboard/reports",   label:"Relatórios", icon:"chart",   premium:true },
+  { id:"equipe",     href:"/dashboard/team",      label:"Equipe",     icon:"users",   premium:true },
+  { id:"config",     href:"/dashboard/settings",  label:"Config",     icon:"settings" },
 ]
 
 const PLAN_MENU: Record<string,string[]> = {
@@ -24,28 +24,42 @@ const PLAN_MENU: Record<string,string[]> = {
 }
 const PLAN_LABEL: Record<string,string> = { trial:"Trial", basic:"Basic", pro:"Pro", business:"Business" }
 
-const ICON_PATHS: Record<string,React.ReactNode> = {
-  dashboard: <><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></>,
-  cart:      <><path d="M3 4h2l2.5 12h11l2-8H6"/><circle cx="9" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></>,
-  box:       <path d="M21 8v13H3V8M12 3v18M3 8l9-5 9 5"/>,
-  receipt:   <path d="M6 2v20l3-2 3 2 3-2 3 2V2zM9 8h6M9 12h6M9 16h4"/>,
-  cash:      <><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M7 9v6M17 9v6"/></>,
-  chart:     <><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></>,
-  users:     <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="6" r="2.5"/><path d="M15 14c2.8 0 5 2.2 5 5"/></>,
-  settings:  <><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2"/></>,
-  logout:    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>,
-  menu:      <path d="M3 6h18M3 12h18M3 18h18"/>,
-  chevron:   <path d="M9 18l6-6-6-6"/>,
-  sun:       <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></>,
-  moon:      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>,
+const ICONS: Record<string, string> = {
+  dashboard: "M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z",
+  cart:      "M3 4h2l2.5 12h11l2-8H6",
+  box:       "M21 8v13H3V8M12 3v18M3 8l9-5 9 5",
+  receipt:   "M6 2v20l3-2 3 2 3-2 3 2V2zM9 8h6M9 12h6M9 16h4",
+  cash:      "M3 6h18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z",
+  chart:     "M3 3v18h18M7 12h3v6H7zM12 8h3v10h-3zM17 5h3v13h-3z",
+  users:     "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  settings:  "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z",
+  logout:    "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
+  menu:      "M3 6h18M3 12h18M3 18h18",
+  sun:       "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41",
+  moon:      "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z",
+  bell:      "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
+  search:    "M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0",
+  plus:      "M12 5v14M5 12h14",
+  chevron:   "M9 18l6-6-6-6",
 }
 
-function Icon({ name, size=17 }: { name:string; size?:number }) {
+function Icon({ name, size=16 }: { name:string; size?:number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-      {ICON_PATHS[name]}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+      <path d={ICONS[name] || ICONS.menu}/>
     </svg>
   )
+}
+
+const PAGE_NAMES: Record<string,string> = {
+  "/dashboard": "Dashboard",
+  "/dashboard/sales": "Vendas",
+  "/dashboard/inventory": "Estoque",
+  "/dashboard/receipts": "Recibos",
+  "/dashboard/cash": "Caixa",
+  "/dashboard/reports": "Relatórios",
+  "/dashboard/team": "Equipe",
+  "/dashboard/settings": "Configurações",
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -53,26 +67,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname()
   const { user: authUser, logout: authLogout } = useAuthStore()
   const [store,      setStore]      = useState<any>(null)
-  const [dark,       setDark]       = useState(false)
+  const [dark,       setDark]       = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [search,     setSearch]     = useState("")
 
   useEffect(() => {
     if (!authUser) { router.push("/login"); return }
-
-    // Restaurar tema salvo
     const saved = localStorage.getItem("vp-theme")
-    if (saved === "dark") {
+    const palette = localStorage.getItem("vp-palette") || "emerald"
+    document.documentElement.setAttribute("data-palette", palette)
+    if (saved === "light") {
+      setDark(false)
+      document.documentElement.setAttribute("data-theme", "light")
+    } else {
       setDark(true)
       document.documentElement.setAttribute("data-theme", "dark")
     }
-
-    // Buscar dados da loja
-    api.get("/stores")
-      .then(r => {
-        const s = Array.isArray(r.data) ? r.data[0] : r.data
-        if (s) setStore(s)
-      })
-      .catch(() => {})
+    api.get("/stores").then(r => {
+      const s = Array.isArray(r.data) ? r.data[0] : r.data
+      if (s) {
+        setStore(s)
+        if (s.palette) {
+          document.documentElement.setAttribute("data-palette", s.palette)
+          localStorage.setItem("vp-palette", s.palette)
+        }
+      }
+    }).catch(() => {})
   }, [authUser])
 
   function toggleDark() {
@@ -82,18 +102,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     localStorage.setItem("vp-theme", next ? "dark" : "light")
   }
 
-  function logout() {
-    authLogout()
-    router.push("/login")
-  }
+  function logout() { authLogout(); router.push("/login") }
 
-  const plan        = store?.plan || authUser?.plan || "basic"
-  const role        = authUser?.role || "store_owner"
-  const storeName   = store?.name || "Minha Loja"
-  const storeInit   = storeName.slice(0,2).toUpperCase()
-  const color       = store?.primaryColor || "#1D9E75"
-  const userName    = authUser?.name || "Usuário"
-  const userInit    = userName.split(" ").map((n:string)=>n[0]).join("").slice(0,2).toUpperCase()
+  const plan      = store?.plan || authUser?.plan || "basic"
+  const role      = authUser?.role || "store_owner"
+  const storeName = store?.name || "Minha Loja"
+  const storeInit = storeName.slice(0,2).toUpperCase()
+  const userName  = authUser?.name || "Usuário"
+  const userInit  = userName.split(" ").map((n:string)=>n[0]).join("").slice(0,2).toUpperCase()
+  const userRole  = role === "seller" ? "Vendedor" : role === "manager" ? "Gerente" : "Proprietário"
+  const pageName  = PAGE_NAMES[pathname] || "VendaPro"
 
   const allowed  = PLAN_MENU[plan] || PLAN_MENU.basic
   const navItems = NAV_ALL.filter(n => {
@@ -101,192 +119,98 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return allowed.includes(n.id)
   })
 
-  const active    = pathname === "/dashboard" ? "dashboard" : NAV_ALL.find(n => n.href !== "/dashboard" && pathname.startsWith(n.href))?.id || "dashboard"
-  const pageLabel = NAV_ALL.find(n => n.id === active)?.label || "Dashboard"
-
   return (
-    <>
+    <div className="vp-layout">
+      {/* ── SIDEBAR ── */}
+      <aside className={`vp-sidebar${mobileOpen ? " open" : ""}`}>
+        {/* Brand */}
+        <div className="vp-sidebar-brand">
+          <div className="vp-sidebar-logo">{storeInit}</div>
+          <div className="vp-sidebar-brand-info">
+            <div className="vp-sidebar-store-name">{storeName}</div>
+            <div className="vp-sidebar-plan">{PLAN_LABEL[plan] || plan}</div>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="vp-sidebar-nav">
+          {navItems.map(item => {
+            const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
+            return (
+              <Link key={item.id} href={item.href} className={`vp-nav-item${active ? " active" : ""}`} onClick={() => setMobileOpen(false)}>
+                <Icon name={item.icon} size={16} />
+                <span>{item.label}</span>
+                <span className="nav-dot"/>
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="vp-sidebar-footer">
+          <div className="vp-user-row" onClick={logout} title="Sair">
+            <div className="vp-avatar">{userInit}</div>
+            <div className="vp-user-info">
+              <div className="vp-user-name">{userName}</div>
+              <div className="vp-user-role">{userRole}</div>
+            </div>
+            <Icon name="logout" size={14} />
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(4px)",zIndex:49}} onClick={() => setMobileOpen(false)}/>
+      )}
+
+      {/* ── MAIN ── */}
+      <div className="vp-main">
+        {/* Topbar */}
+        <header className="vp-topbar">
+          <button className="vp-icon-btn" style={{display:"none"}} id="mobile-menu-btn"
+            onClick={() => setMobileOpen(!mobileOpen)}>
+            <Icon name="menu" size={16}/>
+          </button>
+
+          <div className="vp-breadcrumb">
+            <span>{storeName}</span>
+            <span className="vp-breadcrumb-sep">›</span>
+            <span className="vp-breadcrumb-current">{pageName}</span>
+          </div>
+
+          <div className="vp-search">
+            <Icon name="search" size={14}/>
+            <input
+              placeholder="Buscar venda, produto, cliente..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <span style={{fontSize:11,color:"var(--text-subtle)",whiteSpace:"nowrap"}}>⌘K</span>
+          </div>
+
+          <div className="vp-topbar-actions">
+            <button className="vp-icon-btn" onClick={toggleDark} title={dark ? "Modo claro" : "Modo escuro"}>
+              <Icon name={dark ? "sun" : "moon"} size={15}/>
+            </button>
+            <button className="vp-icon-btn" title="Notificações">
+              <Icon name="bell" size={15}/>
+            </button>
+            <span className="vp-plan-badge">{PLAN_LABEL[plan] || plan}</span>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="vp-content">
+          {children}
+        </main>
+      </div>
+
       <style>{`
-        /* â”€â”€ Dark mode tokens â”€â”€ */
-        [data-theme="dark"] {
-          --bg:#0A1412; --bg-elevated:#0F1B18; --surface:#0F1B18;
-          --surface-2:#142421; --surface-3:#1A2E29;
-          --border:#1F3A33; --border-strong:#2A4D44;
-          --text:#F5F5F4; --text-muted:#A8B3AF; --text-subtle:#7A8480;
-          --brand-tint:rgba(29,158,117,0.12);
-          --success-bg:rgba(29,158,117,0.14);
-          --warning-bg:rgba(180,83,9,0.16);
-          --danger-bg:rgba(185,28,28,0.16);
-          --info-bg:rgba(30,64,175,0.18);
-          --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
-          --shadow:0 1px 3px rgba(0,0,0,0.4);
-          --shadow-md:0 6px 16px rgba(0,0,0,0.45);
-          --shadow-lg:0 16px 40px rgba(0,0,0,0.55);
-        }
-
-        /* â”€â”€ App shell â”€â”€ */
-        html, body, #__next { height: 100%; }
-        .vp-app { display:flex; height:100vh; overflow:hidden; background:var(--bg); color:var(--text); font-family:var(--font,"Geist",sans-serif); }
-
-        /* â”€â”€ Sidebar â”€â”€ */
-        .vp-sb {
-          width:248px; flex-shrink:0;
-          background:#04130F;
-          border-right:1px solid #1F3A33;
-          display:flex; flex-direction:column;
-          height:100vh; position:sticky; top:0; z-index:30;
-          color:#E5F2EC;
-        }
-        .vp-sb-head { padding:16px 14px 12px; border-bottom:1px solid #1F3A33; }
-        .vp-store-card {
-          display:flex; align-items:center; gap:10px;
-          padding:9px 10px; border-radius:10px;
-          background:#0E2620; border:1px solid #1F3A33;
-        }
-        .vp-store-badge {
-          width:34px; height:34px; border-radius:9px;
-          display:grid; place-items:center;
-          color:white; font-weight:700; font-size:13px; flex-shrink:0;
-          font-family:"Geist Mono",monospace;
-        }
-        .vp-store-meta { display:flex; flex-direction:column; min-width:0; flex:1; }
-        .vp-store-meta strong { font-size:13.5px; font-weight:600; color:#F0F7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.01em; }
-        .vp-crumbs { font-size:12px; }
-        @media(max-width:900px){ .vp-crumbs span:first-child { display:none; } }
-        .vp-store-meta small { font-size:11px; color:#7A9990; margin-top:2px; }
-
-        .vp-nav { padding:10px 8px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:1px; scrollbar-width:none; }
-        .vp-nav::-webkit-scrollbar { width:0; }
-        .vp-nav-item {
-          display:flex; align-items:center; gap:10px;
-          padding:8px 10px; border-radius:8px;
-          font-size:13.5px; color:#8DA39A;
-          cursor:pointer; text-decoration:none;
-          transition:background 0.12s, color 0.12s;
-        }
-        .vp-nav-item:hover { background:#0E2620; color:#E5F2EC; }
-        .vp-nav-item.active { background:rgba(29,158,117,0.18); color:#fff; font-weight:500; }
-
-        .vp-sb-foot { padding:10px 12px; border-top:1px solid #1F3A33; display:flex; flex-direction:column; gap:4px; }
-        .vp-theme-btn {
-          display:flex; align-items:center; gap:10px;
-          padding:7px 10px; border-radius:8px;
-          font-size:13px; color:#8DA39A; cursor:pointer;
-          transition:background 0.12s, color 0.12s;
-        }
-        .vp-theme-btn:hover { background:#0E2620; color:#E5F2EC; }
-        .vp-user-pill {
-          display:flex; align-items:center; gap:10px;
-          padding:8px 10px; border-radius:10px; cursor:pointer;
-          transition:background 0.12s;
-        }
-        .vp-user-pill:hover { background:#0E2620; }
-        .vp-avatar { width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:11px; font-weight:700; color:white; flex-shrink:0; }
-        .vp-user-meta { display:flex; flex-direction:column; flex:1; min-width:0; }
-        .vp-user-meta strong { font-size:13px; font-weight:500; color:#F0F7F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .vp-user-meta small { font-size:11px; color:#7A9990; }
-
-        /* â”€â”€ Main â”€â”€ */
-        .vp-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
-
-        /* â”€â”€ Topbar â”€â”€ */
-        .vp-topbar {
-          height:56px; padding:0 24px;
-          border-bottom:1px solid var(--border);
-          background:var(--bg-elevated);
-          display:flex; align-items:center; gap:14px;
-          flex-shrink:0; position:sticky; top:0; z-index:20;
-          backdrop-filter:saturate(180%) blur(8px);
-        }
-        .vp-crumbs { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-subtle); }
-        .vp-crumbs .cur { color:var(--text); font-weight:500; }
-
-        /* Plan badges */
-        .vp-plan { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:500; }
-        .vp-plan-trial    { background:var(--info-bg);    color:var(--info); }
-        .vp-plan-basic    { background:var(--surface-3);  color:var(--text-muted); }
-        .vp-plan-pro      { background:var(--brand-tint); color:var(--brand-deep); }
-        .vp-plan-business { background:linear-gradient(135deg,#04342C,#1D9E75); color:white; }
-
-        /* â”€â”€ Content â”€â”€ */
-        .vp-content { flex:1; overflow-y:auto; background:var(--bg); }
-
-        /* â”€â”€ Mobile â”€â”€ */
-        .vp-mob-btn { display:none; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); color:var(--text-muted); align-items:center; justify-content:center; }
-        .vp-overlay { display:none; }
-        @media (max-width:900px) {
-          .vp-sb { position:fixed; transform:translateX(-100%); transition:transform 0.2s; box-shadow:var(--shadow-lg); }
-          .vp-sb.open { transform:translateX(0); }
-          .vp-mob-btn { display:flex; }
-          .vp-overlay { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:29; }
+        @media (max-width: 900px) {
+          #mobile-menu-btn { display: flex !important; }
         }
       `}</style>
-
-      <div className="vp-app">
-        {mobileOpen && <div className="vp-overlay" onClick={()=>setMobileOpen(false)} />}
-
-        {/* â”€â”€ SIDEBAR â”€â”€ */}
-        <aside className={`vp-sb${mobileOpen?" open":""}`}>
-          <div className="vp-sb-head">
-            <div className="vp-store-card">
-              <div className="vp-store-badge" style={{background:color}}>{storeInit}</div>
-              <div className="vp-store-meta">
-                <strong>{storeName}</strong>
-                <small><span className={`vp-plan vp-plan-${plan}`}>{PLAN_LABEL[plan]||plan}</span></small>
-              </div>
-            </div>
-          </div>
-
-          <nav className="vp-nav">
-            {navItems.map(n => (
-              <Link key={n.id} href={n.href}
-                className={`vp-nav-item${active===n.id?" active":""}`}
-                onClick={()=>setMobileOpen(false)}>
-                <Icon name={n.icon} size={17}/>
-                <span>{n.label}</span>
-              </Link>
-            ))}
-          </nav>
-
-          <div className="vp-sb-foot">
-            <div className="vp-theme-btn" onClick={toggleDark}>
-              <Icon name={dark?"sun":"moon"} size={16}/>
-              <span>{dark?"Modo claro":"Modo escuro"}</span>
-            </div>
-            <div className="vp-user-pill" onClick={logout} title="Sair">
-              <div className="vp-avatar" style={{background:color}}>{userInit}</div>
-              <div className="vp-user-meta">
-                <strong>{userName}</strong>
-                <small>{role==="seller"?"Vendedor":role==="super_admin"?"Super Admin":"Proprietário"}</small>
-              </div>
-              <Icon name="logout" size={14}/>
-            </div>
-          </div>
-        </aside>
-
-        {/* â”€â”€ MAIN â”€â”€ */}
-        <div className="vp-main">
-          <header className="vp-topbar">
-            <button className="vp-mob-btn" onClick={()=>setMobileOpen(true)}>
-              <Icon name="menu" size={18}/>
-            </button>
-            <div className="vp-crumbs">
-              <span>{storeName}</span>
-              <span style={{color:"var(--border-strong)",margin:"0 2px"}}>
-                <Icon name="chevron" size={11}/>
-              </span>
-              <span className="cur">{pageLabel}</span>
-            </div>
-            <div style={{flex:1}}/>
-            <span className={`vp-plan vp-plan-${plan}`}>{PLAN_LABEL[plan]||plan}</span>
-          </header>
-
-          <div className="vp-content">{children}</div>
-        </div>
-      </div>
-    </>
+    </div>
   )
 }
-
-
-
