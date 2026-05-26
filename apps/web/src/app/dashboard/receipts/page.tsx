@@ -105,31 +105,11 @@ export default function ReceiptsPage() {
               </div>
             </div>
             <div style={{padding:20}}>
-              <div id="receipt-print" className="receipt-paper">
-                <div className="rc" style={{marginBottom:10}}>
-                  <div style={{width:32,height:32,borderRadius:7,background:primary,color:"white",display:"inline-grid",placeItems:"center",fontSize:12,fontWeight:700}}>{storeName.slice(0,2).toUpperCase()}</div>
+                  </div>
                 </div>
-                <h4>{storeName}</h4>
-                <div className="rc">Comprovante de Venda</div>
-                <hr className="rdiv"/>
-                <div className="rr"><span>Pedido:</span><span>{receiptNum}</span></div>
-                <div className="rr"><span>Data:</span><span>{new Date(selected.createdAt).toLocaleDateString("pt-BR")}</span></div>
-                <div className="rr"><span>Cliente:</span><span>{selected.customerName||"Não informado"}</span></div>
-                {selected.sellerName && <div className="rr"><span>Vendedor:</span><span>{selected.sellerName}</span></div>}
-                <div className="rr"><span>Pagamento:</span><span>{PAY[selected.paymentMethod]||selected.paymentMethod}</span></div>
-                <hr className="rdiv"/>
-                <div style={{fontWeight:700,fontSize:10,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>ITENS</div>
-                {selected.items?.length > 0 ? selected.items.map((item:any,i:number)=>(
-                  <div key={i} className="rr"><span>{item.quantity}x {item.productName||item.name||item.manualDescription||"Produto"}</span><span>{BRL(item.quantity*item.unitPrice)}</span></div>
-                )) : <div className="rr"><span>Venda</span><span>{BRL(selected.total)}</span></div>}
-                <hr className="rdiv"/>
-                <div className="rr" style={{fontWeight:700,fontSize:14}}><span>TOTAL</span><span>{BRL(selected.total)}</span></div>
-                <hr className="rdiv"/>
-                <div className="rc" style={{marginTop:6}}>Obrigado pela preferencia!</div>
-                <div className="rc" style={{fontSize:10}}>VendaPro - vendapro.com.br</div>
+                  {selected.items?.length > 0 ? selected.items.map((item:any,i:number)=>(
+                </div>
               </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
