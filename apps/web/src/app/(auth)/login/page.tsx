@@ -207,6 +207,7 @@ export default function LoginPage() {
         {/* ESQUERDO */}
         <div className="left-col" style={{
           flex:"0 0 58%",
+          overflowY:"auto" as const,
           background:`linear-gradient(160deg,${pal.color}14 0%,#08101A 42%)`,
           color:"white",
           padding:"18px 28px 20px",
