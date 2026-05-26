@@ -28,89 +28,77 @@ const Logo = ({ size = 32, color = "#1D9E75" }: { size?: number; color?: string 
 
 const BAR_DATA = [38, 52, 61, 85, 70, 78, 95]
 const DAYS = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]
-const LINE_POINTS = [20,35,28,55,42,68,60,82,75,92]
+const LINE_PTS = "0,80 43,65 87,72 130,45 173,55 217,32 260,18"
+const AREA_PTS = "0,100 0,80 43,65 87,72 130,45 173,55 217,32 260,18 260,100"
 
 function MockupPreview({ color }: { color: string }) {
-  const [tick, setTick] = useState(0)
-  useEffect(() => {
-    const t = setInterval(() => setTick(x => x + 1), 2000)
-    return () => clearInterval(t)
-  }, [])
-
-  const maxH = 90
-  const pts = LINE_POINTS.map((y, i) => `${i * (260/9)},${100 - y}`).join(" ")
-  const area = `0,100 ${pts} 260,100`
-
   return (
     <div style={{
-      background:`linear-gradient(135deg, ${color}22 0%, ${color}44 50%, ${color}11 100%)`,
-      border:`1px solid ${color}55`,
-      borderRadius:16,
-      padding:"18px 18px 14px",
-      marginBottom:22,
+      background:`linear-gradient(145deg,${color}30 0%,${color}18 60%,transparent 100%)`,
+      border:`1px solid ${color}44`,
+      borderRadius:14,
+      padding:"14px 16px 12px",
+      marginBottom:18,
       position:"relative",
       overflow:"hidden",
     }}>
-      <div style={{position:"absolute",top:"-30%",right:"-10%",width:"60%",height:"70%",background:`radial-gradient(circle,${color}66,transparent 65%)`,filter:"blur(24px)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",top:"-40%",right:"-5%",width:"55%",height:"80%",background:`radial-gradient(circle,${color}55,transparent 65%)`,filter:"blur(20px)",pointerEvents:"none"}}/>
 
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,position:"relative"}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#FF5F57"}}/>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#FFBD2E"}}/>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#28C840"}}/>
-          <span style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginLeft:8,fontFamily:"monospace"}}>vendapro.com.br/paleta</span>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,position:"relative"}}>
+        <div style={{display:"flex",alignItems:"center",gap:5}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:"#FF5F57"}}/>
+          <div style={{width:7,height:7,borderRadius:"50%",background:"#FFBD2E"}}/>
+          <div style={{width:7,height:7,borderRadius:"50%",background:"#28C840"}}/>
+          <span style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginLeft:6,fontFamily:"monospace"}}>vendapro.com.br/paleta</span>
         </div>
-        <span style={{fontSize:9,color:color,fontWeight:600}}>● online</span>
+        <span style={{fontSize:8,color:color,fontWeight:600}}>● online</span>
       </div>
 
-      <div style={{marginBottom:12,position:"relative"}}>
-        <div style={{fontSize:9,color:"rgba(255,255,255,0.45)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:2}}>FATURAMENTO HOJE</div>
-        <div style={{fontFamily:"'Geist Mono',monospace",fontSize:26,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-0.02em"}}>
-          R$&nbsp;<span style={{color:color}}>4.872</span>
+      <div style={{marginBottom:10,position:"relative"}}>
+        <div style={{fontSize:8,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:2}}>FATURAMENTO HOJE</div>
+        <div style={{fontFamily:"monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1}}>
+          R$ <span style={{color:color}}>4.872</span>
         </div>
-        <div style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginTop:3}}>▲ 18% vs ontem</div>
+        <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginTop:2}}>▲ 18% vs ontem</div>
       </div>
 
-      <div style={{position:"relative",height:90,marginBottom:10}}>
-        <svg viewBox="0 0 260 100" style={{position:"absolute",inset:0,width:"100%",height:"100%"}} preserveAspectRatio="none">
+      <div style={{position:"relative",height:80,marginBottom:6}}>
+        <svg viewBox="0 0 260 100" preserveAspectRatio="none" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
           <defs>
-            <linearGradient id="lg-mockup" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
-              <stop offset="100%" stopColor={color} stopOpacity="0"/>
+            <linearGradient id="agrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.35"/>
+              <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
             </linearGradient>
           </defs>
-          <polygon points={area} fill="url(#lg-mockup)"/>
-          <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+          <polygon points={AREA_PTS} fill="url(#agrad)"/>
+          <polyline points={LINE_PTS} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
         </svg>
 
-        <div style={{display:"flex",alignItems:"flex-end",gap:4,height:"100%",position:"relative",zIndex:1,paddingTop:10}}>
+        <div style={{position:"absolute",bottom:0,left:0,right:0,display:"flex",alignItems:"flex-end",gap:3,height:"70%",padding:"0 2px"}}>
           {BAR_DATA.map((v,i) => (
-            <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-              <div style={{
-                width:"100%",
-                height:`${(v/100)*maxH}%`,
-                background:i===6?color:`${color}55`,
-                borderRadius:"4px 4px 0 0",
-                transition:"all .3s",
-              }}/>
-            </div>
+            <div key={i} style={{
+              flex:1,
+              height:`${v}%`,
+              background:i===6?color:`${color}40`,
+              borderRadius:"3px 3px 0 0",
+            }}/>
           ))}
         </div>
       </div>
 
-      <div style={{display:"flex",gap:4,marginBottom:12}}>
+      <div style={{display:"flex",gap:3,marginBottom:8}}>
         {DAYS.map((d,i)=>(
-          <div key={d} style={{flex:1,textAlign:"center",fontSize:8,color:i===6?"rgba(255,255,255,0.7)":"rgba(255,255,255,0.25)"}}>{d}</div>
+          <div key={d} style={{flex:1,textAlign:"center",fontSize:7,color:i===6?"rgba(255,255,255,0.6)":"rgba(255,255,255,0.22)"}}>{d}</div>
         ))}
       </div>
 
-      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      <div style={{display:"flex",gap:5}}>
         {["● 24 vendas","Meta 84%","● 7 vendedoras"].map((t,i)=>(
           <span key={t} style={{
-            background:i===1?`${color}33`:"rgba(255,255,255,0.06)",
-            border:`1px solid ${i===1?color+"66":"rgba(255,255,255,0.1)"}`,
-            borderRadius:99,padding:"3px 10px",fontSize:9,
-            color:i===1?color:"rgba(255,255,255,0.5)",
+            background:i===1?`${color}28`:"rgba(255,255,255,0.05)",
+            border:`1px solid ${i===1?color+"55":"rgba(255,255,255,0.08)"}`,
+            borderRadius:99,padding:"2px 8px",fontSize:8,
+            color:i===1?color:"rgba(255,255,255,0.45)",
             fontWeight:i===1?600:400,
           }}>{t}</span>
         ))}
@@ -160,40 +148,15 @@ export default function LoginPage() {
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; }
-        .l-input {
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px; padding: 12px 14px;
-          font-size: 14px; outline: none; width: 100%;
-          color: white; font-family: inherit; transition: all .15s;
-        }
+        .l-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none; width: 100%; color: white; font-family: inherit; transition: all .15s; }
         .l-input:focus { box-shadow: 0 0 0 3px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
         .l-input::placeholder { color: rgba(255,255,255,0.25); }
-        .l-input:-webkit-autofill,
-        .l-input:-webkit-autofill:hover,
-        .l-input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0px 1000px #1a2535 inset !important;
-          -webkit-text-fill-color: white !important;
-          border-color: rgba(255,255,255,0.15) !important;
-        }
-        .demo-btn {
-          padding: 7px 14px; border-radius: 8px;
-          font-size: 12px; font-weight: 600; cursor: pointer;
-          transition: all .15s; font-family: inherit;
-          border: 1px solid rgba(255,255,255,0.15);
-          background: transparent; color: rgba(255,255,255,0.6);
-        }
+        .l-input:-webkit-autofill, .l-input:-webkit-autofill:hover, .l-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0px 1000px #1a2535 inset !important; -webkit-text-fill-color: white !important; border-color: rgba(255,255,255,0.15) !important; }
+        .demo-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); }
         .demo-btn:hover { background: rgba(255,255,255,0.08); }
-        .pal-dot {
-          width: 36px; height: 36px; border-radius: 10px;
-          border: 2.5px solid transparent; cursor: pointer;
-          transition: all .18s; flex-shrink: 0;
-        }
+        .pal-dot { width: 34px; height: 34px; border-radius: 9px; border: 2.5px solid transparent; cursor: pointer; transition: all .18s; flex-shrink: 0; }
         .pal-dot:hover { transform: scale(1.1); }
-        .pal-dot.active {
-          border-color: white; transform: scale(1.15);
-          box-shadow: 0 0 0 3px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4);
-        }
+        .pal-dot.active { border-color: white; transform: scale(1.18); box-shadow: 0 0 0 3px rgba(0,0,0,0.5); }
       `}</style>
 
       {/* MOBILE */}
@@ -221,9 +184,7 @@ export default function LoginPage() {
               <label style={{fontSize:12,fontWeight:500,color:"rgba(255,255,255,0.5)"}}>Senha</label>
               <div style={{position:"relative"}}>
                 <input className="l-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:52}}/>
-                <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>
-                  {show?"Ocultar":"Ver"}
-                </button>
+                <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>{show?"Ocultar":"Ver"}</button>
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
@@ -243,57 +204,51 @@ export default function LoginPage() {
       </div>
 
       {/* DESKTOP */}
-      <div className="hidden md:grid min-h-screen" style={{gridTemplateColumns:"1fr 1fr"}}>
+      <div className="hidden md:flex min-h-screen" style={{flexDirection:"row"}}>
 
         {/* ESQUERDO */}
-        <div style={{background:"#08101A",color:"white",padding:"48px 44px",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",inset:"-40% -20% 30% 30%",background:`radial-gradient(circle,${pal.color}2e,transparent 60%)`,filter:"blur(50px)",pointerEvents:"none",transition:"background .5s"}}/>
-          <div style={{position:"absolute",bottom:"-20%",left:"-10%",width:"50%",height:"50%",background:`radial-gradient(circle,${pal.color}1a,transparent 65%)`,filter:"blur(40px)",pointerEvents:"none",transition:"background .5s"}}/>
+        <div style={{flex:1,background:"#08101A",color:"white",padding:"40px 44px",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:"10%",right:"-10%",width:"60%",height:"60%",background:`radial-gradient(circle,${pal.color}28,transparent 65%)`,filter:"blur(50px)",pointerEvents:"none",transition:"background .5s"}}/>
+          <div style={{position:"absolute",bottom:"-10%",left:"-5%",width:"40%",height:"40%",background:`radial-gradient(circle,${pal.color}18,transparent 65%)`,filter:"blur(40px)",pointerEvents:"none",transition:"background .5s"}}/>
 
-          <div style={{display:"flex",alignItems:"center",gap:10,position:"relative"}}>
-            <Logo size={36} color={pal.color}/>
-            <strong style={{fontSize:18,letterSpacing:"-0.01em"}}>VendaPro</strong>
+          <div style={{display:"flex",alignItems:"center",gap:10,position:"relative",marginBottom:"auto"}}>
+            <Logo size={34} color={pal.color}/>
+            <strong style={{fontSize:17,letterSpacing:"-0.01em"}}>VendaPro</strong>
           </div>
 
-          <div style={{marginTop:"auto",position:"relative"}}>
-            <h2 style={{fontSize:40,fontWeight:700,lineHeight:1.05,letterSpacing:"-0.03em",margin:"0 0 14px"}}>
+          <div style={{position:"relative",flex:1,display:"flex",flexDirection:"column",justifyContent:"center",paddingTop:32}}>
+            <h2 style={{fontSize:36,fontWeight:700,lineHeight:1.08,letterSpacing:"-0.03em",margin:"0 0 10px"}}>
               Sua loja, <span style={{color:pal.color,transition:"color .3s"}}>sua cor</span>,<br/>sua identidade.
             </h2>
-            <p style={{fontSize:14,lineHeight:1.75,color:"rgba(255,255,255,0.42)",margin:"0 0 28px",maxWidth:400}}>
+            <p style={{fontSize:13,lineHeight:1.7,color:"rgba(255,255,255,0.4)",margin:"0 0 22px",maxWidth:380}}>
               O VendaPro se molda à sua marca: escolha a paleta e cada gráfico, botão e relatório veste a cara da sua loja. Vendas, estoque, caixa e equipe em um só sistema.
             </p>
 
             <MockupPreview color={pal.color}/>
 
-            <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:"16px 18px",marginBottom:28}}>
-              <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginBottom:14,display:"flex",alignItems:"center",gap:6,letterSpacing:".02em"}}>
-                <span style={{fontSize:14}}>⊕</span> Experimente uma paleta
+            <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"14px 16px",marginBottom:24}}>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginBottom:12,display:"flex",alignItems:"center",gap:6}}>
+                <span>⊕</span> Experimente uma paleta
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4, 36px)",gap:10,marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4, 34px)",gap:9,marginBottom:10}}>
                 {PALETTES.map(p=>(
-                  <button
-                    key={p.id}
-                    className={`pal-dot${activePal===p.id?" active":""}`}
-                    style={{background:p.color}}
-                    title={p.name}
-                    onClick={()=>setActivePal(p.id)}
-                  />
+                  <button key={p.id} className={`pal-dot${activePal===p.id?" active":""}`} style={{background:p.color}} title={p.name} onClick={()=>setActivePal(p.id)}/>
                 ))}
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:10,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-                <div style={{width:10,height:10,borderRadius:"50%",background:pal.color,flexShrink:0}}/>
+              <div style={{display:"flex",alignItems:"center",gap:8,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+                <div style={{width:9,height:9,borderRadius:"50%",background:pal.color,flexShrink:0}}/>
                 <div>
-                  <div style={{fontSize:13,color:pal.color,fontWeight:700,lineHeight:1,transition:"color .3s"}}>{pal.name}</div>
-                  <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginTop:2}}>{pal.desc}</div>
+                  <div style={{fontSize:12,color:pal.color,fontWeight:700}}>{pal.name}</div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:1}}>{pal.desc}</div>
                 </div>
               </div>
             </div>
 
-            <div style={{display:"flex",gap:24,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
+            <div style={{display:"flex",gap:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
               {[["7 dias","trial grátis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
                 <div key={l}>
-                  <strong style={{display:"block",fontSize:18,fontWeight:700,letterSpacing:"-0.02em"}}>{v}</strong>
-                  <small style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{l}</small>
+                  <strong style={{display:"block",fontSize:16,fontWeight:700,letterSpacing:"-0.02em"}}>{v}</strong>
+                  <small style={{fontSize:10,color:"rgba(255,255,255,0.35)"}}>{l}</small>
                 </div>
               ))}
             </div>
@@ -301,13 +256,11 @@ export default function LoginPage() {
         </div>
 
         {/* DIREITO */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#0C1520"}}>
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#0C1520"}}>
           <div style={{width:"100%",maxWidth:380}}>
             <h1 style={{margin:"0 0 8px",fontSize:28,fontWeight:700,letterSpacing:"-0.025em",color:"white"}}>Entrar no VendaPro</h1>
             <p style={{fontSize:14,color:"rgba(255,255,255,0.4)",margin:"0 0 28px"}}>Acesse sua conta e gerencie sua loja.</p>
-            {error && (
-              <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,fontSize:13,color:"#f87171"}}>{error}</div>
-            )}
+            {error && <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,fontSize:13,color:"#f87171"}}>{error}</div>}
             <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}}>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 <label style={{fontSize:13,fontWeight:500,color:"rgba(255,255,255,0.6)"}}>E-mail</label>
@@ -317,9 +270,7 @@ export default function LoginPage() {
                 <label style={{fontSize:13,fontWeight:500,color:"rgba(255,255,255,0.6)"}}>Senha</label>
                 <div style={{position:"relative"}}>
                   <input className="l-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:52}}/>
-                  <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>
-                    {show?"Ocultar":"Ver"}
-                  </button>
+                  <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>{show?"Ocultar":"Ver"}</button>
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
@@ -329,9 +280,7 @@ export default function LoginPage() {
                 </label>
                 <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{color:pal.color,fontWeight:500,textDecoration:"none"}}>Esqueci a senha</a>
               </div>
-              <button type="submit" disabled={loading} style={btnStyle}>
-                {loading?"Entrando...":"Entrar"}
-              </button>
+              <button type="submit" disabled={loading} style={btnStyle}>{loading?"Entrando...":"Entrar"}</button>
             </form>
             <div style={{marginTop:20,padding:14,borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)"}}>
               <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginBottom:10,fontWeight:500}}>Demo — entrar como:</div>
