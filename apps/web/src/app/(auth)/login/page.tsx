@@ -192,7 +192,7 @@ export default function LoginPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-        html, body { height:100%; font-family:'Geist',ui-sans-serif,system-ui,sans-serif; }
+        html, body { height:100%; background:#080f1e; font-family:'Geist',ui-sans-serif,system-ui,sans-serif; }
         .l-input { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; font-size:14px; outline:none; width:100%; color:white; font-family:inherit; transition:all .15s; }
         .l-input:focus { box-shadow:0 0 0 3px rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.25); }
         .l-input::placeholder { color:rgba(255,255,255,0.25); }
@@ -255,7 +255,7 @@ export default function LoginPage() {
         <div className="left-col" style={{
           flex:"0 0 58%",
           overflowY:"auto" as const,
-          background:`linear-gradient(160deg,${pal.color}14 0%,#08101A 42%)`,
+          background:`radial-gradient(ellipse at 15% 10%, ${pal.color}28 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, ${pal.color}18 0%, transparent 45%), #080f1e`,
           color:"white",
           padding:"18px 28px 20px",
           display:"flex",
