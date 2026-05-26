@@ -62,7 +62,7 @@ export default function LoginPage() {
         body { font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; }
         .l-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none; width: 100%; color: white; font-family: inherit; transition: all .15s; }
         .l-input:focus { box-shadow: 0 0 0 3px rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
-        .l-input::placeholder { color: rgba(255,255,255,0.25); }
+        .l-input::placeholder { color: rgba(255,255,255,0.25); } .l-input:-webkit-autofill, .l-input:-webkit-autofill:hover, .l-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0px 1000px #1a2535 inset !important; -webkit-text-fill-color: white !important; border-color: rgba(255,255,255,0.15) !important; }
         .demo-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); }
         .demo-btn:hover { background: rgba(255,255,255,0.08); }
         .pal-dot { width: 28px; height: 28px; border-radius: 7px; border: 2px solid transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; }
