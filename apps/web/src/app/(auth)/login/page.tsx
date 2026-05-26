@@ -82,12 +82,12 @@ function MockupCard({ color }: { color: string }) {
           </svg>
         </div>
 
-        {/* barras SVG com gradiente premium */}
+        {/* barras SVG com gradiente — style inline para funcionar no browser */}
         <svg viewBox="0 0 280 80" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="bar-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={color} stopOpacity="0.85"/>
-              <stop offset="100%" stopColor={color} stopOpacity="0.2"/>
+              <stop offset="0%"   style={{stopColor:color,stopOpacity:0.85}}/>
+              <stop offset="100%" style={{stopColor:color,stopOpacity:0.15}}/>
             </linearGradient>
           </defs>
           {BAR_HEIGHTS.map((h,i) => {
@@ -96,7 +96,7 @@ function MockupCard({ color }: { color: string }) {
             return <rect key={i} x={x} y={80-bh} width={24} height={bh} rx="3"
               fill="url(#bar-grad)"
               stroke={color}
-              strokeOpacity={0.6}
+              strokeOpacity={0.5}
               strokeWidth="0.8"/>
           })}
         </svg>
