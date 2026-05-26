@@ -233,7 +233,7 @@ export default function CashPage() {
 
         .mini-bar-fill{display:block;height:100%;border-radius:999px;}
 
-        .month-sel{display:flex;gap:8px;margin-bottom:16px;align-items:center;width:100%;max-width:360px;} .month-sel .vp-select{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;font-size:13px;color:var(--text);outline:none;cursor:pointer;}
+        .month-sel{display:flex;gap:8px;margin-bottom:16px;align-items:center;} .month-sel select{flex:1;min-width:100px;width:auto!important;} .month-sel .vp-select{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;font-size:13px;color:var(--text);outline:none;cursor:pointer;}
 
         .card-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;}
 
