@@ -86,8 +86,8 @@ function MockupCard({ color }: { color: string }) {
         <svg viewBox="0 0 280 80" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
           {BAR_HEIGHTS.map((h,i) => {
             const bh = (h/100)*68
-            const x  = i*38 + 4
-            return <rect key={i} x={x} y={80-bh} width={32} height={bh} rx="2"
+            const x  = i*36 + 6
+            return <rect key={i} x={x} y={80-bh} width={24} height={bh} rx="2"
               fill={`rgba(${rgb},${BAR_OPACITIES[i]})`}
               stroke={`rgba(${rgb},${BAR_OPACITIES[i]+0.15})`}
               strokeWidth="1"/>
@@ -209,7 +209,7 @@ export default function LoginPage() {
           flex:"0 0 45%",
           background:`linear-gradient(160deg,${pal.color}14 0%,#08101A 42%)`,
           color:"white",
-          padding:"22px 32px 24px",
+          padding:"18px 28px 20px",
           display:"flex",
           flexDirection:"column",
           position:"relative",
@@ -249,7 +249,7 @@ export default function LoginPage() {
           </div>
 
           {/* seletor */}
-          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 12px",marginBottom:12,flexShrink:0}}>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"8px 11px",marginBottom:10,flexShrink:0}}>
             <div style={{fontSize:9.5,color:"rgba(255,255,255,0.32)",marginBottom:9,display:"flex",alignItems:"center",gap:5}}>
               <span>⊕</span> Experimente uma paleta
             </div>
