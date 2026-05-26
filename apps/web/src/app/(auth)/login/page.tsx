@@ -87,8 +87,8 @@ function MockupCard({ color }: { color: string }) {
           <defs>
             {BAR_HEIGHTS.map((_,i) => (
               <linearGradient key={i} id={`bg${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor={color} stopOpacity={BAR_OPACITIES[i] * 1.8}/>
-                <stop offset="100%" stopColor={color} stopOpacity={BAR_OPACITIES[i] * 0.4}/>
+                <stop offset="0%"   stopColor={color} stopOpacity={0.75}/>
+                <stop offset="100%" stopColor={color} stopOpacity={0.25}/>
               </linearGradient>
             ))}
           </defs>
