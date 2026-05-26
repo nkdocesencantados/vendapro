@@ -60,17 +60,17 @@ function MockupCard({ color }: { color: string }) {
       </div>
 
       {/* body */}
-      <div style={{padding:"14px 16px 12px"}}>
+      <div style={{padding:"11px 14px 10px"}}>
         {/* KPI + mini linha */}
-        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:8}}>
           <div>
             <div style={{fontSize:8,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:3}}>FATURAMENTO HOJE</div>
-            <div style={{fontFamily:"'Courier New',monospace",fontSize:26,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em"}}>
+            <div style={{fontFamily:"'Courier New',monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em"}}>
               R$&nbsp;<span style={{color}}>{`4.872`}</span>
             </div>
             <div style={{fontSize:9,color:"rgba(255,255,255,0.38)",marginTop:3}}>▲ 18%&nbsp;vs ontem</div>
           </div>
-          <svg viewBox="0 0 100 44" style={{width:130,height:50,flexShrink:0}}>
+          <svg viewBox="0 0 100 44" style={{width:110,height:40,flexShrink:0}}>
             <defs>
               <linearGradient id="lg-mk" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
@@ -83,7 +83,7 @@ function MockupCard({ color }: { color: string }) {
         </div>
 
         {/* barras */}
-        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:72,marginBottom:5}}>
+        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:52,marginBottom:4}}>
           {BAR_HEIGHTS.map((h,i) => (
             <div key={i} style={{
               flex:1,
@@ -211,7 +211,7 @@ export default function LoginPage() {
           flex:1,
           background:`linear-gradient(160deg,${pal.color}14 0%,#08101A 42%)`,
           color:"white",
-          padding:"28px 36px 32px",
+          padding:"22px 32px 24px",
           display:"flex",
           flexDirection:"column",
           position:"relative",
@@ -220,7 +220,7 @@ export default function LoginPage() {
           <div style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",background:`radial-gradient(ellipse at 25% 15%,${pal.color}1a,transparent 55%)`,pointerEvents:"none",transition:"background .4s"}}/>
 
           {/* header */}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",marginBottom:20,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",marginBottom:10,flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:9}}>
               <Logo size={32} color={pal.color}/>
               <strong style={{fontSize:16,letterSpacing:"-.01em"}}>VendaPro</strong>
@@ -229,20 +229,20 @@ export default function LoginPage() {
           </div>
 
           {/* mockup */}
-          <div style={{position:"relative",marginBottom:10,flexShrink:0}}>
+          <div style={{position:"relative",marginBottom:8,flexShrink:0}}>
             <MockupCard color={pal.color}/>
           </div>
 
           {/* badge adaptativo */}
-          <div style={{marginBottom:14,flexShrink:0}}>
+          <div style={{marginBottom:10,flexShrink:0}}>
             <span style={{display:"inline-flex",alignItems:"center",gap:5,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:99,padding:"4px 12px",fontSize:10.5,color:"rgba(255,255,255,0.55)"}}>
               <span style={{color:pal.color,transition:"color .3s"}}>●</span> Adaptativo por loja
             </span>
           </div>
 
           {/* headline */}
-          <div style={{position:"relative",marginBottom:14,flexShrink:0}}>
-            <h2 style={{fontSize:28,fontWeight:700,lineHeight:1.05,letterSpacing:"-.03em",margin:"0 0 8px"}}>
+          <div style={{position:"relative",marginBottom:10,flexShrink:0}}>
+            <h2 style={{fontSize:24,fontWeight:700,lineHeight:1.05,letterSpacing:"-.03em",margin:"0 0 6px"}}>
               Sua loja, <span style={{color:pal.color,transition:"color .3s"}}>sua cor</span>, sua identidade.
             </h2>
             <p style={{fontSize:12.5,lineHeight:1.65,color:"rgba(255,255,255,0.38)",maxWidth:380}}>
@@ -251,7 +251,7 @@ export default function LoginPage() {
           </div>
 
           {/* seletor */}
-          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"11px 13px",marginBottom:16,flexShrink:0}}>
+          <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 12px",marginBottom:12,flexShrink:0}}>
             <div style={{fontSize:9.5,color:"rgba(255,255,255,0.32)",marginBottom:9,display:"flex",alignItems:"center",gap:5}}>
               <span>⊕</span> Experimente uma paleta
             </div>
