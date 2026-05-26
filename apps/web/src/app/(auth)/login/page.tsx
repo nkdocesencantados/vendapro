@@ -206,7 +206,7 @@ export default function LoginPage() {
 
         {/* ESQUERDO */}
         <div className="left-col" style={{
-          flex:1,
+          flex:"0 0 45%",
           background:`linear-gradient(160deg,${pal.color}14 0%,#08101A 42%)`,
           color:"white",
           padding:"22px 32px 24px",
@@ -279,7 +279,7 @@ export default function LoginPage() {
         </div>
 
         {/* DIREITO */}
-        <div style={{flex:"0 0 460px",display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 36px",background:"#0C1520"}}>
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 36px",background:"#0C1520"}}>
           <div style={{width:"100%",maxWidth:370}}>
             <h1 style={{margin:"0 0 6px",fontSize:28,fontWeight:700,letterSpacing:"-.025em",color:"white"}}>Entrar no VendaPro</h1>
             <p style={{fontSize:14,color:"rgba(255,255,255,0.4)",margin:"0 0 24px"}}>Acesse sua conta e gerencie sua loja.</p>
