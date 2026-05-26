@@ -107,7 +107,7 @@ export default function LoginPage() {
           <h1 style={{fontSize:22,fontWeight:600,color:"white",marginBottom:6}}>Entrar no VendaPro</h1>
           <p style={{fontSize:13,color:"rgba(255,255,255,0.4)",marginBottom:24}}>Acesse sua conta e gerencie sua loja.</p>
           {error && <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,fontSize:13,color:"#f87171"}}>{error}</div>}
-          <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}} style={{"--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
+          <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}}>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               <label style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>E-mail</label>
               <input className="l-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required/>
