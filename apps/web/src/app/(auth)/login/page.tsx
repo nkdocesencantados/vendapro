@@ -82,19 +82,17 @@ function MockupCard({ color }: { color: string }) {
           </svg>
         </div>
 
-        {/* barras */}
-        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:52,marginBottom:4}}>
-          {BAR_HEIGHTS.map((h,i) => (
-            <div key={i} style={{
-              flex:1,
-              height:`${h}%`,
-              background:`rgba(${rgb},${BAR_OPACITIES[i]})`,
-              border:`1px solid rgba(${rgb},${BAR_OPACITIES[i]+0.12})`,
-              borderBottom:"none",
-              borderRadius:"4px 4px 0 0",
-            }}/>
-          ))}
-        </div>
+        {/* barras SVG — coordenadas absolutas, sem distorcao */}
+        <svg viewBox="0 0 280 68" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
+          {BAR_HEIGHTS.map((h,i) => {
+            const bh = (h/100)*58
+            const x  = i*38 + 4
+            return <rect key={i} x={x} y={68-bh} width={32} height={bh} rx="4"
+              fill={`rgba(${rgb},${BAR_OPACITIES[i]})`}
+              stroke={`rgba(${rgb},${BAR_OPACITIES[i]+0.15})`}
+              strokeWidth="1"/>
+          })}
+        </svg>
 
         {/* labels */}
         <div style={{display:"flex",gap:5,marginBottom:10}}>
