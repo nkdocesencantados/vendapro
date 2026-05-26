@@ -107,7 +107,7 @@ function MockupCard({ color }: { color: string }) {
         </div>
 
         {/* barras com gradiente via filter glow */}
-        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:80,marginBottom:5,padding:"0 2px"}}>
+        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:110,marginBottom:6,padding:"0 2px"}}>
           {BAR_HEIGHTS.map((v,i) => {
             const hi = i===3||i===5
             return (
