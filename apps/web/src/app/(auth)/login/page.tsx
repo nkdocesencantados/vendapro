@@ -40,77 +40,116 @@ const BAR_OPACITIES = [0.25, 0.30, 0.25, 0.50, 0.35, 0.55, 0.40]
 function MockupCard({ color }: { color: string }) {
   const rgb = hexToRgb(color)
   const palName = PALETTES.find(p => p.color === color)?.name?.toLowerCase() || "paleta"
+
   return (
     <div style={{
-      background:"rgba(0,0,0,0.45)",
-      border:`1px solid rgba(255,255,255,0.08)`,
-      borderRadius:14,
+      background:`radial-gradient(ellipse at 60% 0%, ${color}22 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, ${color}15 0%, transparent 55%),
+                  #0a1628`,
+      border:`1px solid ${color}30`,
+      borderRadius:16,
       overflow:"hidden",
-      boxShadow:`0 20px 50px rgba(0,0,0,0.5)`,
+      boxShadow:`0 0 0 1px ${color}15, 0 24px 60px rgba(0,0,0,0.6), 0 0 80px ${color}10`,
+      backdropFilter:"blur(12px)",
+      position:"relative",
     }}>
+      {/* aurora orb */}
+      <div style={{
+        position:"absolute",top:"-30%",right:"-10%",
+        width:"55%",height:"70%",
+        background:`radial-gradient(circle, ${color}40 0%, transparent 65%)`,
+        filter:"blur(40px)",
+        pointerEvents:"none",
+      }}/>
+
       {/* titlebar */}
-      <div style={{background:"rgba(0,0,0,0.35)",padding:"8px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+      <div style={{
+        background:"rgba(0,0,0,0.3)",
+        backdropFilter:"blur(8px)",
+        padding:"9px 14px",
+        display:"flex",alignItems:"center",justifyContent:"space-between",
+        borderBottom:`1px solid ${color}20`,
+        position:"relative",
+      }}>
         <div style={{display:"flex",alignItems:"center",gap:5}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#FF5F57"}}/>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#FFBD2E"}}/>
-          <div style={{width:8,height:8,borderRadius:"50%",background:"#28C840"}}/>
+          <div style={{width:9,height:9,borderRadius:"50%",background:"#FF5F57",boxShadow:"0 0 4px #FF5F5788"}}/>
+          <div style={{width:9,height:9,borderRadius:"50%",background:"#FFBD2E",boxShadow:"0 0 4px #FFBD2E88"}}/>
+          <div style={{width:9,height:9,borderRadius:"50%",background:"#28C840",boxShadow:"0 0 4px #28C84088"}}/>
         </div>
-        <span style={{fontSize:9,color:"rgba(255,255,255,0.3)",fontFamily:"monospace"}}>vendapro.com.br/{palName}</span>
-        <div style={{width:44}}/>
+        <span style={{fontSize:10,color:"rgba(255,255,255,0.35)",fontFamily:"monospace",letterSpacing:"-.01em"}}>
+          vendapro.com.br/{palName}
+        </span>
+        <div style={{width:50}}/>
       </div>
 
       {/* body */}
-      <div style={{padding:"11px 14px 10px"}}>
+      <div style={{padding:"14px 16px 12px",position:"relative"}}>
         {/* KPI + mini linha */}
-        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:8}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10}}>
           <div>
-            <div style={{fontSize:8,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:3}}>FATURAMENTO HOJE</div>
-            <div style={{fontFamily:"'Geist Mono','Courier New',monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em"}}>
-              R$&nbsp;<span style={{color}}>{`4.872`}</span>
+            <div style={{fontSize:8,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".09em",marginBottom:3}}>FATURAMENTO HOJE</div>
+            <div style={{fontFamily:"'Geist Mono','Courier New',monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em",
+              textShadow:`0 0 20px ${color}66`}}>
+              R$&nbsp;<span style={{color,filter:`drop-shadow(0 0 6px ${color}88)`}}>{`4.872`}</span>
             </div>
             <div style={{fontSize:9,color:"rgba(255,255,255,0.38)",marginTop:3}}>▲ 18%&nbsp;vs ontem</div>
           </div>
-          <svg viewBox="0 0 100 44" style={{width:110,height:40,flexShrink:0}}>
+          <svg viewBox="0 0 100 44" style={{width:120,height:44,flexShrink:0,filter:`drop-shadow(0 0 4px ${color}66)`}}>
             <defs>
-              <linearGradient id="lg-mk" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
-                <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+              <linearGradient id="lg-line" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" style={{stopColor:color,stopOpacity:0.35}}/>
+                <stop offset="100%" style={{stopColor:color,stopOpacity:0.02}}/>
               </linearGradient>
             </defs>
-            <polygon points="0,44 0,34 17,27 33,31 50,18 67,24 83,11 100,4 100,44" fill="url(#lg-mk)"/>
+            <polygon points="0,44 0,34 17,27 33,31 50,18 67,24 83,11 100,4 100,44" fill="url(#lg-line)"/>
             <polyline points="0,34 17,27 33,31 50,18 67,24 83,11 100,4" fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"/>
           </svg>
         </div>
 
-        {/* barras SVG — cada barra com fill direto via rgba */}
-        <svg viewBox="0 0 280 80" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
-          {BAR_HEIGHTS.map((h,i) => {
-            const bh = (h/100)*68
-            const x  = i*36 + 6
+        {/* barras com gradiente via filter glow */}
+        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:80,marginBottom:5,padding:"0 2px"}}>
+          {BAR_HEIGHTS.map((v,i) => {
             const hi = i===3||i===5
             return (
-              <g key={i}>
-                <rect x={x} y={80-bh} width={24} height={bh} rx="3"
-                  fill={hi ? color : `${color}99`}
-                  stroke={color} strokeOpacity={0.7} strokeWidth="0.8"/>
-                <rect x={x} y={80-bh} width={24} height={bh*0.5} rx="3"
-                  fill="rgba(255,255,255,0.12)"
-                  style={{mixBlendMode:"overlay"}}/>
-              </g>
+              <div key={i} style={{
+                flex:1,
+                height:`${v}%`,
+                background: hi
+                  ? `linear-gradient(180deg, ${color} 0%, ${color}88 60%, ${color}33 100%)`
+                  : `linear-gradient(180deg, ${color}cc 0%, ${color}66 60%, ${color}22 100%)`,
+                borderRadius:"4px 4px 0 0",
+                border:`1px solid ${color}${hi?"99":"44"}`,
+                borderBottom:"none",
+                boxShadow: hi ? `0 0 12px ${color}44, inset 0 1px 0 rgba(255,255,255,0.15)` : `inset 0 1px 0 rgba(255,255,255,0.08)`,
+                position:"relative",
+                overflow:"hidden",
+              }}>
+                {/* reflexo topo */}
+                <div style={{
+                  position:"absolute",top:0,left:0,right:0,
+                  height:"35%",
+                  background:"linear-gradient(180deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0) 100%)",
+                  borderRadius:"4px 4px 0 0",
+                }}/>
+              </div>
             )
           })}
-        </svg>
+        </div>
 
         {/* labels */}
         <div style={{display:"flex",gap:5,marginBottom:10}}>
-          {DAYS.map(d => (
-            <div key={d} style={{flex:1,textAlign:"center",fontSize:8.5,color:"rgba(255,255,255,0.28)"}}>{d}</div>
+          {DAYS.map((d,i) => (
+            <div key={d} style={{flex:1,textAlign:"center",fontSize:8.5,color:"rgba(255,255,255,0.3)"}}>{d}</div>
           ))}
         </div>
 
         {/* pills */}
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          <span style={{background:`rgba(${rgb},0.18)`,border:`1px solid rgba(${rgb},0.4)`,borderRadius:99,padding:"3px 10px",fontSize:9.5,color,fontWeight:600}}>Meta 84%</span>
+          <span style={{
+            background:`${color}22`,border:`1px solid ${color}55`,
+            borderRadius:99,padding:"3px 10px",fontSize:9.5,color,fontWeight:600,
+            boxShadow:`0 0 8px ${color}22`,
+          }}>Meta 84%</span>
           <span style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:99,padding:"3px 10px",fontSize:9.5,color:"rgba(255,255,255,0.45)"}}>● 24 vendas</span>
           <span style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:99,padding:"3px 10px",fontSize:9.5,color:"rgba(255,255,255,0.45)"}}>● 7 vendedoras</span>
         </div>
@@ -118,6 +157,7 @@ function MockupCard({ color }: { color: string }) {
     </div>
   )
 }
+
 
 export default function LoginPage() {
   const router = useRouter()
