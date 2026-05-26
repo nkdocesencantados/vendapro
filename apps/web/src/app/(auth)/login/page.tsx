@@ -128,7 +128,7 @@ export default function LoginPage() {
               </label>
               <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{color:pal.color,fontWeight:500,textDecoration:"none",fontSize:13}}>Esqueci a senha</a>
             </div>
-            <button className="l-btn" type="submit" disabled={loading} style={{"--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
+            <button className="l-btn" type="submit" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
@@ -139,7 +139,7 @@ export default function LoginPage() {
       </div>
 
       {/* DESKTOP */}
-      <div className="hidden md:grid min-h-screen" style={{gridTemplateColumns:"1fr 1fr","--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
+      <div className="hidden md:grid min-h-screen" style={{gridTemplateColumns:"1fr 1fr"}}>
 
         {/* ESQUERDO */}
         <div style={{background:"#08101A",color:"white",padding:48,display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
