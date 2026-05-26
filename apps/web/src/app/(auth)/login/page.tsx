@@ -3,14 +3,44 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/contexts/auth.store"
 
+const PALETTES = [
+  { id:"emerald", color:"#1D9E75", name:"Esmeralda" },
+  { id:"indigo",  color:"#6366F1", name:"Índigo" },
+  { id:"amber",   color:"#F59E0B", name:"Âmbar" },
+  { id:"crimson", color:"#E11D48", name:"Carmim" },
+  { id:"violet",  color:"#8B5CF6", name:"Violeta" },
+  { id:"ocean",   color:"#0EA5E9", name:"Oceano" },
+  { id:"rose",    color:"#EC4899", name:"Rosé" },
+  { id:"graphite",color:"#94A3B8", name:"Grafite" },
+]
+
+const Logo = ({ size = 28, color }: { size?: number; color?: string }) => {
+  const tile = color || "#1D9E75"
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="32" height="32" rx="8" ry="8" fill={tile}/>
+      <g stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="#fff">
+        <path d="M16 8 L24 22 L8 22 Z" fill="none"/>
+        <circle cx="16" cy="8"  r="2.4"/>
+        <circle cx="24" cy="22" r="2.4"/>
+        <circle cx="8"  cy="22" r="2.4"/>
+      </g>
+    </svg>
+  )
+}
+
 export default function LoginPage() {
-  const router = useRouter()
-  const login  = useAuthStore((s) => s.login)
+  const router   = useRouter()
+  const login    = useAuthStore((s) => s.login)
   const [email,    setEmail]    = useState("")
   const [password, setPassword] = useState("")
   const [show,     setShow]     = useState(false)
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState("")
+  const [remember, setRemember] = useState(false)
+  const [activePal, setActivePal] = useState("ocean")
+
+  const pal = PALETTES.find(p=>p.id===activePal) || PALETTES[5]
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,199 +53,207 @@ export default function LoginPage() {
     } finally { setLoading(false) }
   }
 
-  const Logo = ({ size = 40 }: { size?: number }) => (
-    <div style={{width:size*1.6,height:size*1.6,borderRadius:size*0.4,background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="4" r="3" fill="white"/>
-        <circle cx="4" cy="18" r="3" fill="white"/>
-        <circle cx="20" cy="18" r="3" fill="white"/>
-        <line x1="12" y1="4" x2="4" y2="18" stroke="white" strokeWidth="1.5"/>
-        <line x1="12" y1="4" x2="20" y2="18" stroke="white" strokeWidth="1.5"/>
-        <line x1="4" y1="18" x2="20" y2="18" stroke="white" strokeWidth="1.5"/>
-      </svg>
-    </div>
-  )
+  function quickLogin(e: string, p: string) {
+    setEmail(e); setPassword(p)
+  }
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; }
-        .login-input {
-          background: white; border: 1.5px solid #E7E5E4; border-radius: 10px;
-          padding: 12px 14px; font-size: 15px; outline: none; width: 100%;
-          color: #0C0A09; font-family: inherit; transition: border-color .12s, box-shadow .12s;
+        .l-input {
+          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none;
+          width: 100%; color: white; font-family: inherit; transition: all .15s;
         }
-        .login-input:focus { border-color: #1D9E75; box-shadow: 0 0 0 3px rgba(29,158,117,0.15); }
-        .login-input::placeholder { color: #C4BEB9; }
-        .login-btn {
-          width: 100%; padding: 14px; background: #1D9E75; color: white;
-          border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
-          cursor: pointer; transition: background .12s; font-family: inherit; letter-spacing: -0.01em;
+        .l-input:focus { border-color: var(--lbrand); box-shadow: 0 0 0 3px var(--lglow); }
+        .l-input::placeholder { color: rgba(255,255,255,0.3); }
+        .l-btn {
+          width: 100%; padding: 13px; background: var(--lbrand); color: white;
+          border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+          cursor: pointer; transition: all .15s; font-family: inherit; letter-spacing: -0.01em;
         }
-        .login-btn:hover { background: #178A65; }
-        .login-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
+        .l-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 16px var(--lglow); }
+        .l-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .demo-btn {
+          padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+          cursor: pointer; transition: all .15s; font-family: inherit; border: 1px solid;
+        }
+        .pal-btn {
+          width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent;
+          cursor: pointer; transition: all .15s; flex-shrink: 0;
+        }
+        .pal-btn.active { border-color: white; box-shadow: 0 0 0 2px rgba(0,0,0,0.3); transform: scale(1.15); }
+        .mockup { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; }
+        .mockup-kpi { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; }
+        .mockup-bar { height: 6px; border-radius: 99px; margin-top: 6px; opacity: 0.5; }
       `}</style>
 
-      {/* ===== MOBILE (< 768px) ===== */}
-      <div className="flex flex-col min-h-screen md:hidden" style={{background:"#04130F"}}>
-        {/* Glow */}
-        <div style={{position:"fixed",top:"-20%",right:"-20%",width:"70vw",height:"70vw",background:"radial-gradient(circle,rgba(29,158,117,0.35),transparent 65%)",filter:"blur(30px)",pointerEvents:"none",zIndex:0}}/>
-
-        {/* Topo escuro */}
+      {/* MOBILE */}
+      <div className="flex flex-col min-h-screen md:hidden" style={{background:"#08101A"}}>
+        <div style={{position:"fixed",top:"-20%",right:"-20%",width:"70vw",height:"70vw",background:`radial-gradient(circle,${pal.color}55,transparent 65%)`,filter:"blur(30px)",pointerEvents:"none",zIndex:0,transition:"background .3s"}}/>
         <div style={{position:"relative",zIndex:1,padding:"48px 28px 36px",display:"flex",flexDirection:"column",gap:20}}>
-          {/* Logo + nome */}
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <Logo size={28}/>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <Logo size={32} color={pal.color}/>
             <strong style={{fontSize:22,color:"white",letterSpacing:"-0.02em"}}>VendaPro</strong>
           </div>
-          {/* Headline */}
-          <div>
-            <h2 style={{fontSize:30,fontWeight:600,color:"white",lineHeight:1.1,letterSpacing:"-0.025em",marginBottom:10}}>
-              Toda a gestão da sua loja em{" "}
-              <span style={{color:"#34D399"}}>um so lugar</span>.
-            </h2>
-            <p style={{fontSize:14,color:"#8DA39A",lineHeight:1.6}}>
-              Vendas, estoque, caixa e equipe - pensado para o pequeno comércio brasileiro.
-            </p>
-          </div>
-          {/* Stats */}
-          <div style={{display:"flex",gap:20,paddingTop:16,borderTop:"1px solid #1F3A33"}}>
-            {[["7 dias","trial gratis"],["3 planos","para cada"],["100%","na nuvem"]].map(([v,l])=>(
-              <div key={l}>
-                <strong style={{display:"block",fontSize:16,fontWeight:600,color:"white"}}>{v}</strong>
-                <small style={{fontSize:11,color:"#8DA39A"}}>{l}</small>
-              </div>
-            ))}
-          </div>
+          <h2 style={{fontSize:28,fontWeight:600,color:"white",lineHeight:1.1,letterSpacing:"-0.025em"}}>
+            Sua loja, <span style={{color:pal.color}}>sua cor</span>, sua identidade.
+          </h2>
         </div>
-
-        {/* Card branco arredondado */}
-        <div style={{position:"relative",zIndex:1,flex:1,background:"#FAFAF9",borderRadius:"24px 24px 0 0",padding:"32px 24px 48px",boxShadow:"0 -4px 24px rgba(0,0,0,0.3)"}}>
-          <h1 style={{fontSize:24,fontWeight:600,letterSpacing:"-0.02em",color:"#0C0A09",marginBottom:6}}>Entrar na sua conta</h1>
-          <p style={{fontSize:14,color:"#78716C",marginBottom:28}}>Acesse e gerencie sua loja.</p>
-
-          {error && (
-            <div style={{marginBottom:16,padding:"10px 14px",background:"#FEE2E2",border:"1px solid #FECACA",borderRadius:8,fontSize:13,color:"#B91C1C"}}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:16}}>
+        <div style={{position:"relative",zIndex:1,flex:1,background:"#0C1520",borderRadius:"24px 24px 0 0",padding:"32px 24px 48px",border:"1px solid rgba(255,255,255,0.08)"}}>
+          <h1 style={{fontSize:22,fontWeight:600,color:"white",marginBottom:6}}>Entrar no VendaPro</h1>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.4)",marginBottom:24}}>Acesse sua conta e gerencie sua loja.</p>
+          {error && <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,fontSize:13,color:"#f87171"}}>{error}</div>}
+          <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}} style={{"--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>E-mail</label>
-              <input className="login-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required autoComplete="email"/>
+              <label style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>E-mail</label>
+              <input className="l-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required/>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>Senha</label>
+              <label style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>Senha</label>
               <div style={{position:"relative"}}>
-                <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:52}} autoComplete="current-password"/>
-                <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#78716C",fontSize:13,fontWeight:500}}>
+                <input className="l-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:52}}/>
+                <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>
                   {show?"Ocultar":"Ver"}
                 </button>
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
-              <span style={{color:"#78716C"}}>Esqueceu a senha?</span>
-              <a href="https://wa.me/5511958924764?text=Olá,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
+              <label style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",color:"rgba(255,255,255,0.5)"}}>
+                <input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} style={{accentColor:pal.color}}/>
+                Lembrar-me
+              </label>
+              <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{color:pal.color,fontWeight:500,textDecoration:"none",fontSize:13}}>Esqueci a senha</a>
             </div>
-            <button className="login-btn" type="submit" disabled={loading} style={{marginTop:4}}>
+            <button className="l-btn" type="submit" disabled={loading} style={{"--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
-
-          {/* WhatsApp */}
-          <div style={{marginTop:24,padding:14,borderRadius:12,background:"#F0FDF4",border:"1px solid #BBF7D0",display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:34,height:34,borderRadius:"50%",background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            </div>
-            <div>
-              <div style={{fontSize:13,fontWeight:500,color:"#166534"}}>Suporte por WhatsApp</div>
-              <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:"#16a34a",textDecoration:"none"}}>(11) 95892-4764</a>
-            </div>
-          </div>
-
-          <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,color:"#A8A29E"}}>
-            VendaPro - Gestão para varejo
-            <span>v2.0</span>
+          <div style={{marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.06)",fontSize:11,color:"rgba(255,255,255,0.3)",display:"flex",justifyContent:"space-between"}}>
+            VendaPro - Gestão para varejo<span>v2.4</span>
           </div>
         </div>
       </div>
 
-      {/* ===== DESKTOP (>= 768px) ===== */}
-      <div className="hidden md:grid min-h-screen" style={{gridTemplateColumns:"1fr 1fr",fontFamily:"'Geist',ui-sans-serif,system-ui,sans-serif"}}>
+      {/* DESKTOP */}
+      <div className="hidden md:grid min-h-screen" style={{gridTemplateColumns:"1fr 1fr","--lbrand":pal.color,"--lglow":pal.color+"44"} as any}>
 
-        {/* Esquerdo */}
-        <div style={{background:"#04130F",color:"#E5F2EC",padding:48,display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",inset:"-40% -20% 30% 30%",background:"radial-gradient(circle,rgba(29,158,117,0.4),transparent 60%)",filter:"blur(20px)",pointerEvents:"none"}}/>
+        {/* ESQUERDO */}
+        <div style={{background:"#08101A",color:"white",padding:48,display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",inset:"-40% -20% 30% 30%",background:`radial-gradient(circle,${pal.color}44,transparent 60%)`,filter:"blur(40px)",pointerEvents:"none",transition:"background .4s"}}/>
+
           <div style={{display:"flex",alignItems:"center",gap:10,position:"relative"}}>
-            <Logo size={40}/>
-            <strong style={{fontSize:18,letterSpacing:"-0.01em",color:"white"}}>VendaPro</strong>
+            <Logo size={36} color={pal.color}/>
+            <strong style={{fontSize:18,letterSpacing:"-0.01em"}}>VendaPro</strong>
           </div>
+
           <div style={{marginTop:"auto",position:"relative"}}>
-            <h2 style={{fontSize:38,fontWeight:600,lineHeight:1.05,letterSpacing:"-0.025em",margin:"0 0 16px",color:"white"}}>
-              Toda a gestão da sua loja em{" "}
-              <span style={{color:"#34D399"}}>um so lugar</span>.
+            <h2 style={{fontSize:36,fontWeight:700,lineHeight:1.05,letterSpacing:"-0.03em",margin:"0 0 12px"}}>
+              Sua loja, <span style={{color:pal.color}}>sua cor</span>,<br/>sua identidade.
             </h2>
-            <p style={{fontSize:15,lineHeight:1.6,color:"#B2C9C0",margin:0,maxWidth:380}}>
-              Vendas, estoque, caixa e equipe - pensado para o pequeno comércio brasileiro.
+            <p style={{fontSize:14,lineHeight:1.7,color:"rgba(255,255,255,0.5)",margin:"0 0 28px",maxWidth:380}}>
+              O VendaPro se molda à sua marca: escolha a paleta e cada gráfico, botão e relatório veste a cara da sua loja.
             </p>
-            <div style={{display:"flex",gap:24,marginTop:32,paddingTop:24,borderTop:"1px solid #1F3A33"}}>
-              {[["7 dias","trial gratis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
+
+            {/* MOCKUP */}
+            <div className="mockup" style={{marginBottom:24}}>
+              <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,display:"flex",justifyContent:"space-between"}}>
+                <span>vendapro.com.br/{activePal}</span>
+                <span style={{color:pal.color}}>● online</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
+                <div className="mockup-kpi">
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>Faturamento hoje</div>
+                  <div style={{fontFamily:"'Geist Mono',monospace",fontSize:18,fontWeight:700,color:pal.color,marginTop:4}}>R$ 4.872</div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:2}}>▲ 18% vs ontem</div>
+                </div>
+                <div className="mockup-kpi">
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>Meta mensal</div>
+                  <div style={{fontFamily:"'Geist Mono',monospace",fontSize:18,fontWeight:700,color:"white",marginTop:4}}>84%</div>
+                  <div className="mockup-bar" style={{background:pal.color,width:"84%"}}/>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {["24 vendas",`Meta ${activePal==="ocean"?"84":"76"}%`,"7 vendedoras"].map(t=>(
+                  <span key={t} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:99,padding:"3px 10px",fontSize:10,color:"rgba(255,255,255,0.6)"}}>● {t}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* PALETTES */}
+            <div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
+                <span>⊕</span> Experimente uma paleta
+              </div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+                {PALETTES.map(p=>(
+                  <button key={p.id} className={`pal-btn${activePal===p.id?" active":""}`} style={{background:p.color}} title={p.name} onClick={()=>setActivePal(p.id)}/>
+                ))}
+              </div>
+              <div style={{fontSize:12,color:pal.color,fontWeight:600}}>{pal.name}</div>
+            </div>
+
+            <div style={{marginTop:24,paddingTop:20,borderTop:"1px solid rgba(255,255,255,0.08)",display:"flex",gap:20}}>
+              {[["7 dias","trial grátis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
                 <div key={l}>
-                  <strong style={{display:"block",fontSize:20,fontWeight:600,color:"white"}}>{v}</strong>
-                  <small style={{fontSize:12,color:"#8DA39A"}}>{l}</small>
+                  <strong style={{display:"block",fontSize:18,fontWeight:700}}>{v}</strong>
+                  <small style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>{l}</small>
                 </div>
               ))}
-            </div>
-            <div style={{marginTop:28,padding:14,borderRadius:12,background:"rgba(255,255,255,0.04)",border:"1px solid #1F3A33",display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:36,height:36,borderRadius:"50%",background:"#1D9E75",display:"grid",placeItems:"center",flexShrink:0}}>
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              </div>
-              <div>
-                <div style={{fontSize:13,fontWeight:500,color:"white"}}>Suporte por WhatsApp</div>
-                <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:"#8DA39A",textDecoration:"none"}}>(11) 95892-4764</a>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Direito */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#FAFAF9"}}>
-          <div style={{width:"100%",maxWidth:360}}>
-            <h1 style={{margin:"0 0 8px",fontSize:26,fontWeight:600,letterSpacing:"-0.02em",color:"#0C0A09"}}>Entrar no VendaPro</h1>
-            <p style={{fontSize:14,color:"#78716C",margin:"0 0 28px"}}>Acesse sua conta e gerencie sua loja.</p>
-            {error && (
-              <div style={{marginBottom:16,padding:"10px 14px",background:"#FEE2E2",border:"1px solid #FECACA",borderRadius:8,fontSize:13,color:"#B91C1C"}}>
-                {error}
-              </div>
-            )}
+        {/* DIREITO */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"48px 32px",background:"#0C1520"}}>
+          <div style={{width:"100%",maxWidth:380}}>
+            <h1 style={{margin:"0 0 8px",fontSize:26,fontWeight:700,letterSpacing:"-0.025em",color:"white"}}>Entrar no VendaPro</h1>
+            <p style={{fontSize:14,color:"rgba(255,255,255,0.4)",margin:"0 0 28px"}}>Acesse sua conta e gerencie sua loja.</p>
+
+            {error && <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:8,fontSize:13,color:"#f87171"}}>{error}</div>}
+
             <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}}>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>E-mail</label>
-                <input className="login-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required/>
+                <label style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>E-mail</label>
+                <input className="l-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required/>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                <label style={{fontSize:12,fontWeight:500,color:"#57534E"}}>Senha</label>
+                <label style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".06em"}}>Senha</label>
                 <div style={{position:"relative"}}>
-                  <input className="login-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:42}}/>
-                  <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#78716C",fontSize:13}}>
+                  <input className="l-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:52}}/>
+                  <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:500}}>
                     {show?"Ocultar":"Ver"}
                   </button>
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:13}}>
-                <span style={{color:"#78716C"}}>Esqueceu a senha?</span>
-                <a href="https://wa.me/5511958924764?text=Olá,%20esqueci%20minha%20senha%20do%20VendaPro" target="_blank" rel="noopener noreferrer" style={{color:"#1D9E75",fontWeight:500,textDecoration:"none"}}>Falar com suporte</a>
+                <label style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",color:"rgba(255,255,255,0.5)"}}>
+                  <input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} style={{accentColor:pal.color,width:14,height:14}}/>
+                  Lembrar-me
+                </label>
+                <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer" style={{color:pal.color,fontWeight:500,textDecoration:"none"}}>Esqueci a senha</a>
               </div>
-              <button className="login-btn" type="submit" disabled={loading} style={{marginTop:4}}>
+              <button className="l-btn" type="submit" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </button>
             </form>
-            <div style={{marginTop:24,paddingTop:18,borderTop:"1px solid #E7E5E4",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,color:"#78716C"}}>
-              VendaPro - Gestão para varejo
-              <span>v2.0</span>
+
+            {/* DEMO */}
+            <div style={{marginTop:20,padding:14,borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)"}}>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginBottom:10,fontWeight:500}}>Demo — entrar como:</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                <button className="demo-btn" onClick={()=>quickLogin("admin@vendapro.com.br","VendaPro@2026!")} style={{background:pal.color,color:"white",borderColor:pal.color}}>Dona de loja</button>
+                <button className="demo-btn" onClick={()=>quickLogin("vendedor@vendapro.com.br","123456")} style={{background:"transparent",color:"rgba(255,255,255,0.6)",borderColor:"rgba(255,255,255,0.15)"}}>Vendedora</button>
+                <button className="demo-btn" onClick={()=>quickLogin("superadmin@vendapro.com.br","super123")} style={{background:"transparent",color:"rgba(255,255,255,0.6)",borderColor:"rgba(255,255,255,0.15)"}}>Super Admin</button>
+              </div>
+            </div>
+
+            <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,color:"rgba(255,255,255,0.25)"}}>
+              <span>Novo no VendaPro? <a href="#" style={{color:pal.color,textDecoration:"none",fontWeight:500}}>Crie sua loja</a></span>
+              <span>v2.4</span>
             </div>
           </div>
         </div>
@@ -223,4 +261,3 @@ export default function LoginPage() {
     </>
   )
 }
-
