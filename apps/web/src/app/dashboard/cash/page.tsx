@@ -217,7 +217,7 @@ export default function CashPage() {
 
         .kpi-dlt{font-size:11px;color:var(--text-subtle);margin-top:2px;}
 
-        .nbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--brand,#1D9E75);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;width:100%;margin-bottom:14px;cursor:pointer;}
+        .nbtn{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:white;border:none;border-radius:var(--r);padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);margin-bottom:0;} .nbtn:hover{filter:brightness(1.1);}
 
         .entry-card{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);}
 
