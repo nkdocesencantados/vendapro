@@ -85,20 +85,18 @@ function MockupCard({ color }: { color: string }) {
         {/* barras SVG com gradiente premium */}
         <svg viewBox="0 0 280 80" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
           <defs>
-            {BAR_HEIGHTS.map((_,i) => (
-              <linearGradient key={i} id={`bg${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor={color} stopOpacity={0.75}/>
-                <stop offset="100%" stopColor={color} stopOpacity={0.25}/>
-              </linearGradient>
-            ))}
+            <linearGradient id="bar-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={color} stopOpacity="0.85"/>
+              <stop offset="100%" stopColor={color} stopOpacity="0.2"/>
+            </linearGradient>
           </defs>
           {BAR_HEIGHTS.map((h,i) => {
             const bh = (h/100)*68
             const x  = i*36 + 6
             return <rect key={i} x={x} y={80-bh} width={24} height={bh} rx="3"
-              fill={`url(#bg${i})`}
+              fill="url(#bar-grad)"
               stroke={color}
-              strokeOpacity={BAR_OPACITIES[i] + 0.2}
+              strokeOpacity={0.6}
               strokeWidth="0.8"/>
           })}
         </svg>
