@@ -26,12 +26,10 @@ const Logo = ({ size = 32, color = "#1D9E75" }: { size?: number; color?: string 
   </svg>
 )
 
-function MockupPreview({ color }: { color: string }) {
-  const bars   = [32, 44, 52, 68, 58, 62, 78]
-  const days   = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]
-  const linePts = "0,72 43,58 87,65 130,40 173,50 217,28 260,14"
-  const areaPts = "0,100 0,72 43,58 87,65 130,40 173,50 217,28 260,14 260,100"
+const BARS  = [32, 45, 38, 62, 52, 58, 74]
+const DAYS  = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]
 
+function MockupPreview({ color }: { color: string }) {
   return (
     <div style={{
       background:`linear-gradient(145deg,${color}28 0%,${color}14 60%,transparent 100%)`,
@@ -42,6 +40,7 @@ function MockupPreview({ color }: { color: string }) {
       position:"relative",
       overflow:"hidden",
     }}>
+      {/* glow */}
       <div style={{position:"absolute",top:"-50%",right:"-5%",width:"50%",height:"90%",background:`radial-gradient(circle,${color}50,transparent 65%)`,filter:"blur(18px)",pointerEvents:"none"}}/>
 
       {/* titlebar */}
@@ -58,38 +57,52 @@ function MockupPreview({ color }: { color: string }) {
       {/* KPI */}
       <div style={{marginBottom:8,position:"relative"}}>
         <div style={{fontSize:7,color:"rgba(255,255,255,0.38)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:1}}>FATURAMENTO HOJE</div>
-        <div style={{fontFamily:"monospace",fontSize:19,fontWeight:700,color:"white",lineHeight:1}}>
+        <div style={{fontFamily:"monospace",fontSize:20,fontWeight:700,color:"white",lineHeight:1}}>
           R$ <span style={{color:color}}>4.872</span>
         </div>
         <div style={{fontSize:8,color:"rgba(255,255,255,0.28)",marginTop:2}}>▲ 18% vs ontem</div>
       </div>
 
-      {/* chart: linha sobre barras, mesmo SVG */}
-      <div style={{height:64,position:"relative",marginBottom:4}}>
-        <svg viewBox="0 0 260 100" preserveAspectRatio="none" style={{width:"100%",height:"100%"}}>
+      {/* chart container — barras HTML + linha SVG sobrepostos */}
+      <div style={{position:"relative",height:60,marginBottom:4}}>
+
+        {/* BARRAS: flex de divs, alinhadas ao bottom */}
+        <div style={{
+          position:"absolute",bottom:0,left:0,right:0,
+          display:"flex",alignItems:"flex-end",
+          gap:3,height:"100%",
+        }}>
+          {BARS.map((v,i)=>(
+            <div key={i} style={{
+              flex:1,
+              height:`${v}%`,
+              background: i===6 ? color : `${color}40`,
+              borderRadius:"3px 3px 0 0",
+              transition:"height .3s",
+            }}/>
+          ))}
+        </div>
+
+        {/* LINHA SVG: position absolute por cima, pointer-events none */}
+        <svg
+          viewBox="0 0 260 100"
+          preserveAspectRatio="none"
+          style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}}
+        >
           <defs>
             <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.28"/>
+              <stop offset="0%" stopColor={color} stopOpacity="0.32"/>
               <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
             </linearGradient>
           </defs>
-          {/* barras como rects */}
-          {bars.map((v,i) => {
-            const w = 28
-            const x = i * (260/7) + (260/7 - w)/2
-            const h = v * 0.55
-            return <rect key={i} x={x} y={100-h} width={w} height={h} rx="3"
-              fill={i===6?color:`${color}38`}/>
-          })}
-          {/* area e linha */}
-          <polygon points={areaPts} fill="url(#ag)"/>
-          <polyline points={linePts} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+          <polygon points="0,100 0,72 43,55 87,65 130,35 173,48 217,22 260,8 260,100" fill="url(#ag)"/>
+          <polyline points="0,72 43,55 87,65 130,35 173,48 217,22 260,8" fill="none" stroke={color} strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round"/>
         </svg>
       </div>
 
       {/* dias */}
       <div style={{display:"flex",gap:0,marginBottom:8}}>
-        {days.map((d,i)=>(
+        {DAYS.map((d,i)=>(
           <div key={d} style={{flex:1,textAlign:"center",fontSize:6.5,color:i===6?"rgba(255,255,255,0.55)":"rgba(255,255,255,0.2)"}}>{d}</div>
         ))}
       </div>
@@ -143,7 +156,7 @@ export default function LoginPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; }
+        html, body { height: 100%; font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; }
         .l-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none; width: 100%; color: white; font-family: inherit; transition: all .15s; }
         .l-input:focus { box-shadow: 0 0 0 3px rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
         .l-input::placeholder { color: rgba(255,255,255,0.25); }
@@ -153,7 +166,6 @@ export default function LoginPage() {
         .pal-dot { width: 34px; height: 34px; border-radius: 9px; border: 2.5px solid transparent; cursor: pointer; transition: all .18s; }
         .pal-dot:hover { transform: scale(1.1); }
         .pal-dot.active { border-color: white; transform: scale(1.18); box-shadow: 0 0 0 3px rgba(0,0,0,0.5); }
-        @media (max-width: 767px) { html, body { overflow: auto; } }
       `}</style>
 
       {/* MOBILE */}
@@ -200,8 +212,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* DESKTOP — altura exata da viewport, sem scroll */}
-      <div className="hidden md:flex" style={{height:"100vh",flexDirection:"row",overflow:"hidden"}}>
+      {/* DESKTOP */}
+      <div className="hidden md:flex" style={{height:"100vh",overflow:"hidden"}}>
 
         {/* ESQUERDO */}
         <div style={{flex:1,background:"#08101A",color:"white",padding:"32px 40px",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden"}}>
@@ -214,19 +226,19 @@ export default function LoginPage() {
             <strong style={{fontSize:16,letterSpacing:"-0.01em"}}>VendaPro</strong>
           </div>
 
-          {/* conteúdo central */}
-          <div style={{position:"relative",flex:1,display:"flex",flexDirection:"column",justifyContent:"center",paddingTop:24}}>
+          {/* corpo */}
+          <div style={{position:"relative",flex:1,display:"flex",flexDirection:"column",justifyContent:"center",paddingTop:20}}>
             <h2 style={{fontSize:32,fontWeight:700,lineHeight:1.08,letterSpacing:"-0.03em",margin:"0 0 8px"}}>
               Sua loja, <span style={{color:pal.color,transition:"color .3s"}}>sua cor</span>,<br/>sua identidade.
             </h2>
-            <p style={{fontSize:12.5,lineHeight:1.65,color:"rgba(255,255,255,0.38)",margin:"0 0 18px",maxWidth:360}}>
+            <p style={{fontSize:12.5,lineHeight:1.65,color:"rgba(255,255,255,0.38)",margin:"0 0 16px",maxWidth:360}}>
               O VendaPro se molda à sua marca: escolha a paleta e cada gráfico, botão e relatório veste a cara da sua loja. Vendas, estoque, caixa e equipe em um só sistema.
             </p>
 
             <MockupPreview color={pal.color}/>
 
-            {/* seletor paletas */}
-            <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px",marginBottom:18}}>
+            {/* seletor */}
+            <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
               <div style={{fontSize:10,color:"rgba(255,255,255,0.32)",marginBottom:10,display:"flex",alignItems:"center",gap:5}}>
                 <span>⊕</span> Experimente uma paleta
               </div>
@@ -244,7 +256,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* stats rodapé */}
+            {/* stats */}
             <div style={{display:"flex",gap:20,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
               {[["7 dias","trial grátis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
                 <div key={l}>
