@@ -82,15 +82,24 @@ function MockupCard({ color }: { color: string }) {
           </svg>
         </div>
 
-        {/* barras SVG — coordenadas absolutas, sem distorcao */}
+        {/* barras SVG com gradiente premium */}
         <svg viewBox="0 0 280 80" style={{width:"100%",height:"auto",display:"block",marginBottom:4}} xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            {BAR_HEIGHTS.map((_,i) => (
+              <linearGradient key={i} id={`bg${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor={color} stopOpacity={BAR_OPACITIES[i] * 1.8}/>
+                <stop offset="100%" stopColor={color} stopOpacity={BAR_OPACITIES[i] * 0.4}/>
+              </linearGradient>
+            ))}
+          </defs>
           {BAR_HEIGHTS.map((h,i) => {
             const bh = (h/100)*68
             const x  = i*36 + 6
-            return <rect key={i} x={x} y={80-bh} width={24} height={bh} rx="2"
-              fill={`rgba(${rgb},${BAR_OPACITIES[i]})`}
-              stroke={`rgba(${rgb},${BAR_OPACITIES[i]+0.15})`}
-              strokeWidth="1"/>
+            return <rect key={i} x={x} y={80-bh} width={24} height={bh} rx="3"
+              fill={`url(#bg${i})`}
+              stroke={color}
+              strokeOpacity={BAR_OPACITIES[i] + 0.2}
+              strokeWidth="0.8"/>
           })}
         </svg>
 
