@@ -163,7 +163,7 @@ export default function ReportsPage() {
 
         .kpi .lbl{font-size:clamp(11px,1vw,13px);color:var(--text-subtle);margin-bottom:4px;}
 
-        .kpi .val{font-size:clamp(14px,4vw,20px);font-weight:600;letter-spacing:-.02em;}
+        .kpi .val{font-family:var(--font-mono);font-size:clamp(14px,4vw,20px);font-weight:600;letter-spacing:-.02em;}
 
         .kpi .dlt{font-size:11px;color:#1D9E75;margin-top:2px;}
 
