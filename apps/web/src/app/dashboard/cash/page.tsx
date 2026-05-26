@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 
@@ -79,7 +79,7 @@ function exportCashPDF(entries: any[], income: number, expense: number, profit: 
 
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
-const CAT_MAP: Record<string,string> = { sale:"Venda", service:"ServiÃƒÆ’Ã‚Â§o", rent:"Aluguel", salary:"SalÃƒÆ’Ã‚Â¡rio", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
+const CAT_MAP: Record<string,string> = { sale:"Venda", service:"Serviço", rent:"Aluguel", salary:"Salário", supplier:"Fornecedor", tax:"Imposto", utilities:"Contas", marketing:"Marketing", other:"Outros" }
 
 
 
@@ -327,7 +327,7 @@ export default function CashPage() {
 
         ) : entries.length===0 ? (
 
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lanÃƒÆ’Ã‚Â§amento neste perÃƒÆ’Ã‚Â­odo.</div>
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum lançamento neste período.</div>
 
         ) : entries.map((e:any)=>(
 
@@ -337,7 +337,7 @@ export default function CashPage() {
 
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={e.type==="income"?"#1D9E75":"#f87171"} strokeWidth="2.5" strokeLinecap="round">
 
-      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lanÃƒÂ§amento</button>
+      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lançamento</button>
 
               </svg>
 
@@ -411,7 +411,7 @@ export default function CashPage() {
 
             <div className="vp-modal-head">
 
-              <h2>Novo lanÃƒÆ’Ã‚Â§amento</h2>
+              <h2>Novo lançamento</h2>
 
               <button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowForm(false)}>X</button>
 
@@ -445,11 +445,11 @@ export default function CashPage() {
 
                     {form.type==="income"?(
 
-                      <><option value="sale">Venda</option><option value="service">ServiÃƒÆ’Ã‚Â§o</option><option value="other">Outros</option></>
+                      <><option value="sale">Venda</option><option value="service">Serviço</option><option value="other">Outros</option></>
 
                     ):(
 
-                      <><option value="rent">Aluguel</option><option value="salary">SalÃƒÆ’Ã‚Â¡rio</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
+                      <><option value="rent">Aluguel</option><option value="salary">Salário</option><option value="supplier">Fornecedor</option><option value="tax">Imposto</option><option value="utilities">Contas</option><option value="marketing">Marketing</option><option value="other">Outros</option></>
 
                     )}
 
@@ -463,7 +463,7 @@ export default function CashPage() {
 
                 <label>Descricao</label>
 
-                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mÃƒÆ’Ã‚Âªs" />
+                <input className="vp-input" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Ex: Aluguel do mês" />
 
               </div>
 

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 
@@ -482,7 +482,7 @@ export default function SalesPage() {
 
                     <option value="credit_card">Cartão Crédito</option>
 
-                    <option value="debit_card">CartÃƒÆ’Ã‚Â£o DÃƒÆ’Ã‚Â©bito</option>
+                    <option value="debit_card">Cartão Débito</option>
 
                   </select>
 
@@ -580,7 +580,7 @@ export default function SalesPage() {
 
             <div className="vp-modal-body">
 
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta ação não pode ser desfeita.</p>
 
             </div>
 

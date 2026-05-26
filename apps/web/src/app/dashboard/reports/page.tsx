@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 
@@ -58,7 +58,7 @@ function exportRepCSV(products: any[], from: string, to: string) {
 
 }
 
-﻿function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
+function exportRepPDF(products: any[], revenue: number, profit: number, totalSales: number, from: string, to: string) {
   const margin=revenue>0?Math.round((profit/revenue)*100):0;
   const maxRev=products.length>0?Number(products[0].revenue):1;
   const rows=products.map((p:any,i:number)=>{
@@ -79,7 +79,7 @@ function exportRepCSV(products: any[], from: string, to: string) {
 
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
-const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"CrÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â©dito",debit_card:"DÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â©bito"}
+const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Crédito",debit_card:"Débito"}
 
 
 
@@ -277,7 +277,7 @@ export default function ReportsPage() {
 
                 <div style={{padding:"10px 14px"}}>
 
-                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â­odo.</div>
+                  {products.length===0 ? <div style={{color:"var(--text-subtle)",fontSize:13}}>Sem dados no período.</div>
 
                   : products.map((p:any,i:number)=>{
 
@@ -425,7 +425,7 @@ export default function ReportsPage() {
 
                   </>
 
-                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no perÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â­odo.</div>}
+                ) : <div style={{textAlign:"center",padding:32,color:"var(--text-subtle)",fontSize:13}}>Sem dados no período.</div>}
 
               </div>
 
@@ -441,7 +441,7 @@ export default function ReportsPage() {
 
               <div className="card" style={{padding:14,marginBottom:10}}>
 
-                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do perÃƒÂƒÃ†Â’ÃƒÂ‚Ã‚Â­odo</div>
+                <div style={{fontSize:13,fontWeight:600,marginBottom:12,color:"var(--text)"}}>Fluxo do período</div>
 
                 <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid var(--border)"}}>
 
