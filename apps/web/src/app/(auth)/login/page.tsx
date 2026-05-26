@@ -26,10 +26,20 @@ const Logo = ({ size = 32, color = "#1D9E75" }: { size?: number; color?: string 
   </svg>
 )
 
-const BARS  = [32, 45, 38, 62, 52, 58, 74]
+// Tudo num unico SVG com coordenadas absolutas — sem distorcao
+// viewBox 280x90, barras como rects, linha por cima
+const BARS  = [20, 30, 24, 42, 34, 38, 50]
 const DAYS  = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]
+// linha passa levemente acima das barras
+const LINE  = "4,68 44,52 84,60 124,32 164,44 204,18 244,6"
+const AREA  = "4,90 4,68 44,52 84,60 124,32 164,44 204,18 244,6 244,90"
 
 function MockupPreview({ color }: { color: string }) {
+  const BAR_W = 28
+  const GAP   = 12
+  const BASE  = 90
+  const MAX_H = 52
+
   return (
     <div style={{
       background:`linear-gradient(145deg,${color}28 0%,${color}14 60%,transparent 100%)`,
@@ -40,7 +50,6 @@ function MockupPreview({ color }: { color: string }) {
       position:"relative",
       overflow:"hidden",
     }}>
-      {/* glow */}
       <div style={{position:"absolute",top:"-50%",right:"-5%",width:"50%",height:"90%",background:`radial-gradient(circle,${color}50,transparent 65%)`,filter:"blur(18px)",pointerEvents:"none"}}/>
 
       {/* titlebar */}
@@ -63,52 +72,51 @@ function MockupPreview({ color }: { color: string }) {
         <div style={{fontSize:8,color:"rgba(255,255,255,0.28)",marginTop:2}}>▲ 18% vs ontem</div>
       </div>
 
-      {/* chart container — barras HTML + linha SVG sobrepostos */}
-      <div style={{position:"relative",height:60,marginBottom:4}}>
+      {/* SVG unificado: barras + linha + area */}
+      <svg viewBox="0 0 280 96" style={{width:"100%",height:"auto",display:"block",marginBottom:2}} xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.35"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+          </linearGradient>
+        </defs>
 
-        {/* BARRAS: flex de divs, alinhadas ao bottom */}
-        <div style={{
-          position:"absolute",bottom:0,left:0,right:0,
-          display:"flex",alignItems:"flex-end",
-          gap:3,height:"100%",
-        }}>
-          {BARS.map((v,i)=>(
-            <div key={i} style={{
-              flex:1,
-              height:`${v}%`,
-              background: i===6 ? color : `${color}40`,
-              borderRadius:"3px 3px 0 0",
-              transition:"height .3s",
-            }}/>
-          ))}
-        </div>
+        {/* barras */}
+        {BARS.map((v, i) => {
+          const bh = (v / 50) * MAX_H
+          const x  = i * (BAR_W + GAP) + 4
+          return (
+            <rect
+              key={i}
+              x={x} y={BASE - bh}
+              width={BAR_W} height={bh}
+              rx="3"
+              fill={i === 6 ? color : `${color}45`}
+            />
+          )
+        })}
 
-        {/* LINHA SVG: position absolute por cima, pointer-events none */}
-        <svg
-          viewBox="0 0 260 100"
-          preserveAspectRatio="none"
-          style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}}
-        >
-          <defs>
-            <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.32"/>
-              <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
-            </linearGradient>
-          </defs>
-          <polygon points="0,100 0,72 43,55 87,65 130,35 173,48 217,22 260,8 260,100" fill="url(#ag)"/>
-          <polyline points="0,72 43,55 87,65 130,35 173,48 217,22 260,8" fill="none" stroke={color} strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round"/>
-        </svg>
-      </div>
+        {/* area e linha */}
+        <polygon points={AREA} fill="url(#ag2)"/>
+        <polyline points={LINE} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
 
-      {/* dias */}
-      <div style={{display:"flex",gap:0,marginBottom:8}}>
-        {DAYS.map((d,i)=>(
-          <div key={d} style={{flex:1,textAlign:"center",fontSize:6.5,color:i===6?"rgba(255,255,255,0.55)":"rgba(255,255,255,0.2)"}}>{d}</div>
-        ))}
-      </div>
+        {/* labels dias */}
+        {DAYS.map((d, i) => {
+          const x = i * (BAR_W + GAP) + 4 + BAR_W / 2
+          return (
+            <text
+              key={d}
+              x={x} y="96"
+              textAnchor="middle"
+              fontSize="6.5"
+              fill={i === 6 ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.22)"}
+            >{d}</text>
+          )
+        })}
+      </svg>
 
       {/* pills */}
-      <div style={{display:"flex",gap:4}}>
+      <div style={{display:"flex",gap:4,marginTop:2}}>
         {["● 24 vendas","Meta 84%","● 7 vendedoras"].map((t,i)=>(
           <span key={t} style={{
             background:i===1?`${color}25`:"rgba(255,255,255,0.05)",
@@ -220,13 +228,11 @@ export default function LoginPage() {
           <div style={{position:"absolute",top:"5%",right:"-10%",width:"55%",height:"55%",background:`radial-gradient(circle,${pal.color}24,transparent 65%)`,filter:"blur(45px)",pointerEvents:"none",transition:"background .5s"}}/>
           <div style={{position:"absolute",bottom:"-5%",left:"-5%",width:"40%",height:"40%",background:`radial-gradient(circle,${pal.color}14,transparent 65%)`,filter:"blur(35px)",pointerEvents:"none",transition:"background .5s"}}/>
 
-          {/* logo */}
           <div style={{display:"flex",alignItems:"center",gap:10,position:"relative",flexShrink:0}}>
             <Logo size={32} color={pal.color}/>
             <strong style={{fontSize:16,letterSpacing:"-0.01em"}}>VendaPro</strong>
           </div>
 
-          {/* corpo */}
           <div style={{position:"relative",flex:1,display:"flex",flexDirection:"column",justifyContent:"center",paddingTop:20}}>
             <h2 style={{fontSize:32,fontWeight:700,lineHeight:1.08,letterSpacing:"-0.03em",margin:"0 0 8px"}}>
               Sua loja, <span style={{color:pal.color,transition:"color .3s"}}>sua cor</span>,<br/>sua identidade.
@@ -237,7 +243,6 @@ export default function LoginPage() {
 
             <MockupPreview color={pal.color}/>
 
-            {/* seletor */}
             <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
               <div style={{fontSize:10,color:"rgba(255,255,255,0.32)",marginBottom:10,display:"flex",alignItems:"center",gap:5}}>
                 <span>⊕</span> Experimente uma paleta
@@ -256,7 +261,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* stats */}
             <div style={{display:"flex",gap:20,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
               {[["7 dias","trial grátis"],["3 planos","para cada momento"],["100%","na nuvem"]].map(([v,l])=>(
                 <div key={l}>
