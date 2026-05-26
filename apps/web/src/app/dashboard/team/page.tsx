@@ -88,10 +88,10 @@ export default function TeamPage() {
             {sellers.length} / {maxSellers} vendedores - plano {planLabel[plan]||plan}
           </div>
         </div>
+        <button className="nbtn" disabled={atLimit} onClick={()=>setShowForm(true)} style={atLimit?{opacity:0.5,cursor:"not-allowed"}:{}}>
+          + Adicionar vendedor
+        </button>
       </div>
-
-      <button className="nbtn" disabled={atLimit} onClick={()=>setShowForm(true)} style={atLimit?{opacity:0.5,cursor:"not-allowed"}:{}}>
-        + Adicionar vendedor
       </button>
 
       {atLimit && maxSellers > 0 && (
@@ -181,4 +181,5 @@ export default function TeamPage() {
     </div>
   )
 }
+
 
