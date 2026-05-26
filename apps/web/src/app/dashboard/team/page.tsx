@@ -65,7 +65,7 @@ export default function TeamPage() {
         .vp-modal-head h2{margin:0;font-size:16px;font-weight:600;}
         .vp-modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
         .vp-modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
-        .nbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--brand,#1D9E75);color:white;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:600;width:100%;margin-bottom:14px;cursor:pointer;}
+        .nbtn{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:white;border:none;border-radius:var(--r);padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);} .nbtn:hover{filter:brightness(1.1);}
         .member-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;}
         .mc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
         .mc-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;}
