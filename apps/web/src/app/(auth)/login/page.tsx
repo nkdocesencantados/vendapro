@@ -65,7 +65,7 @@ function MockupCard({ color }: { color: string }) {
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:8}}>
           <div>
             <div style={{fontSize:8,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:3}}>FATURAMENTO HOJE</div>
-            <div style={{fontFamily:"'Courier New',monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em"}}>
+            <div style={{fontFamily:"'Geist Mono','Courier New',monospace",fontSize:22,fontWeight:700,color:"white",lineHeight:1,letterSpacing:"-.02em"}}>
               R$&nbsp;<span style={{color}}>{`4.872`}</span>
             </div>
             <div style={{fontSize:9,color:"rgba(255,255,255,0.38)",marginTop:3}}>▲ 18%&nbsp;vs ontem</div>
