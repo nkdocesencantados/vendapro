@@ -92,7 +92,7 @@ export default function TeamPage() {
           + Adicionar vendedor
         </button>
       </div>
-      </button>
+
 
       {atLimit && maxSellers > 0 && (
         <div style={{marginBottom:14,padding:14,background:"var(--info-bg)",border:"1px solid var(--info)",borderRadius:12}}>
@@ -181,5 +181,6 @@ export default function TeamPage() {
     </div>
   )
 }
+
 
 
