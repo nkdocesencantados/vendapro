@@ -256,6 +256,7 @@ export default function CashPage() {
           <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>{MONTHS[month-1]} de {year}</div>
 
         </div>
+      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lançamento</button>
 
       </div>
 
@@ -337,7 +338,7 @@ export default function CashPage() {
 
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={e.type==="income"?"#1D9E75":"#f87171"} strokeWidth="2.5" strokeLinecap="round">
 
-      <button className="nbtn" onClick={()=>{setForm({type:"expense",category:"",description:"",amount:0,date:new Date().toISOString().split("T")[0],isPaid:true});setShowForm(true)}}>+ Novo lançamento</button>
+
 
               </svg>
 
