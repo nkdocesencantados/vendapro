@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
 import Link from "next/link"
+import CommandPalette from "@/components/CommandPalette"
 
 const NAV_ALL = [
   { id:"dashboard",  href:"/dashboard",          label:"Dashboard",  icon:"dashboard" },
@@ -70,6 +71,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [dark,       setDark]       = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [search,     setSearch]     = useState("")
+  const [cmdOpen,    setCmdOpen]    = useState(false)
 
   useEffect(() => {
     if (!authUser) { router.push("/login"); return }
@@ -179,15 +181,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="vp-breadcrumb-current">{pageName}</span>
           </div>
 
-          <div className="vp-search">
+          <div className="vp-search" onClick={() => setCmdOpen(true)} style={{cursor:"pointer"}}>
             <Icon name="search" size={14}/>
-            <input
-              placeholder="Buscar venda, produto, cliente..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            <span style={{fontSize:11,color:"var(--text-subtle)",whiteSpace:"nowrap"}}>⌘K</span>
+            <span style={{flex:1,fontSize:13,color:"var(--text-subtle)"}}>Buscar venda, produto, cliente...</span>
+            <span style={{fontSize:11,color:"var(--text-subtle)",whiteSpace:"nowrap",background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:5,padding:"1px 6px"}}>⌘K</span>
           </div>
+          <CommandPalette/>
 
           <div className="vp-topbar-actions">
             <button className="vp-icon-btn" onClick={toggleDark} title={dark ? "Modo claro" : "Modo escuro"}>

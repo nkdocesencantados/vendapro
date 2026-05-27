@@ -21,4 +21,10 @@ export class ReportsController {
     const sellerId = req.user.role === "seller" ? req.user.id : undefined;
     return this.service.advanced(req.user.storeId, from || defaultFrom, to || defaultTo, sellerId);
   }
+
+  @Get('search')
+  search(@Query('storeId') storeId: string, @Query('q') q: string) {
+    return this.reportsService.search(storeId, q)
+  }
+
 }

@@ -141,5 +141,25 @@ export class ReportsService {
     const monthlyGoal = storeRows2?.[0]?.monthlyGoal ? Number(storeRows2[0].monthlyGoal) : 20000;
     return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal };
   }
-}
 
+  async search(storeId: string, q: string) {
+    if (!q || q.trim().length < 2) return { sales: [], products: [] }
+    const term = q.trim().toLowerCase()
+    const { Product } = await import("../products/product.entity")
+    const products = await this.productRepo.createQueryBuilder("p")
+      .where("p.storeId = :storeId", { storeId })
+      .andWhere("LOWER(p.name) LIKE :term", { term: `%${term}%` })
+      .take(5).getMany()
+    const sales = await this.saleRepo.createQueryBuilder("s")
+      .where("s.storeId = :storeId", { storeId })
+      .andWhere("s.status = 'completed'")
+      .andWhere("(LOWER(s.customerName) LIKE :term OR CAST(s.total AS TEXT) LIKE :term)", { term: `%${term}%` })
+      .orderBy("s.createdAt", "DESC")
+      .take(5).getMany()
+    return {
+      products: products.map(p => ({ id: p.id, name: p.name, stock: p.stock, price: p.price, type: "product" })),
+      sales: sales.map(s => ({ id: s.id, customerName: s.customerName || "Cliente avulso", total: s.total, createdAt: s.createdAt, type: "sale" })),
+    }
+  }
+
+}
