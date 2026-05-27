@@ -28,7 +28,7 @@ export class ReportsService {
     const monthSales = await this.saleRepo.find({ where: monthWhere });
     const todayTotal = todaySales.reduce((a, s) => a + Number(s.total), 0);
     const monthTotal = monthSales.reduce((a, s) => a + Number(s.total), 0);
-    const avgTicket = todaySales.length ? todayTotal / todaySales.length : 0;
+    const avgTicket = monthSales.length ? monthTotal / monthSales.length : 0;
     const storeRows = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
     const monthGoal = storeRows?.[0]?.monthlyGoal ? Number(storeRows[0].monthlyGoal) : 20000;
     const weeklyChart = [];
