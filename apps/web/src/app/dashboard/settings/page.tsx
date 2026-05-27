@@ -33,7 +33,6 @@ export default function SettingsPage() {
   const [name,     setName]     = useState("")
   const [palette,  setPalette]  = useState("emerald")
   const [goal,     setGoal]     = useState("")
-  const [lowStock, setLowStock] = useState("5")
   const [address,  setAddress]  = useState("")
   const [userName, setUserName] = useState("")
   const [userEmail,setUserEmail]= useState("")
@@ -49,7 +48,7 @@ export default function SettingsPage() {
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
         setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):"")
-        setLowStock(String(s.lowStockThreshold||"5")); setAddress(s.address||""); setStoreId(s.id)
+setAddress(s.address||""); setStoreId(s.id)
         if(s.palette){ setPalette(s.palette); applyPalette(s.palette) }
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
@@ -66,10 +65,10 @@ export default function SettingsPage() {
   async function saveStore(){
     setSaving(true)
     try{
-      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, lowStockThreshold:+lowStock||5, address })
+      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address })
       const sc = localStorage.getItem("storeConfig")
       const store = sc?JSON.parse(sc):{}
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,lowStockThreshold:+lowStock||5,address}))
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     }catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
@@ -165,17 +164,11 @@ export default function SettingsPage() {
               <input className="st-input" value={address} onChange={e=>setAddress(e.target.value)} placeholder="R. das Flores, 142 — São Paulo/SP"/>
             </div>
 
-            <div className="st-row">
-              <div className="st-field">
-                <label className="st-label">Meta mensal (R$)</label>
-                <div style={{position:"relative"}}>
-                  <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"var(--text-subtle)",fontSize:13,pointerEvents:"none"}}>R$</span>
-                  <input className="st-input" type="number" value={goal} onChange={e=>setGoal(e.target.value)} style={{paddingLeft:36}} placeholder="0"/>
-                </div>
-              </div>
-              <div className="st-field">
-                <label className="st-label">Estoque mínimo</label>
-                <input className="st-input" type="number" value={lowStock} onChange={e=>setLowStock(e.target.value)} placeholder="5"/>
+            <div className="st-field">
+              <label className="st-label">Meta mensal (R$)</label>
+              <div style={{position:"relative"}}>
+                <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"var(--text-subtle)",fontSize:13,pointerEvents:"none"}}>R$</span>
+                <input className="st-input" type="number" value={goal} onChange={e=>setGoal(e.target.value)} style={{paddingLeft:36}} placeholder="0"/>
               </div>
             </div>
           </div>
