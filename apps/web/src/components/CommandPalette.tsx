@@ -27,10 +27,9 @@ export default function CommandPalette() {
   const debounce = useRef<any>(null)
 
   const storeId = typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("storeConfig") || "{}").id || ""
+    ? (() => { try { return JSON.parse(localStorage.getItem("storeConfig") || "{}").id || "" } catch { return "" } })()
     : ""
 
-  // Abrir com Ctrl+K ou /
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setOpen(o => !o) }
@@ -41,13 +40,17 @@ export default function CommandPalette() {
   }, [])
 
   useEffect(() => {
-    if (open) { setTimeout(() => inputRef.current?.focus(), 50); setQuery(""); setResults({ sales:[], products:[] }) }
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 50)
+      setQuery("")
+      setResults({ sales: [], products: [] })
+    }
   }, [open])
 
-  const search = useCallback((q: string) => {
-    if (!q || q.length < 2) { setResults({ sales:[], products:[] }); return }
+  const doSearch = useCallback((q: string) => {
+    if (!q || q.length < 2) { setResults({ sales: [], products: [] }); return }
     setLoading(true)
-    api.get(`/reports/search?storeId=${storeId}&q=${encodeURIComponent(q)}`)
+    api.get("/reports/search?storeId=" + storeId + "&q=" + encodeURIComponent(q))
       .then(r => { setResults(r.data); setSel(0) })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -57,10 +60,10 @@ export default function CommandPalette() {
     const v = e.target.value
     setQuery(v)
     clearTimeout(debounce.current)
-    debounce.current = setTimeout(() => search(v), 280)
+    debounce.current = setTimeout(() => doSearch(v), 280)
   }
 
-  const allResults: Result[] = [
+  const allItems: Result[] = [
     ...results.sales.map(s => ({ ...s, type: "sale" as const })),
     ...results.products.map(p => ({ ...p, type: "product" as const })),
   ]
@@ -72,9 +75,9 @@ export default function CommandPalette() {
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") { e.preventDefault(); setSel(s => Math.min(s+1, allResults.length-1)) }
-    if (e.key === "ArrowUp")   { e.preventDefault(); setSel(s => Math.max(s-1, 0)) }
-    if (e.key === "Enter" && allResults[sel]) navigate(allResults[sel])
+    if (e.key === "ArrowDown") { e.preventDefault(); setSel(s => Math.min(s + 1, allItems.length - 1)) }
+    if (e.key === "ArrowUp")   { e.preventDefault(); setSel(s => Math.max(s - 1, 0)) }
+    if (e.key === "Enter" && allItems[sel]) navigate(allItems[sel])
   }
 
   if (!open) return null
@@ -82,28 +85,34 @@ export default function CommandPalette() {
   const hasSales    = results.sales.length > 0
   const hasProducts = results.products.length > 0
   const hasAny      = hasSales || hasProducts
-  let idx = -1
+
+  const shortcuts = [
+    { label: "Nova venda",    href: "/dashboard/sales",     icon: "🛍️" },
+    { label: "Ver estoque",   href: "/dashboard/inventory", icon: "📦" },
+    { label: "Relatórios",    href: "/dashboard/reports",   icon: "📊" },
+    { label: "Configurações", href: "/dashboard/settings",  icon: "⚙️" },
+  ]
 
   return (
-    <>
+    <div>
       <div
         onClick={() => setOpen(false)}
-        style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",zIndex:9998}}
+        style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.6)", backdropFilter:"blur(6px)", zIndex:9998 }}
       />
       <div style={{
-        position:"fixed",top:"15%",left:"50%",transform:"translateX(-50%)",
-        width:"min(580px,90vw)",
+        position:"fixed", top:"15%", left:"50%", transform:"translateX(-50%)",
+        width:"min(580px, 90vw)",
         background:"var(--surface)",
         border:"1px solid var(--border-strong)",
         borderRadius:16,
-        boxShadow:"0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--brand-glow)",
+        boxShadow:"0 24px 60px rgba(0,0,0,0.5)",
         zIndex:9999,
         overflow:"hidden",
       }}>
-        {/* Input */}
-        <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--border)"}}>
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"14px 16px", borderBottom:"1px solid var(--border)" }}>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0 }}>
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
           </svg>
           <input
             ref={inputRef}
@@ -111,62 +120,59 @@ export default function CommandPalette() {
             onChange={onInput}
             onKeyDown={onKeyDown}
             placeholder="Buscar vendas, produtos, clientes..."
-            style={{flex:1,background:"none",border:"none",outline:"none",fontSize:15,color:"var(--text)",fontFamily:"var(--font)"}}
+            style={{ flex:1, background:"none", border:"none", outline:"none", fontSize:15, color:"var(--text)", fontFamily:"var(--font)" }}
           />
           {loading && (
-            <div style={{width:14,height:14,border:"2px solid var(--border)",borderTopColor:"var(--brand)",borderRadius:"50%",animation:"spin 0.7s linear infinite",flexShrink:0}}/>
+            <div style={{ width:14, height:14, border:"2px solid var(--border)", borderTopColor:"var(--brand)", borderRadius:"50%", animation:"spin 0.7s linear infinite", flexShrink:0 }}/>
           )}
-          <kbd style={{fontSize:11,color:"var(--text-subtle)",background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:5,padding:"2px 6px",flexShrink:0}}>ESC</kbd>
+          <kbd style={{ fontSize:11, color:"var(--text-subtle)", background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:5, padding:"2px 6px", flexShrink:0 }}>ESC</kbd>
         </div>
 
-        {/* Results */}
-        <div style={{maxHeight:360,overflowY:"auto"}}>
-          {!hasAny && query.length >= 2 && !loading && (
-            <div style={{padding:"32px 16px",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>
-              Nenhum resultado para <strong style={{color:"var(--text)"}>"{query}"</strong>
+        <div style={{ maxHeight:360, overflowY:"auto" }}>
+          {query.length >= 2 && !hasAny && !loading && (
+            <div style={{ padding:"32px 16px", textAlign:"center", color:"var(--text-subtle)", fontSize:13 }}>
+              Nenhum resultado para <strong style={{ color:"var(--text)" }}>{query}</strong>
             </div>
           )}
-          {!hasAny && query.length < 2 && (
-            <div style={{padding:"24px 16px"}}>
-              <div style={{fontSize:11,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>Atalhos rápidos</div>
-              {[
-                { label:"Nova venda",     href:"/dashboard/sales",     icon:"🛍️" },
-                { label:"Ver estoque",    href:"/dashboard/inventory", icon:"📦" },
-                { label:"Relatórios",     href:"/dashboard/reports",   icon:"📊" },
-                { label:"Configurações",  href:"/dashboard/settings",  icon:"⚙️" },
-              ].map(item => (
-                <div key={item.href} onClick={() => { router.push(item.href); setOpen(false) }}
-                  style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,cursor:"pointer",transition:"background .12s"}}
-                  onMouseEnter={e => (e.currentTarget.style.background="var(--surface-2)")}
-                  onMouseLeave={e => (e.currentTarget.style.background="transparent")}
+
+          {query.length < 2 && (
+            <div style={{ padding:"16px" }}>
+              <div style={{ fontSize:11, color:"var(--text-subtle)", textTransform:"uppercase", letterSpacing:".08em", marginBottom:10 }}>Atalhos rápidos</div>
+              {shortcuts.map(item => (
+                <div
+                  key={item.href}
+                  onClick={() => { router.push(item.href); setOpen(false) }}
+                  style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px", borderRadius:8, cursor:"pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "var(--surface-2)" }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "transparent" }}
                 >
-                  <span style={{fontSize:16}}>{item.icon}</span>
-                  <span style={{fontSize:13,color:"var(--text)"}}>{item.label}</span>
+                  <span style={{ fontSize:16 }}>{item.icon}</span>
+                  <span style={{ fontSize:13, color:"var(--text)" }}>{item.label}</span>
                 </div>
               ))}
             </div>
           )}
 
           {hasSales && (
-            <div style={{padding:"8px 0"}}>
-              <div style={{fontSize:10,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".08em",padding:"4px 16px 6px"}}>Vendas</div>
-              {results.sales.map(s => {
-                idx++
-                const isSel = sel === idx
+            <div style={{ padding:"8px 0" }}>
+              <div style={{ fontSize:10, color:"var(--text-subtle)", textTransform:"uppercase", letterSpacing:".08em", padding:"4px 16px 6px" }}>Vendas</div>
+              {results.sales.map((s, i) => {
+                const isSel = sel === i
                 return (
-                  <div key={s.id} onClick={() => navigate(s)}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"9px 16px",cursor:"pointer",background:isSel?"var(--surface-2)":"transparent",transition:"background .1s"}}
-                    onMouseEnter={() => setSel(idx)}
+                  <div
+                    key={s.id}
+                    onClick={() => navigate(s)}
+                    onMouseEnter={() => setSel(i)}
+                    style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 16px", cursor:"pointer", background: isSel ? "var(--surface-2)" : "transparent" }}
                   >
-                    <div style={{width:32,height:32,borderRadius:8,background:"var(--brand)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"white",flexShrink:0}}>
-                      {(s.customerName||"AV").slice(0,2).toUpperCase()}
+                    <div style={{ width:32, height:32, borderRadius:8, background:"var(--brand)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"white", flexShrink:0 }}>
+                      {(s.customerName || "AV").slice(0,2).toUpperCase()}
                     </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.customerName||"Cliente avulso"}</div>
-                      <div style={{fontSize:11,color:"var(--text-subtle)"}}>{s.createdAt ? new Date(s.createdAt).toLocaleDateString("pt-BR") : ""}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.customerName || "Cliente avulso"}</div>
+                      <div style={{ fontSize:11, color:"var(--text-subtle)" }}>{s.createdAt ? new Date(s.createdAt).toLocaleDateString("pt-BR") : ""}</div>
                     </div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:13,fontWeight:700,color:"var(--brand)"}}>{BRL(s.total||0)}</div>
-                    {isSel && <kbd style={{fontSize:10,color:"var(--text-subtle)",background:"var(--surface-3)",border:"1px solid var(--border)",borderRadius:4,padding:"1px 5px"}}>↵</kbd>}
+                    <div style={{ fontFamily:"var(--font-mono)", fontSize:13, fontWeight:700, color:"var(--brand)" }}>{BRL(s.total || 0)}</div>
                   </div>
                 )
               })}
@@ -174,25 +180,25 @@ export default function CommandPalette() {
           )}
 
           {hasProducts && (
-            <div style={{padding:"8px 0",borderTop: hasSales ? "1px solid var(--border)" : "none"}}>
-              <div style={{fontSize:10,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".08em",padding:"4px 16px 6px"}}>Produtos</div>
-              {results.products.map(p => {
-                idx++
-                const isSel = sel === idx
+            <div style={{ padding:"8px 0", borderTop: hasSales ? "1px solid var(--border)" : "none" }}>
+              <div style={{ fontSize:10, color:"var(--text-subtle)", textTransform:"uppercase", letterSpacing:".08em", padding:"4px 16px 6px" }}>Produtos</div>
+              {results.products.map((p, i) => {
+                const isSel = sel === (results.sales.length + i)
                 return (
-                  <div key={p.id} onClick={() => navigate(p)}
-                    style={{display:"flex",alignItems:"center",gap:10,padding:"9px 16px",cursor:"pointer",background:isSel?"var(--surface-2)":"transparent",transition:"background .1s"}}
-                    onMouseEnter={() => setSel(idx)}
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(p)}
+                    onMouseEnter={() => setSel(results.sales.length + i)}
+                    style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 16px", cursor:"pointer", background: isSel ? "var(--surface-2)" : "transparent" }}
                   >
-                    <div style={{width:32,height:32,borderRadius:8,background:"var(--surface-3)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{ width:32, height:32, borderRadius:8, background:"var(--surface-3)", border:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                       <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" strokeWidth={1.6}><path d="M21 8v13H3V8M12 3v18M3 8l9-5 9 5"/></svg>
                     </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:13,fontWeight:600,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</div>
-                      <div style={{fontSize:11,color:"var(--text-subtle)"}}>Estoque: {p.stock} un.</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{p.name}</div>
+                      <div style={{ fontSize:11, color:"var(--text-subtle)" }}>Estoque: {p.stock} un.</div>
                     </div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:13,fontWeight:600,color:"var(--text)"}}>{BRL(p.price||0)}</div>
-                    {isSel && <kbd style={{fontSize:10,color:"var(--text-subtle)",background:"var(--surface-3)",border:"1px solid var(--border)",borderRadius:4,padding:"1px 5px"}}>↵</kbd>}
+                    <div style={{ fontFamily:"var(--font-mono)", fontSize:13, fontWeight:600, color:"var(--text)" }}>{BRL(p.price || 0)}</div>
                   </div>
                 )
               })}
@@ -200,16 +206,15 @@ export default function CommandPalette() {
           )}
         </div>
 
-        {/* Footer */}
-        <div style={{padding:"8px 16px",borderTop:"1px solid var(--border)",display:"flex",gap:14,alignItems:"center"}}>
-          {[["↑↓","navegar"],["↵","abrir"],["ESC","fechar"]].map(([k,l]) => (
-            <div key={k} style={{display:"flex",alignItems:"center",gap:5}}>
-              <kbd style={{fontSize:10,color:"var(--text-subtle)",background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:4,padding:"1px 5px"}}>{k}</kbd>
-              <span style={{fontSize:11,color:"var(--text-subtle)"}}>{l}</span>
+        <div style={{ padding:"8px 16px", borderTop:"1px solid var(--border)", display:"flex", gap:14, alignItems:"center" }}>
+          {[["↑↓","navegar"], ["↵","abrir"], ["ESC","fechar"]].map(([k, l]) => (
+            <div key={k} style={{ display:"flex", alignItems:"center", gap:5 }}>
+              <kbd style={{ fontSize:10, color:"var(--text-subtle)", background:"var(--surface-2)", border:"1px solid var(--border)", borderRadius:4, padding:"1px 5px" }}>{k}</kbd>
+              <span style={{ fontSize:11, color:"var(--text-subtle)" }}>{l}</span>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   )
 }
