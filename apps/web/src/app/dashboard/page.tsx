@@ -12,27 +12,28 @@ const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Cr
 function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
   if(!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
   const max = Math.max(...data,1)
+  const maxVal = Math.max(...data)
   return (
     <div>
-      <div style={{display:"flex",alignItems:"flex-end",gap:4,height:120}}>
+      <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140}}>
         {data.map((v,i)=>{
-          const pct = Math.max((v/max)*100,2)
-          const isMax = v===Math.max(...data)
+          const pct = v > 0 ? Math.max((v/max)*100, 8) : 3
+          const isMax = v === maxVal && v > 0
+          const hasValue = v > 0
           return (
-            <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
+            <div key={i} title={`${labels[i]}: R$ ${v.toFixed(2)}`} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",height:"100%",justifyContent:"flex-end"}}>
               <div style={{
                 width:"100%",
                 height:`${pct}%`,
-                background: isMax ? color : `${color}40`,
-                borderRadius:"4px 4px 0 0",
+                background: isMax ? color : hasValue ? `${color}70` : `${color}18`,
+                borderRadius:"3px 3px 0 0",
                 transition:"all 0.3s ease",
-                minHeight:4,
               }}/>
             </div>
           )
         })}
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-subtle)",marginTop:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-subtle)",marginTop:6}}>
         <span>{labels[0]}</span>
         <span>{labels[Math.floor(labels.length/2)]}</span>
         <span>{labels[labels.length-1]}</span>
