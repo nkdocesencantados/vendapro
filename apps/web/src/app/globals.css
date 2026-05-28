@@ -33,8 +33,8 @@
   --text-muted:  #8DA89E;
   --text-subtle: #5A7A6E;
 
-  --success:     #1D9E75;
-  --success-bg:  rgba(29,158,117,0.12);
+  --success:     color-mix(in srgb, #4ade80 50%, var(--brand) 50%);
+  --success-bg:  color-mix(in srgb, var(--success) 12%, transparent);
   --warning:     #F59E0B;
   --warning-bg:  rgba(245,158,11,0.12);
   --danger:      #EF4444;
@@ -84,6 +84,8 @@
 /* ── PALETA: ÂMBAR ── */
 [data-palette="amber"] {
   --brand:       #F59E0B;
+  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
+  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
   --brand-deep:  #2D1A00;
   --brand-mid:   #92400E;
   --brand-soft:  #FCD34D;
@@ -105,6 +107,8 @@
 /* ── PALETA: CARMIM ── */
 [data-palette="crimson"] {
   --brand:       #E11D48;
+  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
+  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
   --brand-deep:  #2D0010;
   --brand-mid:   #9F1239;
   --brand-soft:  #FB7185;
@@ -168,6 +172,8 @@
 /* ── PALETA: ROSÉ ── */
 [data-palette="rose"] {
   --brand:       #EC4899;
+  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
+  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
   --brand-deep:  #2D0022;
   --brand-mid:   #9D174D;
   --brand-soft:  #F472B6;
@@ -810,6 +816,8 @@ body {
   color: var(--text);
   letter-spacing: -0.02em;
   line-height: 1;
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 .vp-kpi-value.brand { color: var(--brand); }
@@ -823,8 +831,9 @@ body {
   gap: 4px;
 }
 
-.vp-kpi-delta.up { color: var(--success); }
-.vp-kpi-delta.down { color: var(--danger); }
+.vp-kpi-delta.up { color: var(--success); text-shadow: none; filter: none; }
+.vp-kpi-delta.down { color: var(--danger); text-shadow: none; filter: none; }
+.vp-kpi-delta.info { color: var(--text-muted); text-shadow: none; filter: none; }
 
 /* CARDS */
 .vp-card {
@@ -1087,6 +1096,55 @@ body {
 /* ═══════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════ */
+
+/* ═══════════════════════════════════════
+   CHART BARS — glow proporcional ao tema
+═══════════════════════════════════════ */
+
+/* Dark mode: gradiente suave, glow leve na base */
+.chart-bars .bar {
+  min-height: 10px;
+  border-radius: 4px 4px 0 0;
+  background: var(--brand);
+  box-shadow: 0 0 10px -4px color-mix(in srgb, var(--brand) 35%, transparent);
+  transition: box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+[data-theme="dark"] .chart-bars .bar {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--brand) 22%, transparent) 0%,
+    color-mix(in srgb, var(--brand) 65%, transparent) 45%,
+    var(--brand) 100%
+  );
+  box-shadow: 0 0 10px -4px color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+/* Âmbar: sem borrão, barra sólida e discreta */
+[data-palette="amber"] .chart-bars .bar,
+[data-theme="light"][data-palette="amber"] .chart-bars .bar {
+  background: var(--brand);
+  box-shadow: 0 0 6px -3px color-mix(in srgb, var(--brand) 25%, transparent);
+}
+
+/* Modo claro geral: sem glow neon */
+[data-theme="light"] .chart-bars .bar {
+  background: var(--brand);
+  box-shadow: 0 1px 4px -1px color-mix(in srgb, var(--brand) 20%, transparent);
+}
+
+/* Label âmbar em uppercase nos KPIs */
+[data-palette="amber"] .vp-kpi-label,
+[data-theme="light"][data-palette="amber"] .vp-kpi-label {
+  color: var(--text-muted);
+}
+
+/* KPI hover glow: proporcional ao tema */
+[data-palette="amber"] .vp-kpi:hover,
+[data-theme="light"] .vp-kpi:hover {
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--brand) 15%, transparent);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
