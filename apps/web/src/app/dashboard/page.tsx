@@ -78,27 +78,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
   if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div>
-      <div style={{position:"relative",width:"100%",height:260}}>
-        <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
-      </div>
-      <div style={{display:"flex",marginTop:4}}>
-        {data.map((v,i) => (
-          <div key={i} style={{flex:1,textAlign:"center",minWidth:0}}>
-            {v > 0 && (
-              <span style={{
-                fontSize:"clamp(8px,1.5vw,11px)",
-                color:"rgba(255,255,255,0.55)",
-                display:"block",
-                overflow:"hidden",
-                textOverflow:"ellipsis",
-                whiteSpace:"nowrap",
-                padding:"0 1px",
-              }}>{labels[i]}</span>
-            )}
-          </div>
-        ))}
-      </div>
+    <div style={{position:"relative",width:"100%",height:260}}>
+      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
 }
