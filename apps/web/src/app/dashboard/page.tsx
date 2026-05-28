@@ -50,11 +50,11 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         </div>
 
         {/* Eixo X — só dias com venda */}
-        <div style={{display:"flex",gap:2,height:28,alignItems:"flex-start",marginTop:2}}>
+        <div style={{display:"flex",gap:2,height:36,alignItems:"flex-start",marginTop:4}}>
           {data.map((v,i) => (
-            <div key={i} style={{flex:1,overflow:"hidden",textAlign:"center"}}>
+            <div key={i} style={{flex:1,textAlign:"center",position:"relative"}}>
               {v > 0 && (
-                <span style={{fontSize:8,color:"var(--text-subtle)",display:"inline-block",transform:"rotate(-40deg)",transformOrigin:"top left",whiteSpace:"nowrap",marginLeft:4}}>
+                <span style={{fontSize:8,color:"var(--text-subtle)",display:"inline-block",transform:"rotate(-45deg)",transformOrigin:"top center",whiteSpace:"nowrap",position:"absolute",top:0,left:"50%",marginLeft:-10}}>
                   {labels[i]}
                 </span>
               )}
