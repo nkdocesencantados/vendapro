@@ -41,12 +41,34 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         datasets: [{
           data,
           backgroundColor: color,
-          borderRadius: 4,
+          borderRadius: 5,
           borderSkipped: false,
           barPercentage: 0.55,
           categoryPercentage: 0.65,
+          borderColor: color,
+          borderWidth: 0,
+          hoverBackgroundColor: color,
+          hoverBorderWidth: 0,
         }]
       },
+      plugins: [{
+        id: "barShadow",
+        beforeDatasetsDraw(chart: any) {
+          const { ctx } = chart
+          chart.getDatasetMeta(0).data.forEach((bar: any) => {
+            const { x, y, width, height } = bar.getProps(["x","y","width","height"])
+            ctx.save()
+            ctx.shadowColor = color + "66"
+            ctx.shadowBlur = 10
+            ctx.shadowOffsetY = 4
+            ctx.fillStyle = color + "33"
+            ctx.beginPath()
+            ctx.roundRect(x - width/2, y, width, height, 5)
+            ctx.fill()
+            ctx.restore()
+          })
+        }
+      }],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -57,7 +79,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: {
-              color: "rgba(255,255,255,0.55)",
+              color: "rgba(255,255,255,0.5)",
               font: { size: 8 },
               maxRotation: 45,
               minRotation: 45,
