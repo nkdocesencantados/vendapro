@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+﻿import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum PaymentMethod {
   CREDIT_CARD = 'credit_card',
@@ -51,7 +51,10 @@ export class Sale {
   @Column()
   sellerId: string;
 
-@CreateDateColumn()
+  @Column({ type: 'timestamp', nullable: true })
+  saleDate: Date;
+
+  @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()

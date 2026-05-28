@@ -21,8 +21,8 @@ export class ReportsService {
     const todayEnd = new Date(now); todayEnd.setHours(23,59,59,999);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-    const todayWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(todayStart, todayEnd) };
-    const monthWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(monthStart, monthEnd) };
+    const todayWhere: any = { storeId, status: SaleStatus.COMPLETED, saleDate: Between(todayStart, todayEnd) };
+    const monthWhere: any = { storeId, status: SaleStatus.COMPLETED, saleDate: Between(monthStart, monthEnd) };
     if (sellerId) { todayWhere.sellerId = sellerId; monthWhere.sellerId = sellerId; }
     const todaySales = await this.saleRepo.find({ where: todayWhere });
     const monthSales = await this.saleRepo.find({ where: monthWhere });
@@ -39,7 +39,7 @@ export class ReportsService {
       const d = new Date(firstDay); d.setDate(firstDay.getDate() + i);
       const start = new Date(d); start.setHours(0,0,0,0);
       const end = new Date(d); end.setHours(23,59,59,999);
-      const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) };
+      const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, saleDate: Between(start, end) };
       if (sellerId) weekWhere.sellerId = sellerId;
       const sales = await this.saleRepo.find({ where: weekWhere });
       const dd = String(d.getDate()).padStart(2,"0")
@@ -77,7 +77,7 @@ export class ReportsService {
       topProducts = Object.values(prodMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
     }
     // recentSales
-    const recentSales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED }, order: { createdAt: "DESC" }, take: 5 });
+    const recentSales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED }, order: { saleDate: "DESC" }, take: 5 });
     const recentSellerIds = [...new Set(recentSales.map(s => s.sellerId).filter(Boolean))];
     const recentUsers = recentSellerIds.length > 0 ? await (this.saleRepo.manager.find(User, { where: recentSellerIds.map((id: string) => ({ id })) })) : [];
     const recentUserMap: Record<string, string> = {};
@@ -90,7 +90,7 @@ export class ReportsService {
   async advanced(storeId: string, from: string, to: string, sellerId?: string) {
     const fromDate = new Date(from); fromDate.setHours(0,0,0,0);
     const toDate = new Date(to); toDate.setHours(23,59,59,999);
-    const advWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(fromDate, toDate) };
+    const advWhere: any = { storeId, status: SaleStatus.COMPLETED, saleDate: Between(fromDate, toDate) };
     if (sellerId) advWhere.sellerId = sellerId;
     const sales = await this.saleRepo.find({ where: advWhere });
     const totalRevenue = sales.reduce((a, s) => a + Number(s.total), 0);
@@ -101,7 +101,7 @@ export class ReportsService {
     const minSale = sales.length ? Math.min(...sales.map(s => Number(s.total))) : 0;
     const dailyMap: Record<string, { value: number; count: number }> = {};
     for (const s of sales) {
-      const day = new Date(s.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+      const day = new Date(s.saleDate || s.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
       if (!dailyMap[day]) dailyMap[day] = { value: 0, count: 0 };
       dailyMap[day].value += Number(s.total);
       dailyMap[day].count += 1;
@@ -161,7 +161,7 @@ export class ReportsService {
       .where("s.storeId = :storeId", { storeId })
       .andWhere("s.status = 'completed'")
       .andWhere("(s.customerName ILIKE :term OR CAST(s.total AS TEXT) LIKE :term)", { term: `%${term}%` })
-      .orderBy("s.createdAt", "DESC")
+      .orderBy("s.saleDate", "DESC")
       .take(5).getMany()
     return {
       products: products.map(p => ({ id: p.id, name: p.name, stock: p.stock, price: p.price, type: "product" })),

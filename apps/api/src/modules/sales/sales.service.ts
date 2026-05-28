@@ -1,4 +1,4 @@
-// v2
+﻿// v4
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
@@ -22,10 +22,10 @@ export class SalesService {
     const where: any = { storeId };
     if (from && to) {
       const toDate = new Date(to); toDate.setHours(23, 59, 59, 999);
-      where.createdAt = Between(new Date(from), toDate);
+      where.saleDate = Between(new Date(from), toDate);
     }
     if (sellerId) where.sellerId = sellerId;
-    const sales = await this.saleRepo.find({ where, order: { createdAt: "DESC" } });
+    const sales = await this.saleRepo.find({ where, order: { saleDate: "DESC" } });
     const sellerIds = [...new Set(sales.map((s: any) => s.sellerId).filter(Boolean))];
     const sellers = sellerIds.length > 0 ? await this.userRepo.findByIds(sellerIds) : [];
     const sellerMap: any = {};
@@ -69,16 +69,12 @@ export class SalesService {
     const discount = Number(saleData.discount) || 0;
     const total = subtotal - discount;
     const commission = total * ((Number(saleData.commissionRate) || 15) / 100);
-
-    const saleDate = saleData.saleDate ? new Date(saleData.saleDate)
-      : saleData.createdAt ? new Date(saleData.createdAt)
-      : new Date();
-
+    const saleDate = saleData.saleDate ? new Date(saleData.saleDate) : new Date();
     const { saleDate: _sd, createdAt: _ca, ...cleanSaleData } = saleData;
 
     const saleEntity = this.saleRepo.create({
       ...cleanSaleData, storeId, sellerId, subtotal, total, commission,
-      status: SaleStatus.COMPLETED,
+      status: SaleStatus.COMPLETED, saleDate,
     });
     const savedSale: any = await this.saleRepo.save(saleEntity);
     const saleId: string = savedSale.id;
@@ -96,13 +92,6 @@ export class SalesService {
       description: `Venda #${saleId.slice(0, 8)}`, amount: total,
       date: saleDate, isPaid: true, referenceId: saleId, storeId, createdById: sellerId,
     }));
-
-    try {
-      await this.saleRepo.query(
-        `UPDATE sales SET "createdAt" = $1 WHERE id = $2`,
-        [saleDate, saleId]
-      );
-    } catch (e) { /* ignora se falhar */ }
 
     return { id: saleId, message: "Venda criada com sucesso" };
   }
@@ -123,7 +112,7 @@ export class SalesService {
   async todaySummary(storeId: string) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) } });
+    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, saleDate: Between(today, tomorrow) } });
     const total = sales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = sales.length ? total / sales.length : 0;
     return { total, count: sales.length, avgTicket };
