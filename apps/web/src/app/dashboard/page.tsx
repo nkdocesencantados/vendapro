@@ -34,8 +34,40 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     const max  = Math.max(...data, 1)
     const step = max<=100?10:max<=500?50:max<=2000?200:max<=5000?500:max<=10000?1000:2000
 
+    const haloPlugin = {
+      id: "halo",
+      beforeDatasetsDraw(chart: any) {
+        const { ctx } = chart
+        chart.getDatasetMeta(0).data.forEach((bar: any) => {
+          const { x, y, width, height } = bar.getProps(["x","y","width","height"])
+          const w = width * 0.55
+          ctx.save()
+          ctx.shadowColor = color
+          ctx.shadowBlur = 40
+          ctx.shadowOffsetX = 0
+          ctx.shadowOffsetY = 0
+          ctx.fillStyle = color
+          ctx.beginPath()
+          ctx.roundRect(x - w/2, y, w, height, 5)
+          ctx.fill()
+          ctx.restore()
+          ctx.save()
+          ctx.shadowColor = color + "cc"
+          ctx.shadowBlur = 20
+          ctx.shadowOffsetX = 0
+          ctx.shadowOffsetY = 0
+          ctx.fillStyle = color
+          ctx.beginPath()
+          ctx.roundRect(x - w/2, y, w, height, 5)
+          ctx.fill()
+          ctx.restore()
+        })
+      }
+    }
+
     chartRef.current = new Chart(canvasRef.current, {
       type: "bar",
+      plugins: [haloPlugin],
       data: {
         labels,
         datasets: [{
@@ -45,30 +77,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           borderSkipped: false,
           barPercentage: 0.55,
           categoryPercentage: 0.65,
-          borderColor: color,
-          borderWidth: 0,
-          hoverBackgroundColor: color,
-          hoverBorderWidth: 0,
         }]
       },
-      plugins: [{
-        id: "barShadow",
-        beforeDatasetsDraw(chart: any) {
-          const { ctx } = chart
-          chart.getDatasetMeta(0).data.forEach((bar: any) => {
-            const { x, y, width, height } = bar.getProps(["x","y","width","height"])
-            ctx.save()
-            ctx.shadowColor = color + "66"
-            ctx.shadowBlur = 10
-            ctx.shadowOffsetY = 4
-            ctx.fillStyle = color + "33"
-            ctx.beginPath()
-            ctx.roundRect(x - width/2, y, width, height, 5)
-            ctx.fill()
-            ctx.restore()
-          })
-        }
-      }],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -79,7 +89,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: {
-              color: "rgba(255,255,255,0.5)",
+              color: "rgba(255,255,255,0.45)",
               font: { size: 8 },
               maxRotation: 45,
               minRotation: 45,
@@ -91,7 +101,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           y: {
             min: 0,
             ticks: {
-              color: "rgba(255,255,255,0.35)",
+              color: "rgba(255,255,255,0.3)",
               font: { size: 9 },
               stepSize: step,
               callback: (v:any) => { const n=Number(v); return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
