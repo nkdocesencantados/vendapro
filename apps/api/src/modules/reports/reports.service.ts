@@ -32,8 +32,11 @@ export class ReportsService {
     const storeRows = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
     const monthGoal = storeRows?.[0]?.monthlyGoal ? Number(storeRows[0].monthlyGoal) : 20000;
     const weeklyChart = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const totalDays = today.getDate();
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(firstDay); d.setDate(firstDay.getDate() + i);
       const start = new Date(d); start.setHours(0,0,0,0);
       const end = new Date(d); end.setHours(23,59,59,999);
       const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) };
