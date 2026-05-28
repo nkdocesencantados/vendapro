@@ -346,13 +346,13 @@ export default function SalesPage() {
 
       <div className="kpi-grid">
 
-        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRLshort(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRL(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
 
         <div className="kpi"><div className="lbl">Concluídas</div><div className="val">{completed}</div></div>
 
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRLshort(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRL(completed ? totalRev/completed : 0)}</div></div>
 
       </div>
 

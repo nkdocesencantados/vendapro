@@ -274,7 +274,7 @@ export default function StockPage() {
 
           <h1 style={{margin:0,fontSize:"clamp(20px,5vw,26px)",fontWeight:600,letterSpacing:"-.02em"}}>Estoque</h1>
 
-          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>{products.length} produtos - valor: {BRLshort(totalVal)}</div>
+          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>{products.length} produtos - valor: {BRL(totalVal)}</div>
 
         </div>
 
@@ -290,7 +290,7 @@ export default function StockPage() {
 
         <div className="kpi"><div className="lbl">Total produtos</div><div className="val">{products.length}</div></div>
 
-        <div className="kpi"><div className="lbl">Valor estoque</div><div className="val">{BRLshort(totalVal)}</div></div>
+        <div className="kpi"><div className="lbl">Valor estoque</div><div className="val">{BRL(totalVal)}</div></div>
 
         <div className="kpi"><div className="lbl">Estoque baixo</div><div className="val" style={{color:"#f59e0b"}}>{lowCount}</div></div>
 
