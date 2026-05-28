@@ -13,27 +13,28 @@ const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Cr
 function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const chartRef  = React.useRef<any>(null)
+  const [ready, setReady] = React.useState(false)
 
   React.useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !data.length) return
-
-    const Chart = (window as any).Chart
-    if (!Chart) {
-      const timer = setTimeout(() => {
-        if ((window as any).Chart) {
-          canvas.dispatchEvent(new Event("rebuild"))
-        }
-      }, 500)
-      return () => clearTimeout(timer)
+    let attempts = 0
+    const tryInit = () => {
+      if ((window as any).Chart) { setReady(true); return }
+      attempts++
+      if (attempts < 20) setTimeout(tryInit, 300)
     }
+    tryInit()
+  }, [])
 
-    if (chartRef.current) chartRef.current.destroy()
+  React.useEffect(() => {
+    if (!ready || !canvasRef.current || !data.length) return
+    const Chart = (window as any).Chart
+    if (!Chart) return
+    if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null }
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const max = Math.max(...data, 1)
+    const step = max <= 100 ? 10 : max <= 500 ? 50 : max <= 2000 ? 200 : max <= 5000 ? 500 : max <= 10000 ? 1000 : 2000
 
-    chartRef.current = new Chart(ctx, {
+    chartRef.current = new Chart(canvasRef.current, {
       type: "bar",
       data: {
         labels,
@@ -42,62 +43,42 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           backgroundColor: data.map(v => v > 0 ? color : "rgba(255,255,255,0.06)"),
           borderRadius: 4,
           borderSkipped: false,
-          barPercentage: 0.7,
-          categoryPercentage: 0.8,
+          barPercentage: 0.6,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { bottom: 4 } },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx: any) => `R$ ${Number(ctx.parsed.y).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-            }
-          }
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { label: (c: any) => `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
         },
         scales: {
           x: {
-            ticks: {
-              color: "rgba(255,255,255,0.4)",
-              font: { size: 8 },
-              maxRotation: 45,
-              minRotation: 45,
-              autoSkip: false,
-              callback: function(this: any, _: any, i: number) {
-                return data[i] > 0 ? labels[i] : ""
-              }
+            ticks: { color:"rgba(255,255,255,0.4)", font:{size:8}, maxRotation:45, minRotation:45, autoSkip:false,
+              callback: function(_:any, i:number) { return data[i] > 0 ? labels[i] : "" }
             },
-            grid: { color: "rgba(255,255,255,0.04)" },
-            border: { color: "rgba(255,255,255,0.08)" }
+            grid: { color:"rgba(255,255,255,0.04)" },
+            border: { color:"rgba(255,255,255,0.08)" }
           },
           y: {
-            ticks: {
-              color: "rgba(255,255,255,0.3)",
-              font: { size: 9 },
-              callback: (v: any) => v >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`
+            min: 0,
+            ticks: { color:"rgba(255,255,255,0.35)", font:{size:9}, stepSize: step,
+              callback: (v:any) => { const n=Number(v); return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
             },
-            grid: { color: "rgba(255,255,255,0.06)" },
-            border: { display: false }
+            grid: { color:"rgba(255,255,255,0.06)" },
+            border: { display:false }
           }
         }
       }
     })
-
     return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null } }
-  }, [data, labels, color])
+  }, [ready, data, labels, color])
 
-  if (!data.length) return (
-    <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>
-      Sem dados no período
-    </div>
-  )
+  if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div style={{position:"relative",width:"100%",height:"clamp(160px, 25vw, 220px)"}}>
-      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia" style={{display:"block",width:"100%",height:"100%"}}/>
+    <div style={{position:"relative",width:"100%",height:220}}>
+      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
 }
@@ -306,7 +287,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="d-card-body">
-              <BarChart data={chartData} labels={chartLabels} color={getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9"}/>
+              <BarChart data={chartData} labels={chartLabels} color={(() => { try { return getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9" } catch { return "#0EA5E9" } })()}/>
             </div>
           </div>
 
