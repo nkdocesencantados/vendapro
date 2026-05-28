@@ -207,15 +207,12 @@ export default function CashPage() {
 
         .vp-modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
 
-        .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-
-        .kpi{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);}
-
-        .kpi-lbl{font-size:11px;color:var(--text-subtle);margin-bottom:4px;}
-
-        .kpi-val{font-size:clamp(14px,4vw,20px);font-weight:600;letter-spacing:-.02em;color:var(--text);}
-
-        .kpi-dlt{font-size:11px;color:var(--text-subtle);margin-top:2px;}
+                .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+        .kpi{padding:20px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);position:relative;overflow:hidden;transition:var(--transition);}
+        .kpi:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+        .kpi-lbl{font-size:11px;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+        .kpi-val{font-family:var(--font-mono);font-size:clamp(20px,2.5vw,28px);font-weight:700;letter-spacing:-.03em;line-height:1;}
+        .kpi-dlt{font-size:12px;color:var(--text-subtle);margin-top:8px;}
 
         .nbtn{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:white;border:none;border-radius:var(--r);padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);margin-bottom:0;} .nbtn:hover{filter:brightness(1.1);}
 
@@ -289,21 +286,24 @@ export default function CashPage() {
 
 
       <div className="kpi-grid">
-
-        <div className="kpi"><div className="kpi-lbl">Entradas</div><div className="kpi-val" style={{color:"#1D9E75"}}>{BRLshort(data.income)}</div></div>
-
-        <div className="kpi"><div className="kpi-lbl">Saidas</div><div className="kpi-val" style={{color:"var(--danger)"}}>{BRLshort(data.expense)}</div></div>
-
-        <div className="kpi" style={{gridColumn:"span 2"}}>
-
-          <div className="kpi-lbl">Saldo do mês</div>
-
-          <div className="kpi-val" style={{fontSize:"clamp(18px,5vw,26px)"}}>{BRL(data.profit)}</div>
-
-          <div className="kpi-dlt">{margin}% margem</div>
-
+        <div className="kpi">
+          <div className="kpi-lbl">Entradas</div>
+          <div className="kpi-val" style={{color:"var(--success)"}}>{BRL(data.income)}</div>
+          <div className="kpi-dlt" style={{color:"var(--success)"}}>receitas do mês</div>
+          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"rgba(29,158,117,0.1)",filter:"blur(20px)",pointerEvents:"none"}}/>
         </div>
-
+        <div className="kpi">
+          <div className="kpi-lbl">Saídas</div>
+          <div className="kpi-val" style={{color:"var(--danger)"}}>{BRL(data.expense)}</div>
+          <div className="kpi-dlt" style={{color:"var(--danger)"}}>despesas do mês</div>
+          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"rgba(239,68,68,0.1)",filter:"blur(20px)",pointerEvents:"none"}}/>
+        </div>
+        <div className="kpi" style={{gridColumn:"span 2"}}>
+          <div className="kpi-lbl">Saldo do mês</div>
+          <div className="kpi-val">{BRL(data.profit)}</div>
+          <div className="kpi-dlt">{margin}% margem</div>
+          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"var(--brand-glow)",filter:"blur(20px)",pointerEvents:"none"}}/>
+        </div>
       </div>
 
 
