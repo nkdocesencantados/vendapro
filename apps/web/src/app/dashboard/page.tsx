@@ -52,7 +52,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
               color: "rgba(255,255,255,0.3)",
               font: { size: 9 },
               maxRotation: 90,
-              autoSkip: true,
+              autoSkip: false,
               maxTicksLimit: 28,
               callback: function(this: any, _: any, i: number) {
                 return data[i] > 0 ? labels[i].split("/")[0] : ""
@@ -80,7 +80,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
   if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div style={{position:"relative",height:140}}>
+    <div style={{position:"relative",height:200}}>
       <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
