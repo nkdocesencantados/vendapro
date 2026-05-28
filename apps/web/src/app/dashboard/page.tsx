@@ -17,17 +17,20 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     <div>
       <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140}}>
         {data.map((v,i)=>{
-          const pct = v > 0 ? Math.max((v/max)*100, 8) : 3
+          const pct = v > 0 ? Math.max((v/max)*100, 10) : 4
           const isMax = v === maxVal && v > 0
           const hasValue = v > 0
           return (
-            <div key={i} title={`${labels[i]}: R$ ${v.toFixed(2)}`} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",height:"100%",justifyContent:"flex-end"}}>
+            <div key={i} title={`${labels[i]}: R$ ${v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`}
+              style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",height:"100%",justifyContent:"flex-end",cursor:"default"}}>
               <div style={{
                 width:"100%",
                 height:`${pct}%`,
-                background: isMax ? color : hasValue ? `${color}88` : `${color}30`,
+                background: isMax ? color : hasValue ? `${color}` : "var(--surface-3)",
+                opacity: isMax ? 1 : hasValue ? 0.55 : 0.35,
                 borderRadius:"3px 3px 0 0",
                 transition:"all 0.3s ease",
+                minHeight: 4,
               }}/>
             </div>
           )
