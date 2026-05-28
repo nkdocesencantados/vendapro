@@ -82,7 +82,7 @@ function exportSalesPDF(sales: any[]) {
   const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
   const total=sales.reduce((a:number,s:any)=>a+Number(s.total),0);
   const header='<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;">'+logo+'</div><div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">N&K Doces Encantados</div></div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:white;">Relatorio de Vendas</div><div style="font-size:12px;color:#8DA39A;">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>';
-  const kpis='<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;"><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Total vendas</div><div style="font-size:22px;font-weight:700;color:#1D9E75;">'+sales.length+'</div></div><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Faturamento</div><div style="font-size:22px;font-weight:700;">R$ '+total.toFixed(2)+'</div></div><div style="padding:16px 20px;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Ticket medio</div><div style="font-size:22px;font-weight:700;">R$ '+(sales.length>0?(total/sales.length).toFixed(2):'0.00')+'</div></div></div>';
+  const kpis='<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;"><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Total vendas</div><div style="font-size:22px;font-weight:700;color:#1D9E75;">'+sales.length+'</div></div><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Faturamento</div><div style="font-size:22px;font-weight:700;">R$ '+total.toFixed(2)+'</div></div><div style="padding:16px 20px;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Ticket médio</div><div style="font-size:22px;font-weight:700;">R$ '+(sales.length>0?(total/sales.length).toFixed(2):'0.00')+'</div></div></div>';
   const table='<div style="padding:20px 32px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1D9E75;"><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Data</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Cliente</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Vendedor</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Pagamento</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Total</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   const footer='<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;"><div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br</div><div style="font-size:11px;color:#1D9E75;font-weight:700;">N&K Doces Encantados</div></div>';
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style></head><body>'+header+kpis+table+footer+'</body></html>';
@@ -352,13 +352,13 @@ export default function SalesPage() {
 
       <div className="kpi-grid">
 
-        <div className="kpi"><div className="lbl">Fat. do mÃªs</div><div className="val">{BRL(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRL(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
 
-        <div className="kpi"><div className="lbl">ConcluÃ­das</div><div className="val">{completed}</div></div>
+        <div className="kpi"><div className="lbl">Concluídas</div><div className="val">{completed}</div></div>
 
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket mÃ©dio</div><div className="val">{BRL(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRL(completed ? totalRev/completed : 0)}</div></div>
 
       </div>
 
@@ -370,7 +370,7 @@ export default function SalesPage() {
 
         <div className="filter-row">
 
-          {[["active","ConcluÃ­das"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+          {[["active","Concluídas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
 
             <button key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</button>
 
