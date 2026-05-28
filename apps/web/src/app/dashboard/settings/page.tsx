@@ -33,6 +33,7 @@ export default function SettingsPage() {
   const [name,     setName]     = useState("")
   const [palette,  setPalette]  = useState("emerald")
   const [goal,     setGoal]     = useState("")
+  const [margin,   setMargin]   = useState("26")
   const [address,  setAddress]  = useState("")
   const [userName, setUserName] = useState("")
   const [userEmail,setUserEmail]= useState("")
