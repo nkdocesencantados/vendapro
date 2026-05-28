@@ -112,7 +112,7 @@ export default function DashboardPage() {
   const meta       = store?.monthlyGoal   || data?.monthGoal || 0
   const metaPct    = meta>0 ? Math.min(Math.round((fat/meta)*100),100) : 0
   const chartData  = (data?.weeklyChart||[]).map((d:any)=> chartMode==="revenue" ? d.value : d.count||0)
-  const chartLabels= (data?.weeklyChart||[]).map((d:any)=>d.day+"/"+year)
+  const chartLabels= (data?.weeklyChart||[]).map((d:any)=>d.day)
   const sellers:any[]    = data?.topSellers  || []
   const products:any[]   = data?.topProducts || []
   const recentSales:any[]= data?.recentSales || []
