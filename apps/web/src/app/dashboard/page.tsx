@@ -11,71 +11,61 @@ const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Cr
 
 function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
   if(!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
-  const max = Math.max(...data, 1)
+  const max   = Math.max(...data, 1)
   const steps = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(max * p))
-  const activeDays = data.filter(v => v > 0).length
-  const barW = activeDays > 0 ? Math.max(6, Math.min(32, Math.floor(560 / data.length))) : 8
 
   return (
-    <div style={{position:"relative"}}>
-      <div style={{display:"flex",gap:8}}>
-        {/* Eixo Y */}
-        <div style={{display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",alignItems:"flex-end",width:48,flexShrink:0,paddingBottom:22}}>
-          {steps.map((v,i) => (
-            <span key={i} style={{fontSize:9,color:"var(--text-subtle)",lineHeight:1,whiteSpace:"nowrap"}}>
-              {v >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`}
-            </span>
+    <div style={{display:"flex",gap:8}}>
+      {/* Eixo Y */}
+      <div style={{display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",alignItems:"flex-end",width:52,flexShrink:0,paddingBottom:28}}>
+        {steps.map((v,i) => (
+          <span key={i} style={{fontSize:9,color:"var(--text-subtle)",whiteSpace:"nowrap",lineHeight:1}}>
+            {v>=1000?`R$${(v/1000).toFixed(1)}k`:`R$${v}`}
+          </span>
+        ))}
+      </div>
+
+      {/* Gráfico */}
+      <div style={{flex:1,position:"relative"}}>
+        {/* Linhas grade */}
+        <div style={{position:"absolute",top:0,left:0,right:0,bottom:28,display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",pointerEvents:"none"}}>
+          {steps.map((_,i) => (
+            <div key={i} style={{width:"100%",height:1,background:"var(--border)"}}/>
           ))}
         </div>
 
-        {/* Área do gráfico */}
-        <div style={{flex:1,position:"relative"}}>
-          {/* Linhas de grade */}
-          <div style={{position:"absolute",inset:0,bottom:22,display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",pointerEvents:"none"}}>
-            {steps.map((_,i) => (
-              <div key={i} style={{width:"100%",height:"1px",background:"var(--border)",opacity:0.5}}/>
-            ))}
-          </div>
-
-          {/* Barras */}
-          <div style={{display:"flex",alignItems:"flex-end",gap:2,height:160,paddingBottom:0}}>
-            {data.map((v,i) => {
-              const pct = v > 0 ? Math.max((v/max)*100, 4) : 0
-              return (
-                <div key={i} title={v > 0 ? `${labels[i]}: ${v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}` : labels[i]}
-                  style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",height:"100%",cursor: v > 0 ? "pointer" : "default"}}>
-                  {v > 0 && (
-                    <div style={{
-                      width:"100%",
-                      height:`${pct}%`,
-                      background: color,
-                      borderRadius:"3px 3px 0 0",
-                      transition:"all 0.2s ease",
-                      minHeight:4,
-                    }}/>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Eixo X — só dias com venda */}
-          <div style={{display:"flex",alignItems:"flex-end",gap:2,height:22,marginTop:4}}>
-            {data.map((v,i) => (
-              <div key={i} style={{flex:1,textAlign:"center"}}>
+        {/* Barras */}
+        <div style={{display:"flex",alignItems:"flex-end",gap:2,height:160}}>
+          {data.map((v,i) => {
+            const pct = v > 0 ? Math.max((v/max)*100, 4) : 0
+            return (
+              <div key={i} title={v>0?`${labels[i]}: ${v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`:labels[i]}
+                style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",height:"100%"}}>
                 {v > 0 && (
-                  <span style={{fontSize:8,color:"var(--text-subtle)",display:"block",transform:"rotate(-35deg)",transformOrigin:"top center",whiteSpace:"nowrap",marginTop:2}}>
-                    {labels[i]}
-                  </span>
+                  <div style={{width:"100%",height:`${pct}%`,background:color,borderRadius:"3px 3px 0 0",minHeight:4,transition:"height .2s"}}/>
                 )}
               </div>
-            ))}
-          </div>
+            )
+          })}
+        </div>
+
+        {/* Eixo X — só dias com venda */}
+        <div style={{display:"flex",gap:2,height:28,alignItems:"flex-start",marginTop:2}}>
+          {data.map((v,i) => (
+            <div key={i} style={{flex:1,overflow:"hidden",textAlign:"center"}}>
+              {v > 0 && (
+                <span style={{fontSize:8,color:"var(--text-subtle)",display:"inline-block",transform:"rotate(-40deg)",transformOrigin:"top left",whiteSpace:"nowrap",marginLeft:4}}>
+                  {labels[i]}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   )
 }
+
 
 export default function DashboardPage() {
   const { user: authUser } = useAuthStore()
