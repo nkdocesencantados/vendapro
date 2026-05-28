@@ -284,7 +284,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="d-card-body">
-              <BarChart data={chartData} labels={chartLabels} color="var(--brand)"/>
+              <BarChart data={chartData} labels={chartLabels} color={getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9"}/>
             </div>
           </div>
 
