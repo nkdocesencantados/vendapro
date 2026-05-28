@@ -35,8 +35,13 @@ export default function CommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setOpen(o => !o) }
       if (e.key === "Escape") setOpen(false)
     }
+    function onOpen() { setOpen(true) }
     window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
+    window.addEventListener("open-cmd-palette", onOpen)
+    return () => {
+      window.removeEventListener("keydown", onKey)
+      window.removeEventListener("open-cmd-palette", onOpen)
+    }
   }, [])
 
   useEffect(() => {

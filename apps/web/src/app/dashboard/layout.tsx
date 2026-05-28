@@ -181,7 +181,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="vp-breadcrumb-current">{pageName}</span>
           </div>
 
-          <div className="vp-search" onClick={() => setCmdOpen(true)} style={{cursor:"pointer"}}>
+          <div className="vp-search" onClick={() => window.dispatchEvent(new CustomEvent("open-cmd-palette"))} style={{cursor:"pointer"}}>
             <Icon name="search" size={14}/>
             <span style={{flex:1,fontSize:13,color:"var(--text-subtle)"}}>Buscar venda, produto, cliente...</span>
             <span style={{fontSize:11,color:"var(--text-subtle)",whiteSpace:"nowrap",background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:5,padding:"1px 6px"}}>⌘K</span>
