@@ -165,7 +165,7 @@ export default function DashboardPage() {
   const notifs = [
     ...lowStock.map((p:any)=>({ type:"warn", msg:`Estoque baixo: ${p.name}` })),
     ...(metaPct>=100?[{ type:"ok", msg:"🎉 Meta do mês atingida!" }]:[]),
-    ...(today>0?[{ type:"info", msg:`+vendas hoje: ${BRLshort(today)}` }]:[]),
+    ...(today>0?[{ type:"info", msg:`+vendas hoje: ${BRL(today)}` }]:[]),
   ]
 
   if(loading) return (
@@ -255,7 +255,7 @@ export default function DashboardPage() {
             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 3v18h18M7 12h3v6H7zM12 8h3v10h-3zM17 5h3v13h-3z"/></svg>
             Faturamento hoje
           </div>
-          <div className="d-kpi-val">{BRLshort(today)}</div>
+          <div className="d-kpi-val">{BRL(today)}</div>
           <div className={`d-kpi-delta${today>0?" ok":""}`}>{today>0?"+vendas hoje":"Sem vendas hoje"}</div>
           <div className="d-kpi-glow"/>
         </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             Faturamento do mês
           </div>
-          <div className="d-kpi-val">{BRLshort(fat)}</div>
+          <div className="d-kpi-val">{BRL(fat)}</div>
           <div className="d-kpi-delta ok">+{totalV} vendas</div>
           <div className="d-kpi-glow"/>
         </div>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 8v4l3 3"/></svg>
             Lucro estimado
           </div>
-          <div className="d-kpi-val">{BRLshort(lucro)}</div>
+          <div className="d-kpi-val">{BRL(lucro)}</div>
           <div className="d-kpi-delta ok">{margem}% margem</div>
           <div className="d-kpi-glow"/>
         </div>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 6h18v12H3zM12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0"/></svg>
             Ticket médio
           </div>
-          <div className="d-kpi-val">{BRLshort(ticket)}</div>
+          <div className="d-kpi-val">{BRL(ticket)}</div>
           <div className="d-kpi-delta">Por venda</div>
           <div className="d-kpi-glow"/>
         </div>
@@ -303,7 +303,7 @@ export default function DashboardPage() {
             </div>
             <div style={{textAlign:"right"}}>
               <div style={{fontFamily:"var(--font-mono)",fontSize:"clamp(14px,2vw,20px)",fontWeight:700,color:"var(--text)"}}>
-                {BRLshort(fat)}<span style={{color:"var(--text-subtle)",fontSize:12,fontWeight:400}}> / {BRLshort(Number(meta))}</span>
+                {BRL(fat)}<span style={{color:"var(--text-subtle)",fontSize:12,fontWeight:400}}> / {BRLshort(Number(meta))}</span>
               </div>
               <div style={{fontSize:12,color:"var(--brand)",fontWeight:600,marginTop:2}}>{metaPct}% atingido</div>
             </div>
