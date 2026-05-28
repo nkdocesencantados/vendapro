@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -6,7 +6,7 @@ import { api } from "@/lib/api"
 
 
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃ©dito", debit_card:"DÃ©bito" }
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -130,7 +130,13 @@ export default function SalesPage() {
 
   async function load() {
 
-    try { const r = await api.get("/sales"); setSales(r.data) }
+    try {
+      const now = new Date()
+      const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+      const to = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().split('T')[0]
+      const r = await api.get("/sales?from=" + from + "&to=" + to)
+      setSales(r.data)
+    }
 
     catch(e){ console.error(e) } finally { setLoading(false) }
 
@@ -346,13 +352,13 @@ export default function SalesPage() {
 
       <div className="kpi-grid">
 
-        <div className="kpi"><div className="lbl">Fat. do mês</div><div className="val">{BRL(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
+        <div className="kpi"><div className="lbl">Fat. do mÃªs</div><div className="val">{BRL(totalRev)}</div><div className="dlt">+ {completed} vendas</div></div>
 
-        <div className="kpi"><div className="lbl">Concluídas</div><div className="val">{completed}</div></div>
+        <div className="kpi"><div className="lbl">ConcluÃ­das</div><div className="val">{completed}</div></div>
 
         <div className="kpi"><div className="lbl">Canceladas</div><div className="val" style={{color:"var(--danger)"}}>{cancelled}</div></div>
 
-        <div className="kpi"><div className="lbl">Ticket médio</div><div className="val">{BRL(completed ? totalRev/completed : 0)}</div></div>
+        <div className="kpi"><div className="lbl">Ticket mÃ©dio</div><div className="val">{BRL(completed ? totalRev/completed : 0)}</div></div>
 
       </div>
 
@@ -364,7 +370,7 @@ export default function SalesPage() {
 
         <div className="filter-row">
 
-          {[["active","Concluídas"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
+          {[["active","ConcluÃ­das"],["cancelled","Canceladas"],["all","Todas"]].map(([v,l])=>(
 
             <button key={v} className={`fbtn ${filter===v?"fbtn-on":"fbtn-off"}`} onClick={()=>setFilter(v)}>{l}</button>
 
@@ -432,7 +438,7 @@ export default function SalesPage() {
 
                   <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
 
-                    {s.status==="completed"?"Concluída":"Cancelada"}
+                    {s.status==="completed"?"ConcluÃ­da":"Cancelada"}
 
                   </span>
 
@@ -498,9 +504,9 @@ export default function SalesPage() {
 
                     <option value="cash">Dinheiro</option>
 
-                    <option value="credit_card">Cartão Crédito</option>
+                    <option value="credit_card">CartÃ£o CrÃ©dito</option>
 
-                    <option value="debit_card">Cartão Débito</option>
+                    <option value="debit_card">CartÃ£o DÃ©bito</option>
 
                   </select>
 
@@ -598,7 +604,7 @@ export default function SalesPage() {
 
             <div className="vp-modal-body">
 
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta ação não pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
 
             </div>
 
@@ -621,6 +627,7 @@ export default function SalesPage() {
   )
 
 }
+
 
 
 
