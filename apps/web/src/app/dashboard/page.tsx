@@ -34,9 +34,9 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         })}
       </div>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-subtle)",marginTop:6}}>
-        <span>{labels[0]}</span>
-        <span>{labels[Math.floor(labels.length/2)]}</span>
-        <span>{labels[labels.length-1]}</span>
+        <span>{labels[0]?.split('/')[0]}</span>
+        <span>{labels[Math.floor(labels.length/2)]?.split('/')[0]}</span>
+        <span>{labels[labels.length-1]?.split('/')[0]}</span>
       </div>
     </div>
   )

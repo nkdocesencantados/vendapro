@@ -39,7 +39,7 @@ export class ReportsService {
       const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) };
       if (sellerId) weekWhere.sellerId = sellerId;
       const sales = await this.saleRepo.find({ where: weekWhere });
-      weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { weekday: "short" }), value: sales.reduce((a, s) => a + Number(s.total), 0) });
+      weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }), value: sales.reduce((a, s) => a + Number(s.total), 0) });
     }
     const lowStock = await this.productRepo.createQueryBuilder("p").where("p.storeId = :storeId", { storeId }).andWhere("p.stock <= p.minStock").getMany();
     // topSellers
