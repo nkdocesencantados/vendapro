@@ -55,8 +55,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         },
         scales: {
           x: {
-            ticks: { color:"rgba(255,255,255,0.55)", font:{size:10}, maxRotation:45, minRotation:45, autoSkip:false,
-              callback: function(_:any, i:number) { return data[i] > 0 ? labels[i].split("/")[0] : "" }
+            ticks: { color:"rgba(255,255,255,0.55)", font:{size:10}, maxRotation:0, minRotation:0, autoSkip:false,
+              callback: function(_:any, i:number) { return data[i] > 0 ? String(Number(labels[i].split("/")[0])) : "" }
             },
             grid: { color:"rgba(255,255,255,0.04)" },
             border: { color:"rgba(255,255,255,0.08)" }
