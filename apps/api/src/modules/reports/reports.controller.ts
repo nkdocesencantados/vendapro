@@ -24,7 +24,7 @@ export class ReportsController {
 
   @Get('search')
   search(@Query('storeId') storeId: string, @Query('q') q: string) {
-    return this.reportsService.search(storeId, q)
+    return this.service.search(storeId, q)
   }
 
 }
