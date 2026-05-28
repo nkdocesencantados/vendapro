@@ -55,7 +55,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
               autoSkip: false,
               maxTicksLimit: 28,
               callback: function(this: any, _: any, i: number) {
-                return data[i] > 0 ? labels[i].split("/")[0] : ""
+                return data[i] > 0 ? labels[i] : ""
               }
             },
             grid: { color: "rgba(255,255,255,0.04)" },
