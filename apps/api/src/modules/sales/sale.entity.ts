@@ -51,10 +51,7 @@ export class Sale {
   @Column()
   sellerId: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  saleDate: Date;
-
-  @CreateDateColumn()
+@CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
