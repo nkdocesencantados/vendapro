@@ -43,7 +43,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           backgroundColor: data.map(v => v > 0 ? color : "rgba(255,255,255,0.06)"),
           borderRadius: 4,
           borderSkipped: false,
-          barPercentage: 0.6,
+          barPercentage: 0.85,
+          categoryPercentage: 0.9,
         }]
       },
       options: {
@@ -54,7 +55,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         },
         scales: {
           x: {
-            ticks: { color:"rgba(255,255,255,0.4)", font:{size:8}, maxRotation:45, minRotation:45, autoSkip:false,
+            ticks: { color:"rgba(255,255,255,0.5)", font:{size:10,weight:"500"}, maxRotation:0, minRotation:0, autoSkip:true, maxTicksLimit:8,
               callback: function(_:any, i:number) { return data[i] > 0 ? labels[i] : "" }
             },
             grid: { color:"rgba(255,255,255,0.04)" },
@@ -77,7 +78,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
   if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div style={{position:"relative",width:"100%",height:220}}>
+    <div style={{position:"relative",width:"100%",height:260}}>
       <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
