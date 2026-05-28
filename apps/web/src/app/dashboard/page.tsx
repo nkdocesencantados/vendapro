@@ -56,7 +56,17 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: { color:"rgba(255,255,255,0.55)", font:{size:10}, maxRotation:0, minRotation:0, autoSkip:false,
-              callback: function(_:any, i:number) { return data[i] > 0 ? String(Number(labels[i].split("/")[0])) : "" }
+              callback: function(_:any, i:number) {
+                if (!data[i] || data[i] === 0) return ""
+                // verifica se o vizinho anterior também tem venda — se sim, pula no mobile
+                const prev = i > 0 ? data[i-1] : 0
+                const next = i < data.length-1 ? data[i+1] : 0
+                if (prev > 0 || next > 0) {
+                  // dias consecutivos — mostra só o primeiro do grupo
+                  if (prev > 0) return ""
+                }
+                return String(Number(labels[i].split("/")[0]))
+              }
             },
             grid: { color:"rgba(255,255,255,0.04)" },
             border: { color:"rgba(255,255,255,0.08)" }
