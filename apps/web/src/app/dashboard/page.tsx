@@ -1,4 +1,5 @@
 ﻿"use client"
+import React from "react"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import Link from "next/link"
@@ -10,58 +11,77 @@ const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Ag
 const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
 function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
-  if(!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
-  const max   = Math.max(...data, 1)
-  const steps = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(max * p))
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const chartRef  = React.useRef<any>(null)
+
+  React.useEffect(() => {
+    if (!canvasRef.current || !data.length) return
+    if (chartRef.current) chartRef.current.destroy()
+
+    const ctx = canvasRef.current.getContext("2d")
+    if (!ctx) return
+
+    const Chart = (window as any).Chart
+    if (!Chart) return
+
+    chartRef.current = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: data.map(v => v > 0 ? color : "rgba(255,255,255,0.06)"),
+          borderRadius: 4,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx: any) => `R$ ${Number(ctx.parsed.y).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "rgba(255,255,255,0.3)",
+              font: { size: 9 },
+              maxRotation: 45,
+              autoSkip: true,
+              maxTicksLimit: 12,
+              callback: function(this: any, _: any, i: number) {
+                return data[i] > 0 ? labels[i] : ""
+              }
+            },
+            grid: { color: "rgba(255,255,255,0.04)" },
+            border: { color: "rgba(255,255,255,0.08)" }
+          },
+          y: {
+            ticks: {
+              color: "rgba(255,255,255,0.3)",
+              font: { size: 9 },
+              callback: (v: any) => v >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`
+            },
+            grid: { color: "rgba(255,255,255,0.06)" },
+            border: { display: false }
+          }
+        }
+      }
+    })
+
+    return () => { if (chartRef.current) chartRef.current.destroy() }
+  }, [data, labels, color])
+
+  if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div style={{display:"flex",gap:8}}>
-      {/* Eixo Y */}
-      <div style={{display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",alignItems:"flex-end",width:52,flexShrink:0,paddingBottom:28}}>
-        {steps.map((v,i) => (
-          <span key={i} style={{fontSize:9,color:"var(--text-subtle)",whiteSpace:"nowrap",lineHeight:1}}>
-            {v>=1000?`R$${(v/1000).toFixed(1)}k`:`R$${v}`}
-          </span>
-        ))}
-      </div>
-
-      {/* Gráfico */}
-      <div style={{flex:1,position:"relative"}}>
-        {/* Linhas grade */}
-        <div style={{position:"absolute",top:0,left:0,right:0,bottom:28,display:"flex",flexDirection:"column-reverse",justifyContent:"space-between",pointerEvents:"none"}}>
-          {steps.map((_,i) => (
-            <div key={i} style={{width:"100%",height:1,background:"var(--border)"}}/>
-          ))}
-        </div>
-
-        {/* Barras */}
-        <div style={{display:"flex",alignItems:"flex-end",gap:2,height:160}}>
-          {data.map((v,i) => {
-            const pct = v > 0 ? Math.max((v/max)*100, 4) : 0
-            return (
-              <div key={i} title={v>0?`${labels[i]}: ${v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}`:labels[i]}
-                style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"flex-end",height:"100%"}}>
-                {v > 0 && (
-                  <div style={{width:"100%",height:`${pct}%`,background:color,borderRadius:"3px 3px 0 0",minHeight:4,transition:"height .2s"}}/>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Eixo X — só dias com venda */}
-        <div style={{display:"flex",gap:2,height:36,alignItems:"flex-start",marginTop:4}}>
-          {data.map((v,i) => (
-            <div key={i} style={{flex:1,textAlign:"center",position:"relative"}}>
-              {v > 0 && (
-                <span style={{fontSize:8,color:"var(--text-subtle)",display:"inline-block",transform:"rotate(-45deg)",transformOrigin:"top center",whiteSpace:"nowrap",position:"absolute",top:0,left:"50%",marginLeft:-10}}>
-                  {labels[i]}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+    <div style={{position:"relative",height:180}}>
+      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
 }

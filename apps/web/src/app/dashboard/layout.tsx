@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
 import Link from "next/link"
+import Script from "next/script"
 import CommandPalette from "@/components/CommandPalette"
 
 const NAV_ALL = [
@@ -122,6 +123,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   })
 
   return (
+    <>
+    <Script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" strategy="beforeInteractive"/>
     <div className="vp-layout">
       {/* ── SIDEBAR ── */}
       <aside className={`vp-sidebar${mobileOpen ? " open" : ""}`}>
@@ -211,5 +214,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
       `}</style>
     </div>
+    </>
   )
 }
