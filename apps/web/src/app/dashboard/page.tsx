@@ -89,8 +89,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: {
-              color: "rgba(255,255,255,0.45)",
-              font: { size: 8 },
+              color: "#ffffff",
+              font: { size: 9 },
               maxRotation: 45,
               minRotation: 45,
               autoSkip: false,
