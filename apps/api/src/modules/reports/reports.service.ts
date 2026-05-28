@@ -153,7 +153,7 @@ export class ReportsService {
     const sales = await this.saleRepo.createQueryBuilder("s")
       .where("s.storeId = :storeId", { storeId })
       .andWhere("s.status = 'completed'")
-      .andWhere("(LOWER(s.customerName) LIKE :term OR CAST(s.total AS TEXT) LIKE :term)", { term: `%${term}%` })
+      .andWhere("(s.customerName ILIKE :term OR CAST(s.total AS TEXT) LIKE :term)", { term: `%${term}%` })
       .orderBy("s.createdAt", "DESC")
       .take(5).getMany()
     return {
