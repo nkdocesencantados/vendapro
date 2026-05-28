@@ -19,9 +19,13 @@ export class SalesService {
 
   async findAll(storeId: string, from?: string, to?: string, sellerId?: string) {
     const where: any = { storeId };
-    if (from && to) where.createdAt = Between(new Date(from), new Date(to));
+    if (from && to) {
+      const fromDate = new Date(from);
+      const toDate = new Date(to); toDate.setHours(23,59,59,999);
+      where.saleDate = Between(fromDate, toDate);
+    }
     if (sellerId) where.sellerId = sellerId;
-    const sales = await this.saleRepo.find({ where, order: { createdAt: "DESC" } });
+    const sales = await this.saleRepo.find({ where, order: { saleDate: "DESC" } });
     const sellerIds = [...new Set(sales.map((s: any) => s.sellerId).filter(Boolean))];
     const sellers = sellerIds.length > 0 ? await this.userRepo.findByIds(sellerIds) : [];
     const sellerMap: any = {};
@@ -78,7 +82,9 @@ export class SalesService {
       if (item.productId) await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
     }
 
-    const saleDate = saleData.createdAt ? new Date(saleData.createdAt) : new Date();
+    const saleDate = saleData.saleDate ? new Date(saleData.saleDate)
+      : saleData.createdAt ? new Date(saleData.createdAt)
+      : new Date();
     await this.financialRepo.save(this.financialRepo.create({
       type: EntryType.INCOME, category: EntryCategory.SALE,
       description: `Venda #${saleId.slice(0, 8)}`, amount: total,
@@ -104,7 +110,7 @@ export class SalesService {
   async todaySummary(storeId: string) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, createdAt: Between(today, tomorrow) } });
+    const sales = await this.saleRepo.find({ where: { storeId, status: SaleStatus.COMPLETED, saleDate: Between(today, tomorrow) } });
     const total = sales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = sales.length ? total / sales.length : 0;
     return { total, count: sales.length, avgTicket };
