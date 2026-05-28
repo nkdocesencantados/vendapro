@@ -15,14 +15,23 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
   const chartRef  = React.useRef<any>(null)
 
   React.useEffect(() => {
-    if (!canvasRef.current || !data.length) return
-    if (chartRef.current) chartRef.current.destroy()
-
-    const ctx = canvasRef.current.getContext("2d")
-    if (!ctx) return
+    const canvas = canvasRef.current
+    if (!canvas || !data.length) return
 
     const Chart = (window as any).Chart
-    if (!Chart) return
+    if (!Chart) {
+      const timer = setTimeout(() => {
+        if ((window as any).Chart) {
+          canvas.dispatchEvent(new Event("rebuild"))
+        }
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+
+    if (chartRef.current) chartRef.current.destroy()
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
 
     chartRef.current = new Chart(ctx, {
       type: "bar",
@@ -33,11 +42,14 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           backgroundColor: data.map(v => v > 0 ? color : "rgba(255,255,255,0.06)"),
           borderRadius: 4,
           borderSkipped: false,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { bottom: 4 } },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -49,11 +61,11 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: {
-              color: "rgba(255,255,255,0.3)",
-              font: { size: 9 },
-              maxRotation: 90,
+              color: "rgba(255,255,255,0.4)",
+              font: { size: 8 },
+              maxRotation: 45,
+              minRotation: 45,
               autoSkip: false,
-              maxTicksLimit: 28,
               callback: function(this: any, _: any, i: number) {
                 return data[i] > 0 ? labels[i] : ""
               }
@@ -74,14 +86,18 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
       }
     })
 
-    return () => { if (chartRef.current) chartRef.current.destroy() }
+    return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null } }
   }, [data, labels, color])
 
-  if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
+  if (!data.length) return (
+    <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>
+      Sem dados no período
+    </div>
+  )
 
   return (
-    <div style={{position:"relative",height:200}}>
-      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
+    <div style={{position:"relative",width:"100%",height:"clamp(160px, 25vw, 220px)"}}>
+      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia" style={{display:"block",width:"100%",height:"100%"}}/>
     </div>
   )
 }
