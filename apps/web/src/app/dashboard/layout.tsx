@@ -73,6 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileOpen, setMobileOpen] = useState(false)
   const [search,     setSearch]     = useState("")
   const [cmdOpen,    setCmdOpen]    = useState(false)
+  const [notifOpen,  setNotifOpen]  = useState(false)
 
   useEffect(() => {
     if (!authUser) { router.push("/login"); return }
@@ -195,9 +196,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <button className="vp-icon-btn" onClick={toggleDark} title={dark ? "Modo claro" : "Modo escuro"}>
               <Icon name={dark ? "sun" : "moon"} size={15}/>
             </button>
-            <button className="vp-icon-btn" title="Notificações">
-              <Icon name="bell" size={15}/>
-            </button>
+            <div style={{position:"relative"}}>
+              <button className="vp-icon-btn" title="Notificações" onClick={()=>setNotifOpen(o=>!o)}>
+                <Icon name="bell" size={15}/>
+              </button>
+              {notifOpen && (
+                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:260,background:"var(--bg-elevated)",border:"1px solid var(--border)",borderRadius:12,boxShadow:"var(--shadow-lg)",zIndex:200,overflow:"hidden"}}>
+                  <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:13,fontWeight:600,color:"var(--text)"}}>Notificações</div>
+                  <div style={{maxHeight:240,overflowY:"auto"}}>
+                    <div style={{padding:"10px 16px",fontSize:12,color:"var(--text-muted)"}}>
+                      Nenhuma notificação no momento.
+                    </div>
+                  </div>
+                </div>
+              )}
+              {notifOpen && <div style={{position:"fixed",inset:0,zIndex:199}} onClick={()=>setNotifOpen(false)}/>}
+            </div>
             <span className="vp-plan-badge">{PLAN_LABEL[plan] || plan}</span>
           </div>
         </header>

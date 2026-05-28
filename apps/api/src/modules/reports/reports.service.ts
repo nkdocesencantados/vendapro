@@ -42,7 +42,7 @@ export class ReportsService {
       const weekWhere: any = { storeId, status: SaleStatus.COMPLETED, createdAt: Between(start, end) };
       if (sellerId) weekWhere.sellerId = sellerId;
       const sales = await this.saleRepo.find({ where: weekWhere });
-      weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }), value: sales.reduce((a, s) => a + Number(s.total), 0) });
+      weeklyChart.push({ day: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }), value: sales.reduce((a, s) => a + Number(s.total), 0), count: sales.length });
     }
     const lowStock = await this.productRepo.createQueryBuilder("p").where("p.storeId = :storeId", { storeId }).andWhere("p.stock <= p.minStock").getMany();
     // topSellers
@@ -80,7 +80,8 @@ export class ReportsService {
     const recentUserMap: Record<string, string> = {};
     recentUsers.forEach((u: any) => recentUserMap[u.id] = u.name);
     const recentSalesData = recentSales.map(s => ({ ...s, sellerName: recentUserMap[s.sellerId] || null }));
-    return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * 0.263), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthSalesCount: monthSales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart, topSellers, topProducts, recentSales: recentSalesData };
+    const storeMargin = storeRows?.[0]?.margin ? Number(storeRows[0].margin) / 100 : 0.263;
+    return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * storeMargin), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthSalesCount: monthSales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart, topSellers, topProducts, recentSales: recentSalesData };
   }
 
   async advanced(storeId: string, from: string, to: string, sellerId?: string) {

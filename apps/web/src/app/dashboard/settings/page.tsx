@@ -65,10 +65,10 @@ setAddress(s.address||""); setStoreId(s.id)
   async function saveStore(){
     setSaving(true)
     try{
-      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address })
+      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26 })
       const sc = localStorage.getItem("storeConfig")
       const store = sc?JSON.parse(sc):{}
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address}))
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     }catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
@@ -164,11 +164,20 @@ setAddress(s.address||""); setStoreId(s.id)
               <input className="st-input" value={address} onChange={e=>setAddress(e.target.value)} placeholder="R. das Flores, 142 — São Paulo/SP"/>
             </div>
 
-            <div className="st-field">
-              <label className="st-label">Meta mensal (R$)</label>
-              <div style={{position:"relative"}}>
-                <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"var(--text-subtle)",fontSize:13,pointerEvents:"none"}}>R$</span>
-                <input className="st-input" type="number" value={goal} onChange={e=>setGoal(e.target.value)} style={{paddingLeft:36}} placeholder="0"/>
+            <div className="st-row">
+              <div className="st-field">
+                <label className="st-label">Meta mensal (R$)</label>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"var(--text-subtle)",fontSize:13,pointerEvents:"none"}}>R$</span>
+                  <input className="st-input" type="number" value={goal} onChange={e=>setGoal(e.target.value)} style={{paddingLeft:36}} placeholder="0"/>
+                </div>
+              </div>
+              <div className="st-field">
+                <label className="st-label">Margem de lucro (%)</label>
+                <div style={{position:"relative"}}>
+                  <input className="st-input" type="number" min="0" max="100" value={margin} onChange={e=>setMargin(e.target.value)} style={{paddingRight:32}} placeholder="26"/>
+                  <span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:"var(--text-subtle)",fontSize:13,pointerEvents:"none"}}>%</span>
+                </div>
               </div>
             </div>
           </div>

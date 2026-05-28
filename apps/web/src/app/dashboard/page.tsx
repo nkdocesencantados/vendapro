@@ -53,7 +53,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
               font: { size: 9 },
               maxRotation: 45,
               autoSkip: true,
-              maxTicksLimit: 12,
+              maxTicksLimit: 28,
               callback: function(this: any, _: any, i: number) {
                 return data[i] > 0 ? labels[i] : ""
               }
@@ -93,6 +93,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [store,   setStore]   = useState<any>(null)
   const [color,   setColor]   = useState("var(--brand)")
+  const [chartMode, setChartMode] = useState<"revenue"|"count">("revenue")
 
   const now        = new Date()
   const monthLabel = MONTHS[now.getMonth()]
@@ -113,12 +114,17 @@ export default function DashboardPage() {
   const totalV     = data?.monthSalesCount|| 0
   const meta       = store?.monthlyGoal   || data?.monthGoal || 0
   const metaPct    = meta>0 ? Math.min(Math.round((fat/meta)*100),100) : 0
-  const chartData  = (data?.weeklyChart||[]).map((d:any)=>d.value)
+  const chartData  = (data?.weeklyChart||[]).map((d:any)=> chartMode==="revenue" ? d.value : d.count||0)
   const chartLabels= (data?.weeklyChart||[]).map((d:any)=>d.day)
   const sellers:any[]    = data?.topSellers  || []
   const products:any[]   = data?.topProducts || []
   const recentSales:any[]= data?.recentSales || []
   const lowStock:any[]   = data?.lowStock    || []
+  const notifs = [
+    ...lowStock.map((p:any)=>({ type:"warn", msg:`Estoque baixo: ${p.name}` })),
+    ...(metaPct>=100?[{ type:"ok", msg:"🎉 Meta do mês atingida!" }]:[]),
+    ...(today>0?[{ type:"info", msg:`+vendas hoje: ${BRLshort(today)}` }]:[]),
+  ]
 
   if(loading) return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"60vh",flexDirection:"column",gap:16}}>
@@ -276,11 +282,11 @@ export default function DashboardPage() {
             <div className="d-card-head">
               <div>
                 <div className="d-card-title">Vendas por dia</div>
-                <div className="d-card-sub">Últimos {chartData.length||0} dias</div>
+                <div className="d-card-sub">{monthLabel} {year}</div>
               </div>
               <div style={{display:"flex",gap:6}}>
-                <button className="vp-btn vp-btn-ghost vp-btn-sm" style={{fontSize:11}}>Receita</button>
-                <button className="vp-btn vp-btn-secondary vp-btn-sm" style={{fontSize:11}}>Quantidade</button>
+                <button className={`vp-btn vp-btn-sm${chartMode==="revenue"?" vp-btn-secondary":" vp-btn-ghost"}`} style={{fontSize:11}} onClick={()=>setChartMode("revenue")}>Receita</button>
+                <button className={`vp-btn vp-btn-sm${chartMode==="count"?" vp-btn-secondary":" vp-btn-ghost"}`} style={{fontSize:11}} onClick={()=>setChartMode("count")}>Quantidade</button>
               </div>
             </div>
             <div className="d-card-body">
