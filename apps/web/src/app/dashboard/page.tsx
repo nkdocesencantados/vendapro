@@ -31,8 +31,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     if (!Chart) return
     if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null }
 
-    const max = Math.max(...data, 1)
-    const step = max <= 100 ? 10 : max <= 500 ? 50 : max <= 2000 ? 200 : max <= 5000 ? 500 : max <= 10000 ? 1000 : 2000
+    const max  = Math.max(...data, 1)
+    const step = max<=100?10:max<=500?50:max<=2000?200:max<=5000?500:max<=10000?1000:2000
 
     chartRef.current = new Chart(canvasRef.current, {
       type: "bar",
@@ -40,34 +40,42 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         labels,
         datasets: [{
           data,
-          backgroundColor: data.map(v => v > 0 ? color : "rgba(255,255,255,0.06)"),
+          backgroundColor: color,
           borderRadius: 4,
           borderSkipped: false,
-          barPercentage: 0.5,
-          categoryPercentage: 0.6,
+          barPercentage: 0.55,
+          categoryPercentage: 0.65,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false },
-          tooltip: { callbacks: { label: (c: any) => `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c:any) => `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
         },
         scales: {
           x: {
-            ticks: { color:"rgba(255,255,255,0.55)", font:{size:9}, maxRotation:0, minRotation:0, autoSkip:false,
-              callback: function(_:any, i:number) { return data[i] > 0 ? String(Number(labels[i].split("/")[0])) : "" }
+            ticks: {
+              color: "rgba(255,255,255,0.55)",
+              font: { size: 8 },
+              maxRotation: 45,
+              minRotation: 45,
+              autoSkip: false,
             },
-            grid: { color:"rgba(255,255,255,0.04)" },
-            border: { color:"rgba(255,255,255,0.08)" }
+            grid: { color: "rgba(255,255,255,0.04)" },
+            border: { color: "rgba(255,255,255,0.08)" }
           },
           y: {
             min: 0,
-            ticks: { color:"rgba(255,255,255,0.35)", font:{size:9}, stepSize: step,
+            ticks: {
+              color: "rgba(255,255,255,0.35)",
+              font: { size: 9 },
+              stepSize: step,
               callback: (v:any) => { const n=Number(v); return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
             },
-            grid: { color:"rgba(255,255,255,0.06)" },
-            border: { display:false }
+            grid: { color: "rgba(255,255,255,0.06)" },
+            border: { display: false }
           }
         }
       }
@@ -75,7 +83,9 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null } }
   }, [ready, data, labels, color])
 
-  if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
+  if (!data.length) return (
+    <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem vendas no período</div>
+  )
 
   return (
     <div style={{position:"relative",width:"100%",height:260}}>
@@ -112,8 +122,10 @@ export default function DashboardPage() {
   const totalV     = data?.monthSalesCount|| 0
   const meta       = store?.monthlyGoal   || data?.monthGoal || 0
   const metaPct    = meta>0 ? Math.min(Math.round((fat/meta)*100),100) : 0
-  const chartData  = (data?.weeklyChart||[]).map((d:any)=> chartMode==="revenue" ? d.value : d.count||0)
-  const chartLabels= (data?.weeklyChart||[]).map((d:any)=>d.day)
+  const chartRaw   = (data?.weeklyChart||[])
+  const chartFiltered = chartRaw.filter((d:any) => chartMode==="revenue" ? d.value > 0 : (d.count||0) > 0)
+  const chartData  = chartFiltered.map((d:any) => chartMode==="revenue" ? d.value : d.count||0)
+  const chartLabels= chartFiltered.map((d:any) => d.day)
   const sellers:any[]    = data?.topSellers  || []
   const products:any[]   = data?.topProducts || []
   const recentSales:any[]= data?.recentSales || []
