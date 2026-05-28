@@ -55,7 +55,7 @@ export default function CommandPalette() {
   const doSearch = useCallback((q: string) => {
     if (!q || q.length < 2) { setResults({ sales: [], products: [] }); return }
     setLoading(true)
-    api.get("/reports/search?storeId=" + storeId + "&q=" + encodeURIComponent(q))
+    api.get("/reports/search?q=" + encodeURIComponent(q))
       .then(r => { setResults(r.data); setSel(0) })
       .catch(() => {})
       .finally(() => setLoading(false))

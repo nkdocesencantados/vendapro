@@ -23,8 +23,8 @@ export class ReportsController {
   }
 
   @Get('search')
-  search(@Query('storeId') storeId: string, @Query('q') q: string) {
-    return this.service.search(storeId, q)
+  search(@Request() req, @Query('q') q: string) {
+    return this.service.search(req.user.storeId, q)
   }
 
 }
