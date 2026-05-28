@@ -80,7 +80,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
   if (!data.length) return <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem dados no período</div>
 
   return (
-    <div style={{position:"relative",height:180}}>
+    <div style={{position:"relative",height:140}}>
       <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
     </div>
   )
