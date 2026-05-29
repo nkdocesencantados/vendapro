@@ -106,41 +106,36 @@ function MockupCard({ color }: { color: string }) {
           </svg>
         </div>
 
-        {/* barras com gradiente via filter glow */}
-        <div style={{display:"flex",alignItems:"flex-end",gap:5,height:110,marginBottom:6,padding:"0 2px"}}>
-          {BAR_HEIGHTS.map((v,i) => {
-            const hi = i===3||i===5
-            return (
-              <div key={i} style={{
-                flex:1,
-                height:`${v}%`,
-                background: hi
-                  ? `linear-gradient(180deg, ${color} 0%, ${color}88 60%, ${color}33 100%)`
-                  : `linear-gradient(180deg, ${color}cc 0%, ${color}66 60%, ${color}22 100%)`,
-                borderRadius:"4px 4px 0 0",
-                border:`1px solid ${color}${hi?"99":"44"}`,
-                borderBottom:"none",
-                boxShadow: hi ? `0 0 12px ${color}44, inset 0 1px 0 rgba(255,255,255,0.15)` : `inset 0 1px 0 rgba(255,255,255,0.08)`,
-                position:"relative",
-                overflow:"hidden",
-              }}>
-                {/* reflexo topo */}
-                <div style={{
-                  position:"absolute",top:0,left:0,right:0,
-                  height:"35%",
-                  background:"linear-gradient(180deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0) 100%)",
-                  borderRadius:"4px 4px 0 0",
-                }}/>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* labels */}
-        <div style={{display:"flex",gap:5,marginBottom:10}}>
-          {DAYS.map((d,i) => (
-            <div key={d} style={{flex:1,textAlign:"center",fontSize:8.5,color:"rgba(255,255,255,0.3)"}}>{d}</div>
-          ))}
+        {/* curva de receita animada */}
+        <div style={{marginTop:12,height:120,position:"relative"}}>
+          <svg viewBox="0 0 500 180" preserveAspectRatio="none" style={{width:"100%",height:"100%",display:"block",overflow:"visible"}}>
+            <defs>
+              <linearGradient id="curve-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.38"/>
+                <stop offset="100%" stopColor={color} stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <g stroke={`${color}18`} strokeWidth="1">
+              <line x1="0" y1="20" x2="500" y2="20"/>
+              <line x1="0" y1="65" x2="500" y2="65"/>
+              <line x1="0" y1="110" x2="500" y2="110"/>
+              <line x1="0" y1="155" x2="500" y2="155"/>
+            </g>
+            <path fill='url(#curve-fill)' d="M0,150 L45,118 L90,140 L135,82 L180,112 L225,58 L270,98 L315,44 L360,80 L405,30 L450,62 L500,22 L500,180 L0,180 Z"/>
+            <path id="login-curve" fill="none" stroke={color} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
+              style={{filter:`drop-shadow(0 0 6px ${color}bb)`,strokeDasharray:9999,strokeDashoffset:9999,animation:"lcdraw 2.4s cubic-bezier(.4,0,.2,1) forwards"}}
+              d="M0,150 L45,118 L90,140 L135,82 L180,112 L225,58 L270,98 L315,44 L360,80 L405,30 L450,62 L500,22"/>
+            <circle cx="135" cy="82" r="3" fill="#fff" stroke={color} strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${color})`}}/>
+            <circle cx="315" cy="44" r="3" fill="#fff" stroke={color} strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${color})`}}/>
+            <circle cx="405" cy="30" r="3" fill="#fff" stroke={color} strokeWidth="2" style={{filter:`drop-shadow(0 0 5px ${color})`}}/>
+            <circle r="7" fill={`${color}55`}>
+              <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto"><mpath xlinkHref="#login-curve"/></animateMotion>
+            </circle>
+            <circle r="3.5" fill="#fff" style={{filter:`drop-shadow(0 0 8px ${color}) drop-shadow(0 0 3px #fff)`}}>
+              <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto"><mpath xlinkHref="#login-curve"/></animateMotion>
+            </circle>
+          </svg>
+          <style>{'@keyframes lcdraw { to { stroke-dashoffset: 0; } }'}</style>
         </div>
 
         {/* pills */}
