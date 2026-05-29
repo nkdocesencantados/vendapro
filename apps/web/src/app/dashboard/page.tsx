@@ -60,7 +60,6 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           const haloBlur    = isWarm ? 10 : 18
           const haloSpread  = isWarm ? -4 : -2
 
-          ctx.save()
           ctx.shadowColor  = color + haloOpacity
           ctx.shadowBlur   = haloBlur
           ctx.shadowOffsetX = 0
@@ -69,7 +68,6 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           ctx.beginPath()
           ctx.roundRect(x - w/2, y, w, height, [6, 6, 2, 2])
           ctx.fill()
-          ctx.restore()
 
           // Contorno interno: brand-glow a 22% â€” "fio de luz" na borda
           ctx.save()
