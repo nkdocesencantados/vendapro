@@ -1,215 +1,453 @@
-"use client"
+﻿"use client"
+import React from "react"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { fmt, fmtDate } from "@/lib/utils"
+import Link from "next/link"
+import { useAuthStore } from "@/contexts/auth.store"
 
-const emptyItem = () => ({ productId: "", name: "", quantity: "1", unitPrice: "", isManual: false })
-const emptyForm = () => ({ customerName: "", paymentMethod: "cash", discount: 0, items: [emptyItem()] })
+function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
+function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v) }
+const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
-export default function SalesPage() {
-  const [sales, setSales] = useState<any[]>([])
-  const [products, setProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState<any>(emptyForm())
+function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const chartRef  = React.useRef<any>(null)
+  const [ready, setReady] = React.useState(false)
 
-  useEffect(() => { loadSales(); loadProducts() }, [])
+  React.useEffect(() => {
+    let attempts = 0
+    const tryInit = () => {
+      if ((window as any).Chart) { setReady(true); return }
+      attempts++
+      if (attempts < 20) setTimeout(tryInit, 300)
+    }
+    tryInit()
+  }, [])
 
-  async function loadSales() {
-    try { const r = await api.get("/sales"); setSales(r.data) }
-    catch (e) { console.error(e) }
-    finally { setLoading(false) }
-  }
+  React.useEffect(() => {
+    if (!ready || !canvasRef.current || !data.length) return
+    const Chart = (window as any).Chart
+    if (!Chart) return
+    if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null }
 
-  async function loadProducts() {
-    try { const r = await api.get("/products"); setProducts(r.data) }
-    catch (e) { console.error(e) }
-  }
+    const max  = Math.max(...data, 1)
+    const step = max<=100?10:max<=500?50:max<=2000?200:max<=5000?500:max<=10000?1000:2000
 
-  async function saveSale() {
-    const validItems = form.items.filter((i: any) => i.name && +i.unitPrice > 0)
-    if (!validItems.length) return alert("Adicione ao menos um produto com preco")
-    setSaving(true)
-    try {
-      const payload = {
-        ...form,
-        items: validItems.map((i: any) => ({
-          productId: i.productId || null,
-          name: i.name,
-          quantity: +i.quantity || 1,
-          unitPrice: +i.unitPrice || 0,
-          isManual: !i.productId,
-        }))
+    const isLight = document.documentElement.getAttribute("data-theme") === "light"
+    const glowBlur  = isLight ? 8 : 18
+    const glowAlpha = isLight ? "44" : "88"
+
+    const haloPlugin = {
+      id: "halo",
+      beforeDatasetsDraw(chart: any) {
+        const { ctx } = chart
+        chart.getDatasetMeta(0).data.forEach((bar: any) => {
+          const { x, y, width, height } = bar.getProps(["x","y","width","height"])
+          const w = width * 0.7
+          const grad = ctx.createLinearGradient(x, y + height, x, y)
+          grad.addColorStop(0, color + "38")
+          grad.addColorStop(0.5, color + "99")
+          grad.addColorStop(1, color)
+          ctx.save()
+          ctx.shadowColor = color + glowAlpha
+          ctx.shadowBlur = glowBlur
+          ctx.shadowOffsetX = 0
+          ctx.shadowOffsetY = 0
+          ctx.fillStyle = grad
+          ctx.beginPath()
+          ctx.roundRect(x - w/2, y, w, height, 5)
+          ctx.fill()
+          ctx.restore()
+        })
       }
-      await api.post("/sales", payload)
-      setShowForm(false)
-      setForm(emptyForm())
-      loadSales()
-      loadProducts()
-    } catch (e: any) {
-      const msg = e?.response?.data?.message || "Erro ao salvar venda"
-      alert(typeof msg === "string" ? msg : JSON.stringify(msg))
-      console.error(e)
-    } finally {
-      setSaving(false)
     }
-  }
 
-  async function cancelSale(id: string) {
-    if (!confirm("Cancelar esta venda?")) return
-    try { await api.patch(`/sales/${id}/cancel`); loadSales(); loadProducts() }
-    catch { loadSales() }
-  }
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "bar",
+      plugins: [haloPlugin],
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: color,
+          borderRadius: 5,
+          borderSkipped: false,
+          barPercentage: 0.55,
+          categoryPercentage: 0.65,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c:any) => `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#ffffff",
+              font: { size: 9 },
+              maxRotation: 45,
+              minRotation: 45,
+              autoSkip: false,
+            },
+            grid: { color: "rgba(255,255,255,0.04)" },
+            border: { color: "rgba(255,255,255,0.08)" }
+          },
+          y: {
+            min: 0,
+            ticks: {
+              color: "rgba(255,255,255,0.3)",
+              font: { size: 9 },
+              stepSize: step,
+              callback: (v:any) => { const n=Number(v); return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
+            },
+            grid: { color: "rgba(255,255,255,0.06)" },
+            border: { display: false }
+          }
+        }
+      }
+    })
+    return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null } }
+  }, [ready, data, labels, color])
 
-  const addItem = () => setForm({ ...form, items: [...form.items, emptyItem()] })
-  const removeItem = (i: number) => setForm({ ...form, items: form.items.filter((_: any, j: number) => j !== i) })
-
-  function selectProduct(i: number, productId: string) {
-    const it = [...form.items]
-    if (productId === "__manual__") {
-      it[i] = { productId: "", name: "", quantity: it[i].quantity, unitPrice: "", isManual: true }
-    } else {
-      const p = products.find((p: any) => p.id === productId)
-      if (p) it[i] = { productId: p.id, name: p.name, quantity: it[i].quantity, unitPrice: String(p.price), isManual: false }
-      else it[i] = { ...it[i], productId: "" }
-    }
-    setForm({ ...form, items: it })
-  }
-
-  function updateItem(i: number, field: string, val: string) {
-    const it = [...form.items]
-    it[i] = { ...it[i], [field]: val }
-    setForm({ ...form, items: it })
-  }
-
-  const total = form.items.reduce((a: number, i: any) => a + (+i.quantity || 0) * (+i.unitPrice || 0), 0) - form.discount
-  const inputStyle: any = { padding: "8px", border: "1px solid #e5e7eb", borderRadius: "6px", fontSize: "13px", background: "white", width: "100%", boxSizing: "border-box" }
+  if (!data.length) return (
+    <div style={{padding:"40px 0",textAlign:"center",color:"var(--text-subtle)",fontSize:13}}>Sem vendas no período</div>
+  )
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ background: "white", borderBottom: "0.5px solid #e5e7eb", padding: "0 20px", height: "50px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 500 }}>Vendas</div>
-        <button onClick={() => setShowForm(!showForm)} style={{ background: "#1D9E75", color: "white", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "13px", cursor: "pointer" }}>+ Nova Venda</button>
+    <div style={{position:"relative",width:"100%",height:260}}>
+      <canvas ref={canvasRef} role="img" aria-label="Gráfico de vendas por dia"/>
+    </div>
+  )
+}
+
+
+export default function DashboardPage() {
+  const { user: authUser } = useAuthStore()
+  const [data,    setData]    = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [store,   setStore]   = useState<any>(null)
+  const [color,   setColor]   = useState("var(--brand)")
+  const [chartMode, setChartMode] = useState<"revenue"|"count">("revenue")
+
+  const now        = new Date()
+  const monthLabel = MONTHS[now.getMonth()]
+  const year       = now.getFullYear()
+
+  useEffect(() => {
+    api.get("/stores").then(r=>{ const s=Array.isArray(r.data)?r.data[0]:r.data; if(s) setStore(s) }).catch(()=>{})
+    api.get("/reports/dashboard").then(r=>setData(r.data)).catch(()=>{}).finally(()=>setLoading(false))
+  }, [])
+
+  const storeName  = store?.name || "Minha Loja"
+  const firstName  = (authUser?.name||"Você").split(" ")[0]
+  const fat        = data?.monthSales     || 0
+  const today      = data?.todaySales     || 0
+  const lucro      = data?.profit         || 0
+  const margem     = fat>0 ? Math.round((lucro/fat)*100) : 0
+  const ticket     = data?.avgTicket      || 0
+  const totalV     = data?.monthSalesCount|| 0
+  const meta       = store?.monthlyGoal   || data?.monthGoal || 0
+  const metaPct    = meta>0 ? Math.min(Math.round((fat/meta)*100),100) : 0
+  const chartRaw   = (data?.weeklyChart||[])
+  const chartFiltered = chartRaw.filter((d:any) => chartMode==="revenue" ? d.value > 0 : (d.count||0) > 0)
+  const chartData  = chartFiltered.map((d:any) => chartMode==="revenue" ? d.value : d.count||0)
+  const chartLabels= chartFiltered.map((d:any) => d.day)
+  const sellers:any[]    = data?.topSellers  || []
+  const products:any[]   = data?.topProducts || []
+  const recentSales:any[]= data?.recentSales || []
+  const lowStock:any[]   = data?.lowStock    || []
+  const notifs = [
+    ...lowStock.map((p:any)=>({ type:"warn", msg:`Estoque baixo: ${p.name}` })),
+    ...(metaPct>=100?[{ type:"ok", msg:"🎉 Meta do mês atingida!" }]:[]),
+    ...(today>0?[{ type:"info", msg:`+vendas hoje: ${BRL(today)}` }]:[]),
+  ]
+
+  if(loading) return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"60vh",flexDirection:"column",gap:16}}>
+      <div style={{width:40,height:40,border:"3px solid var(--border)",borderTopColor:"var(--brand)",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+      <div style={{color:"var(--text-subtle)",fontSize:13}}>Carregando dashboard...</div>
+    </div>
+  )
+
+  return (
+    <div>
+      <style>{`
+        .d-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+        .d-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px;position:relative;overflow:hidden;transition:var(--transition);}
+        .d-kpi:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow-md);}
+        .d-kpi-label{font-size:11px;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+        .d-kpi-val{font-family:var(--font-mono);font-size:clamp(20px,2.5vw,32px);font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1;}
+        .d-kpi-delta{font-size:12px;color:var(--text-subtle);margin-top:8px;}
+        .d-kpi-delta.ok{color:var(--brand);text-shadow:none;}
+        .d-kpi-glow{position:absolute;bottom:-20px;right:-20px;width:60px;height:60px;border-radius:50%;background:color-mix(in srgb,var(--brand) 18%,transparent);filter:blur(16px);pointer-events:none;opacity:.6;}
+        .d-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;}
+        .d-left{display:flex;flex-direction:column;gap:16px;}
+        .d-right{display:flex;flex-direction:column;gap:16px;}
+        .d-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
+        .d-card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+        .d-card-title{font-size:14px;font-weight:600;color:var(--text);}
+        .d-card-sub{font-size:12px;color:var(--text-subtle);margin-top:2px;}
+        .d-card-body{padding:20px;}
+        .d-seller-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+        .d-seller-row:last-child{border:0;}
+        .d-seller-rank{width:20px;font-size:11px;font-weight:700;color:var(--text-subtle);flex-shrink:0;}
+        .d-seller-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+        .d-seller-info{flex:1;min-width:0;}
+        .d-seller-name{font-size:13px;font-weight:600;color:var(--text);}
+        .d-seller-count{font-size:11px;color:var(--text-subtle);}
+        .d-seller-bar{height:3px;background:var(--surface-3);border-radius:99px;margin-top:4px;overflow:hidden;}
+        .d-seller-bar span{display:block;height:100%;border-radius:99px;background:var(--brand);}
+        .d-seller-rev{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;}
+        .d-sale-row{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border);transition:var(--transition);}
+        .d-sale-row:last-child{border:0;}
+        .d-sale-row:hover{background:var(--surface-2);}
+        .d-sale-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+        .d-sale-info{flex:1;min-width:0;}
+        .d-sale-name{font-size:13px;font-weight:600;color:var(--text);}
+        .d-sale-meta{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap;}
+        .d-sale-val{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--brand);white-space:nowrap;}
+        .d-product-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+        .d-product-row:last-child{border:0;}
+        .d-product-icon{width:36px;height:36px;border-radius:var(--r);background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border);}
+        .d-product-info{flex:1;min-width:0;}
+        .d-product-name{font-size:13px;font-weight:600;color:var(--text);}
+        .d-product-qty{font-size:11px;color:var(--text-subtle);}
+        .d-product-rev{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;}
+        .d-meta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;}
+        @media(max-width:1200px){.d-grid{grid-template-columns:1fr;} .d-kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:640px){.d-kpi-grid{grid-template-columns:1fr 1fr;} .d-card-body{padding:14px;}}
+      `}</style>
+
+      {/* HEADER */}
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:24,flexWrap:"wrap"}}>
+        <div>
+          <h1 style={{margin:0,fontSize:"clamp(22px,3vw,30px)",fontWeight:700,letterSpacing:"-.03em",color:"var(--text)"}}>
+            Olá, {firstName} 👋
+          </h1>
+          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:4}}>
+            Visão geral da {storeName} — {monthLabel} de {year}
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <button className="vp-btn vp-btn-secondary">
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Este mês
+          </button>
+          <Link href="/dashboard/sales">
+            <button className="vp-btn vp-btn-primary">
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nova venda
+            </button>
+          </Link>
+        </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
-        {showForm && (
-          <div style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
-            <h3 style={{ marginBottom: "16px", fontWeight: 500, fontSize: "15px" }}>Nova Venda</h3>
+      {/* KPIs */}
+      <div className="d-kpi-grid">
+        <div className="d-kpi">
+          <div className="d-kpi-label">
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 3v18h18M7 12h3v6H7zM12 8h3v10h-3zM17 5h3v13h-3z"/></svg>
+            Faturamento hoje
+          </div>
+          <div className="d-kpi-val">{BRL(today)}</div>
+          <div className={`d-kpi-delta${today>0?" ok":""}`}>{today>0?"+vendas hoje":"Sem vendas hoje"}</div>
+          <div className="d-kpi-glow"/>
+        </div>
+        <div className="d-kpi">
+          <div className="d-kpi-label">
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Faturamento do mês
+          </div>
+          <div className="d-kpi-val">{BRL(fat)}</div>
+          <div className="d-kpi-delta ok">+{totalV} vendas</div>
+          <div className="d-kpi-glow"/>
+        </div>
+        <div className="d-kpi">
+          <div className="d-kpi-label">
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 8v4l3 3"/></svg>
+            Lucro estimado
+          </div>
+          <div className="d-kpi-val">{BRL(lucro)}</div>
+          <div className="d-kpi-delta ok">{margem}% margem</div>
+          <div className="d-kpi-glow"/>
+        </div>
+        <div className="d-kpi">
+          <div className="d-kpi-label">
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 6h18v12H3zM12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0"/></svg>
+            Ticket médio
+          </div>
+          <div className="d-kpi-val">{BRL(ticket)}</div>
+          <div className="d-kpi-delta">Por venda</div>
+          <div className="d-kpi-glow"/>
+        </div>
+      </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Cliente</label>
-                <input value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} placeholder="Nome do cliente" style={inputStyle} />
+      {/* META */}
+      {meta>0 && (
+        <div className="d-meta-card">
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:"var(--text)"}}>
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                Meta mensal
               </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "#666", display: "block", marginBottom: "4px" }}>Pagamento</label>
-                <select value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })} style={inputStyle}>
-                  <option value="cash">Dinheiro</option>
-                  <option value="pix">PIX</option>
-                  <option value="credit_card">Cartao Credito</option>
-                  <option value="debit_card">Cartao Debito</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                <label style={{ fontSize: "12px", color: "#666" }}>Itens da venda</label>
-                <button onClick={addItem} style={{ background: "none", border: "1px solid #1D9E75", color: "#1D9E75", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", cursor: "pointer" }}>+ Adicionar item</button>
-              </div>
-
-              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "8px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
-                  {["Produto", "Qtd", "Preco (R$)", ""].map(h => <div key={h} style={{ fontSize: "11px", color: "#888", fontWeight: 500 }}>{h}</div>)}
-                </div>
-
-                {form.items.map((item: any, i: number) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "2.5fr 70px 110px 36px", gap: "8px", marginBottom: "6px" }}>
-                    {item.isManual ? (
-                      <div style={{ display: "flex", gap: "4px" }}>
-                        <input
-                          value={item.name}
-                          onChange={e => updateItem(i, "name", e.target.value)}
-                          placeholder="Nome do produto"
-                          style={{ ...inputStyle, flex: 1 }}
-                        />
-                        <button
-                          onClick={() => { const it = [...form.items]; it[i] = { ...emptyItem(), quantity: it[i].quantity }; setForm({ ...form, items: it }) }}
-                          title="Voltar para selecao"
-                          style={{ padding: "0 8px", border: "1px solid #e5e7eb", borderRadius: "6px", background: "white", cursor: "pointer", fontSize: "14px", color: "#666" }}
-                        >↩</button>
-                      </div>
-                    ) : (
-                      <select value={item.productId} onChange={e => selectProduct(i, e.target.value)} style={inputStyle}>
-                        <option value="">Selecione um produto</option>
-                        {products.map((p: any) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name} — R$ {Number(p.price).toFixed(2)} ({p.stock} un)
-                          </option>
-                        ))}
-                        <option value="__manual__">✏ Digitar manualmente</option>
-                      </select>
-                    )}
-                    <input
-                      value={item.quantity}
-                      onChange={e => updateItem(i, "quantity", e.target.value)}
-                      type="number" min="1"
-                      style={{ ...inputStyle, textAlign: "center" }}
-                    />
-                    <input
-                      value={item.unitPrice}
-                      onChange={e => updateItem(i, "unitPrice", e.target.value)}
-                      type="number" min="0" step="0.01"
-                      placeholder="0,00"
-                      style={inputStyle}
-                    />
-                    <button onClick={() => removeItem(i)} style={{ background: "#fee2e2", border: "none", borderRadius: "6px", color: "#ef4444", cursor: "pointer", fontSize: "16px", fontWeight: 700 }}>×</button>
-                  </div>
-                ))}
+              <div style={{fontSize:12,color:"var(--text-subtle)",marginTop:3}}>
+                {meta>fat?`Faltam ${BRLshort(meta-fat)} para a meta`:"🎉 Meta atingida!"}
               </div>
             </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "#1D9E75" }}>Total: {fmt(total)}</div>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <button onClick={() => { setShowForm(false); setForm(emptyForm()) }} style={{ padding: "8px 16px", border: "1px solid #e5e7eb", borderRadius: "8px", background: "white", cursor: "pointer", fontSize: "13px" }}>Cancelar</button>
-                <button onClick={saveSale} disabled={saving} style={{ padding: "8px 20px", background: saving ? "#9ca3af" : "#1D9E75", color: "white", border: "none", borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: 500 }}>
-                  {saving ? "Salvando..." : "Salvar Venda"}
-                </button>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:"var(--font-mono)",fontSize:"clamp(14px,2vw,20px)",fontWeight:700,color:"var(--text)"}}>
+                {BRL(fat)}<span style={{color:"var(--text-subtle)",fontSize:12,fontWeight:400}}> / {BRLshort(Number(meta))}</span>
               </div>
+              <div style={{fontSize:12,color:"var(--brand)",fontWeight:600,marginTop:2}}>{metaPct}% atingido</div>
             </div>
           </div>
-        )}
+          <div className="vp-progress"><div className="vp-progress-fill" style={{width:`${metaPct}%`}}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-subtle)",marginTop:6}}>
+            <span>R$ 0</span><span>{BRLshort(Number(meta)/2)}</span><span>{BRLshort(Number(meta))}</span>
+          </div>
+        </div>
+      )}
 
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Carregando...</div>
-        ) : sales.length === 0 ? (
-          <div style={{ textAlign: "center", color: "#888", padding: "60px" }}>Nenhuma venda registrada ainda.</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {sales.map((s: any) => (
-              <div key={s.id} style={{ background: "white", border: "0.5px solid #e5e7eb", borderRadius: "10px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* MAIN GRID */}
+      <div className="d-grid">
+        <div className="d-left">
+
+          {/* GRÁFICO */}
+          <div className="d-card">
+            <div className="d-card-head">
+              <div>
+                <div className="d-card-title">Vendas por dia</div>
+                <div className="d-card-sub">{monthLabel} {year}</div>
+              </div>
+              <div style={{display:"flex",gap:6}}>
+                <button className={`vp-btn vp-btn-sm${chartMode==="revenue"?" vp-btn-secondary":" vp-btn-ghost"}`} style={{fontSize:11}} onClick={()=>setChartMode("revenue")}>Receita</button>
+                <button className={`vp-btn vp-btn-sm${chartMode==="count"?" vp-btn-secondary":" vp-btn-ghost"}`} style={{fontSize:11}} onClick={()=>setChartMode("count")}>Quantidade</button>
+              </div>
+            </div>
+            <div className="d-card-body">
+              <BarChart data={chartData} labels={chartLabels} color={(() => { try { return getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9" } catch { return "#0EA5E9" } })()}/>
+            </div>
+          </div>
+
+          {/* ÚLTIMAS VENDAS */}
+          {recentSales.length>0 && (
+            <div className="d-card">
+              <div className="d-card-head">
                 <div>
-                  <div style={{ fontWeight: 500, fontSize: "14px" }}>{s.customerName || "Cliente nao informado"}</div>
-                  <div style={{ fontSize: "12px", color: "#888", marginTop: "3px" }}>
-                    {fmtDate(s.createdAt)} — {s.paymentMethod === "cash" ? "Dinheiro" : s.paymentMethod === "pix" ? "PIX" : s.paymentMethod === "credit_card" ? "Credito" : "Debito"}
-                  </div>
+                  <div className="d-card-title">Últimas vendas</div>
+                  <div className="d-card-sub">{totalV} no período</div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 700, color: s.status === "cancelled" ? "#888" : "#1D9E75", fontSize: "15px", textDecoration: s.status === "cancelled" ? "line-through" : "none" }}>{fmt(s.total)}</div>
-                    <div style={{ fontSize: "11px", color: s.status === "completed" ? "#1D9E75" : "#ef4444" }}>{s.status === "completed" ? "Concluida" : "Cancelada"}</div>
+                <Link href="/dashboard/sales">
+                  <button className="vp-btn vp-btn-ghost vp-btn-sm">
+                    Ver todas
+                    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </Link>
+              </div>
+              {recentSales.slice(0,5).map((s:any)=>(
+                <div key={s.id} className="d-sale-row">
+                  <div className="d-sale-av" style={{background:"var(--brand)"}}>
+                    {(s.customerName||"AV").slice(0,2).toUpperCase()}
                   </div>
-                  {s.status !== "cancelled" && (
-                    <button onClick={() => cancelSale(s.id)} style={{ background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", padding: "5px 10px", fontSize: "12px", cursor: "pointer" }}>Cancelar</button>
-                  )}
+                  <div className="d-sale-info">
+                    <div className="d-sale-name">{s.customerName||"Cliente avulso"}</div>
+                    <div className="d-sale-meta">
+                      {s.sellerName&&<span className="vp-pill vp-pill-grey">{s.sellerName.split(" ")[0]}</span>}
+                      <span className="vp-pill vp-pill-grey">{PAY[s.paymentMethod]||s.paymentMethod}</span>
+                    </div>
+                  </div>
+                  <div className="d-sale-val">{BRLshort(s.total)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="d-right">
+
+          {/* RANKING VENDEDORES */}
+          <div className="d-card">
+            <div className="d-card-head">
+              <div className="d-card-title">Ranking vendedores</div>
+              <span className="vp-pill vp-pill-brand">{monthLabel}</span>
+            </div>
+            <div className="d-card-body">
+              {sellers.length===0 ? (
+                <div style={{color:"var(--text-subtle)",fontSize:13,textAlign:"center",padding:"20px 0"}}>Sem dados ainda.</div>
+              ) : sellers.map((s:any,i:number)=>{
+                const maxRev = sellers[0]?.revenue||1
+                const init = (s.sellerName||s.name||"?").split(" ").map((x:string)=>x[0]).slice(0,2).join("")
+                const bgs = ["var(--brand)","var(--brand-mid)","var(--surface-3)","var(--surface-3)","var(--surface-3)"]
+                return (
+                  <div key={i} className="d-seller-row">
+                    <div className="d-seller-rank">#{i+1}</div>
+                    <div className="d-seller-av" style={{background:bgs[i]||"var(--surface-3)"}}>{init}</div>
+                    <div className="d-seller-info">
+                      <div className="d-seller-name">{s.sellerName||s.name}</div>
+                      <div className="d-seller-count">{s.count} vendas</div>
+                      <div className="d-seller-bar"><span style={{width:`${(s.revenue/maxRev)*100}%`}}/></div>
+                    </div>
+                    <div className="d-seller-rev">{BRLshort(s.revenue)}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* TOP PRODUTOS */}
+          <div className="d-card">
+            <div className="d-card-head">
+              <div className="d-card-title">Top produtos</div>
+              <Link href="/dashboard/inventory">
+                <button className="vp-btn vp-btn-ghost vp-btn-sm">
+                  Estoque
+                  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </Link>
+            </div>
+            <div className="d-card-body">
+              {products.length===0 ? (
+                <div style={{color:"var(--text-subtle)",fontSize:13,textAlign:"center",padding:"20px 0"}}>Sem dados ainda.</div>
+              ) : products.slice(0,5).map((p:any,i:number)=>(
+                <div key={i} className="d-product-row">
+                  <div className="d-product-icon">
+                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" strokeWidth={1.6}><path d="M21 8v13H3V8M12 3v18M3 8l9-5 9 5"/></svg>
+                  </div>
+                  <div className="d-product-info">
+                    <div className="d-product-name">{p.name}</div>
+                    <div className="d-product-qty">{p.quantity} un. vendidas</div>
+                  </div>
+                  <div className="d-product-rev">{BRLshort(p.revenue)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ESTOQUE BAIXO */}
+          {lowStock.length>0 && (
+            <div className="d-card" style={{borderColor:"rgba(245,158,11,0.3)",background:"rgba(245,158,11,0.05)"}}>
+              <div className="d-card-head" style={{borderColor:"rgba(245,158,11,0.2)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth={2}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
+                  <div className="d-card-title" style={{color:"var(--warning)"}}>Estoque baixo</div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="d-card-body">
+                <div style={{fontSize:13,color:"var(--text-muted)",lineHeight:1.6,marginBottom:12}}>
+                  {lowStock.slice(0,3).map((p:any)=>p.name).join(", ")} precisam de reposição.
+                </div>
+                <Link href="/dashboard/inventory">
+                  <button className="vp-btn vp-btn-secondary vp-btn-sm">Ver estoque</button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
