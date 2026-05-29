@@ -579,9 +579,10 @@ body {
 }
 
 .vp-nav-item.active {
-  background: var(--brand-glow);
-  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  color: var(--text);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--brand);
 }
 
 .vp-nav-item.active svg { color: var(--brand); }
@@ -729,9 +730,9 @@ body {
 .vp-plan-badge {
   padding: 4px 10px;
   border-radius: var(--r-lg);
-  background: var(--brand-glow);
-  border: 1px solid var(--brand);
-  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+  color: var(--text);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
