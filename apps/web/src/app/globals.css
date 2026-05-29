@@ -84,24 +84,24 @@
 /* ── PALETA: ÂMBAR ── */
 [data-palette="amber"] {
   --brand:       #F59E0B;
-  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
-  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
-  --brand-deep:  #2D1A00;
+  --brand-deep:  #3F1D04;
   --brand-mid:   #92400E;
   --brand-soft:  #FCD34D;
   --brand-tint:  #FEF3C7;
-  --brand-glow:  rgba(245,158,11,0.15);
-  --bg:          #160F00;
-  --bg-elevated: #1C1400;
-  --surface:     #221A00;
-  --surface-2:   #2A2000;
-  --surface-3:   #322600;
-  --border:      rgba(245,158,11,0.12);
-  --border-strong: rgba(245,158,11,0.25);
+  --brand-glow:  rgba(245,158,11,0.12);
+  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
+  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
+  --bg:          #0D0A06;
+  --bg-elevated: #131009;
+  --surface:     #1A150D;
+  --surface-2:   #221C13;
+  --surface-3:   #2A2319;
+  --border:      rgba(245,158,11,0.11);
+  --border-strong: rgba(245,158,11,0.22);
   --text:        #FEF9EC;
-  --text-muted:  #C4A862;
-  --text-subtle: #8A6E2A;
-  --shadow-glow: 0 0 24px rgba(245,158,11,0.2);
+  --text-muted:  #B89A6A;
+  --text-subtle: #7A6040;
+  --shadow-glow: 0 0 20px rgba(245,158,11,0.10);
 }
 
 /* ── PALETA: CARMIM ── */
@@ -460,12 +460,20 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font);
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 90% 520px at 18% -120px,
+      color-mix(in oklab, var(--brand-soft, rgba(255,255,255,0)) 10%, transparent),
+      transparent 70%),
+    radial-gradient(ellipse 70% 480px at 85% -160px,
+      color-mix(in oklab, var(--brand, rgba(255,255,255,0)) 8%, transparent),
+      transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.6s ease, color 0.3s ease;
 }
 
 /* Scrollbar premium */

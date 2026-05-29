@@ -38,25 +38,29 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     const glowBlur  = isLight ? 8 : 18
     const glowAlpha = isLight ? "44" : "88"
 
+    const softColor = getComputedStyle(document.documentElement).getPropertyValue("--brand-soft").trim()
+    const topColor = (softColor && softColor.startsWith("#")) ? softColor : color
+
     const haloPlugin = {
       id: "halo",
-      beforeDatasetsDraw(chart: any) {
+      afterDatasetsDraw(chart: any) {
         const { ctx } = chart
         chart.getDatasetMeta(0).data.forEach((bar: any) => {
           const { x, y, width, height } = bar.getProps(["x","y","width","height"])
-          const w = width * 0.7
+          if (!height || height <= 0) return
+          const w = width * 0.72
           const grad = ctx.createLinearGradient(x, y + height, x, y)
-          grad.addColorStop(0, color + "38")
+          grad.addColorStop(0,   color + "2E")
           grad.addColorStop(0.5, color + "99")
-          grad.addColorStop(1, color)
+          grad.addColorStop(1,   topColor)
           ctx.save()
-          ctx.shadowColor = color + glowAlpha
-          ctx.shadowBlur = glowBlur
+          ctx.shadowColor = color
+          ctx.shadowBlur  = glowBlur
           ctx.shadowOffsetX = 0
-          ctx.shadowOffsetY = 0
+          ctx.shadowOffsetY = 2
           ctx.fillStyle = grad
           ctx.beginPath()
-          ctx.roundRect(x - w/2, y, w, height, 5)
+          ctx.roundRect(x - w/2, y, w, height, [6, 6, 2, 2])
           ctx.fill()
           ctx.restore()
         })
@@ -70,11 +74,12 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         labels,
         datasets: [{
           data,
-          backgroundColor: color,
-          borderRadius: 5,
+          backgroundColor: "transparent",
+          borderColor: "transparent",
+          borderRadius: 6,
           borderSkipped: false,
-          barPercentage: 0.55,
-          categoryPercentage: 0.65,
+          barPercentage: 0.62,
+          categoryPercentage: 0.70,
         }]
       },
       options: {
