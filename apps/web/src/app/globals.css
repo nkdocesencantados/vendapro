@@ -21,12 +21,11 @@
   --brand-tint:  #E7F5EF;
   --brand-glow:  rgba(29,158,117,0.15);
 
-  /* Fundo derivado: preto-base + brand-deep — mesma receita em todas as paletas */
-  --bg:          color-mix(in oklab, #06080A 86%, var(--brand-deep) 14%);
-  --bg-elevated: color-mix(in oklab, #0B0D0F 84%, var(--brand-deep) 16%);
-  --surface:     color-mix(in oklab, #0F1214 82%, var(--brand-deep) 18%);
-  --surface-2:   color-mix(in oklab, #151A1C 80%, var(--brand-deep) 20%);
-  --surface-3:   color-mix(in oklab, #1C2226 78%, var(--brand-deep) 22%);
+  --bg:          #0C1410;
+  --bg-elevated: #111A16;
+  --surface:     #141F1A;
+  --surface-2:   #1A2820;
+  --surface-3:   #203028;
   --border:      rgba(29,158,117,0.12);
   --border-strong: rgba(29,158,117,0.25);
 
@@ -69,7 +68,11 @@
   --brand-soft:  #818CF8;
   --brand-tint:  #EEF2FF;
   --brand-glow:  rgba(99,102,241,0.15);
-  /* fundos derivados do :root via color-mix(brand-deep) */
+  --bg:          #0D0D1A;
+  --bg-elevated: #111124;
+  --surface:     #15152E;
+  --surface-2:   #1C1C3A;
+  --surface-3:   #222244;
   --border:      rgba(99,102,241,0.12);
   --border-strong: rgba(99,102,241,0.25);
   --text:        #EEF2FF;
@@ -81,27 +84,24 @@
 /* ── PALETA: ÂMBAR ── */
 [data-palette="amber"] {
   --brand:       #F59E0B;
-  --brand-deep:  #3F1D04;
+  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
+  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
+  --brand-deep:  #2D1A00;
   --brand-mid:   #92400E;
   --brand-soft:  #FCD34D;
   --brand-tint:  #FEF3C7;
-  --brand-glow:  rgba(245,158,11,0.12);
-  --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
-  --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
-
-  /* Fundo: preto-base misturado com brand-deep */
-  --bg:          color-mix(in oklab, #06080A 86%, #3F1D04 14%);
-  --bg-elevated: color-mix(in oklab, #0B0D0F 84%, #3F1D04 16%);
-  --surface:     color-mix(in oklab, #0F1214 82%, #3F1D04 18%);
-  --surface-2:   color-mix(in oklab, #151A1C 80%, #3F1D04 20%);
-  --surface-3:   color-mix(in oklab, #1C2226 78%, #3F1D04 22%);
-
-  --border:      rgba(245,158,11,0.09);
-  --border-strong: rgba(245,158,11,0.18);
+  --brand-glow:  rgba(245,158,11,0.15);
+  --bg:          #160F00;
+  --bg-elevated: #1C1400;
+  --surface:     #221A00;
+  --surface-2:   #2A2000;
+  --surface-3:   #322600;
+  --border:      rgba(245,158,11,0.12);
+  --border-strong: rgba(245,158,11,0.25);
   --text:        #FEF9EC;
-  --text-muted:  #A89060;
-  --text-subtle: #6B5A35;
-  --shadow-glow: 0 0 20px rgba(245,158,11,0.10);
+  --text-muted:  #C4A862;
+  --text-subtle: #8A6E2A;
+  --shadow-glow: 0 0 24px rgba(245,158,11,0.2);
 }
 
 /* ── PALETA: CARMIM ── */
@@ -114,7 +114,11 @@
   --brand-soft:  #FB7185;
   --brand-tint:  #FFF1F2;
   --brand-glow:  rgba(225,29,72,0.15);
-  /* fundos derivados do :root via color-mix(brand-deep) */
+  --bg:          #160008;
+  --bg-elevated: #1C000E;
+  --surface:     #220014;
+  --surface-2:   #2A001A;
+  --surface-3:   #320020;
   --border:      rgba(225,29,72,0.12);
   --border-strong: rgba(225,29,72,0.25);
   --text:        #FFF1F2;
@@ -131,7 +135,11 @@
   --brand-soft:  #A78BFA;
   --brand-tint:  #F5F3FF;
   --brand-glow:  rgba(139,92,246,0.15);
-  /* fundos derivados do :root via color-mix(brand-deep) */
+  --bg:          #0D0A1A;
+  --bg-elevated: #120F24;
+  --surface:     #17142E;
+  --surface-2:   #1E1A3A;
+  --surface-3:   #252044;
   --border:      rgba(139,92,246,0.12);
   --border-strong: rgba(139,92,246,0.25);
   --text:        #F5F3FF;
@@ -148,7 +156,11 @@
   --brand-soft:  #38BDF8;
   --brand-tint:  #F0F9FF;
   --brand-glow:  rgba(14,165,233,0.15);
-  /* fundos derivados do :root via color-mix(brand-deep) */
+  --bg:          #00111E;
+  --bg-elevated: #001626;
+  --surface:     #001D30;
+  --surface-2:   #00243A;
+  --surface-3:   #002B44;
   --border:      rgba(14,165,233,0.12);
   --border-strong: rgba(14,165,233,0.25);
   --text:        #F0F9FF;
@@ -167,7 +179,11 @@
   --brand-soft:  #F472B6;
   --brand-tint:  #FDF2F8;
   --brand-glow:  rgba(236,72,153,0.15);
-  /* fundos derivados do :root via color-mix(brand-deep) */
+  --bg:          #160010;
+  --bg-elevated: #1C0016;
+  --surface:     #22001C;
+  --surface-2:   #2A0022;
+  --surface-3:   #320028;
   --border:      rgba(236,72,153,0.12);
   --border-strong: rgba(236,72,153,0.25);
   --text:        #FDF2F8;
@@ -444,20 +460,12 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font);
-  background:
-    radial-gradient(ellipse 90% 520px at 18% -120px,
-      color-mix(in oklab, var(--brand-glow, rgba(255,255,255,0.1)) 10%, transparent),
-      transparent 70%),
-    radial-gradient(ellipse 70% 480px at 85% -160px,
-      color-mix(in oklab, var(--brand, rgba(255,255,255,0.1)) 8%, transparent),
-      transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  transition: background 0.6s ease, color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Scrollbar premium */
