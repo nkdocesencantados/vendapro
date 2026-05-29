@@ -41,12 +41,8 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     // Glow: discreto em temas claros/quentes, mais intenso em escuros
     const glowBlur    = isLight || isWarm ? 10 : 18
     const glowOpacity = isLight || isWarm ? 0.35 : 0.55
-    // brand-glow: versão clara da cor (lida do CSS ou derivada)
-    const cssGlow = getComputedStyle(root).getPropertyValue("--brand-glow").trim()
-    // Se brand-glow for rgba (versão antiga), derivamos do color hex
-    const glowColor = cssGlow.startsWith("rgba") || cssGlow.startsWith("rgb")
-      ? color  // fallback: usa brand
-      : cssGlow || color
+    const cssSoft = getComputedStyle(root).getPropertyValue("--brand-soft").trim()
+    const glowColor = (cssSoft && cssSoft.startsWith("#")) ? cssSoft : color + "DD"
 
     const haloPlugin = {
       id: "halo",
