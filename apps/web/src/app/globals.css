@@ -98,9 +98,9 @@
   --surface-3:   #2A2319;
   --border:      rgba(245,158,11,0.11);
   --border-strong: rgba(245,158,11,0.22);
-  --text:        #FEF9EC;
-  --text-muted:  #B89A6A;
-  --text-subtle: #7A6040;
+  --text:        #EEE8D8;
+  --text-muted:  #8A8278;
+  --text-subtle: #524E48;
   --shadow-glow: 0 0 20px rgba(245,158,11,0.10);
 }
 
