@@ -21,13 +21,14 @@
   --brand-tint:  #E7F5EF;
   --brand-glow:  rgba(29,158,117,0.15);
 
+  /* Fundo derivado: preto-base + brand-deep — mesma receita em todas as paletas */
   --bg:          color-mix(in oklab, #06080A 86%, var(--brand-deep) 14%);
   --bg-elevated: color-mix(in oklab, #0B0D0F 84%, var(--brand-deep) 16%);
-  --surface:     color-mix(in oklab, #141618 80%, var(--brand-deep) 20%);
-  --surface-2:   color-mix(in oklab, #1C1F22 76%, var(--brand-deep) 24%);
-  --surface-3:   color-mix(in oklab, #242830 72%, var(--brand-deep) 28%);
-  --border:      rgba(29,158,117,0.15);
-  --border-strong: rgba(29,158,117,0.30);
+  --surface:     color-mix(in oklab, #0F1214 82%, var(--brand-deep) 18%);
+  --surface-2:   color-mix(in oklab, #151A1C 80%, var(--brand-deep) 20%);
+  --surface-3:   color-mix(in oklab, #1C2226 78%, var(--brand-deep) 22%);
+  --border:      rgba(29,158,117,0.12);
+  --border-strong: rgba(29,158,117,0.25);
 
   --text:        #F0F7F4;
   --text-muted:  #8DA89E;
@@ -68,7 +69,7 @@
   --brand-soft:  #818CF8;
   --brand-tint:  #EEF2FF;
   --brand-glow:  rgba(99,102,241,0.15);
-  /* bg deriva do :root via color-mix(brand-deep) */
+  /* fundos derivados do :root via color-mix(brand-deep) */
   --border:      rgba(99,102,241,0.12);
   --border-strong: rgba(99,102,241,0.25);
   --text:        #EEF2FF;
@@ -87,11 +88,19 @@
   --brand-glow:  rgba(245,158,11,0.12);
   --success:     color-mix(in srgb, #86efac 40%, var(--brand) 60%);
   --success-bg:  color-mix(in srgb, var(--success) 14%, transparent);
-  --border:      rgba(245,158,11,0.13);
-  --border-strong: rgba(245,158,11,0.28);
+
+  /* Fundo: preto-base misturado com brand-deep */
+  --bg:          color-mix(in oklab, #06080A 86%, #3F1D04 14%);
+  --bg-elevated: color-mix(in oklab, #0B0D0F 84%, #3F1D04 16%);
+  --surface:     color-mix(in oklab, #0F1214 82%, #3F1D04 18%);
+  --surface-2:   color-mix(in oklab, #151A1C 80%, #3F1D04 20%);
+  --surface-3:   color-mix(in oklab, #1C2226 78%, #3F1D04 22%);
+
+  --border:      rgba(245,158,11,0.09);
+  --border-strong: rgba(245,158,11,0.18);
   --text:        #FEF9EC;
-  --text-muted:  #B89A6A;
-  --text-subtle: #7A6040;
+  --text-muted:  #A89060;
+  --text-subtle: #6B5A35;
   --shadow-glow: 0 0 20px rgba(245,158,11,0.10);
 }
 
@@ -105,7 +114,7 @@
   --brand-soft:  #FB7185;
   --brand-tint:  #FFF1F2;
   --brand-glow:  rgba(225,29,72,0.15);
-  /* bg deriva do :root via color-mix(brand-deep) */
+  /* fundos derivados do :root via color-mix(brand-deep) */
   --border:      rgba(225,29,72,0.12);
   --border-strong: rgba(225,29,72,0.25);
   --text:        #FFF1F2;
@@ -122,7 +131,7 @@
   --brand-soft:  #A78BFA;
   --brand-tint:  #F5F3FF;
   --brand-glow:  rgba(139,92,246,0.15);
-  /* bg deriva do :root via color-mix(brand-deep) */
+  /* fundos derivados do :root via color-mix(brand-deep) */
   --border:      rgba(139,92,246,0.12);
   --border-strong: rgba(139,92,246,0.25);
   --text:        #F5F3FF;
@@ -139,7 +148,7 @@
   --brand-soft:  #38BDF8;
   --brand-tint:  #F0F9FF;
   --brand-glow:  rgba(14,165,233,0.15);
-  /* bg deriva do :root via color-mix(brand-deep) */
+  /* fundos derivados do :root via color-mix(brand-deep) */
   --border:      rgba(14,165,233,0.12);
   --border-strong: rgba(14,165,233,0.25);
   --text:        #F0F9FF;
@@ -158,7 +167,7 @@
   --brand-soft:  #F472B6;
   --brand-tint:  #FDF2F8;
   --brand-glow:  rgba(236,72,153,0.15);
-  /* bg deriva do :root via color-mix(brand-deep) */
+  /* fundos derivados do :root via color-mix(brand-deep) */
   --border:      rgba(236,72,153,0.12);
   --border-strong: rgba(236,72,153,0.25);
   --text:        #FDF2F8;
@@ -437,10 +446,10 @@ body {
   font-family: var(--font);
   background:
     radial-gradient(ellipse 90% 520px at 18% -120px,
-      color-mix(in oklab, var(--brand-glow, rgba(255,255,255,0)) 10%, transparent),
+      color-mix(in oklab, var(--brand-glow, rgba(255,255,255,0.1)) 10%, transparent),
       transparent 70%),
     radial-gradient(ellipse 70% 480px at 85% -160px,
-      color-mix(in oklab, var(--brand, rgba(255,255,255,0)) 8%, transparent),
+      color-mix(in oklab, var(--brand, rgba(255,255,255,0.1)) 8%, transparent),
       transparent 70%),
     var(--bg);
   background-attachment: fixed;
