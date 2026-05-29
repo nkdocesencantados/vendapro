@@ -54,14 +54,30 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
           grad.addColorStop(0.5, color + "99")
           grad.addColorStop(1,   topColor)
           ctx.save()
-          ctx.shadowColor = color
-          ctx.shadowBlur  = glowBlur
+          // Halo externo: brand a 55% (35% em temas quentes)
+          const isWarm = ["amber","rose","crimson","ouro"].includes(document.documentElement.getAttribute("data-palette")||"")
+          const haloOpacity = isWarm ? "59" : "8C"   // 35% ou 55% em hex
+          const haloBlur    = isWarm ? 10 : 18
+          const haloSpread  = isWarm ? -4 : -2
+
+          ctx.save()
+          ctx.shadowColor  = color + haloOpacity
+          ctx.shadowBlur   = haloBlur
           ctx.shadowOffsetX = 0
-          ctx.shadowOffsetY = 2
+          ctx.shadowOffsetY = 0
           ctx.fillStyle = grad
           ctx.beginPath()
           ctx.roundRect(x - w/2, y, w, height, [6, 6, 2, 2])
           ctx.fill()
+          ctx.restore()
+
+          // Contorno interno: brand-glow a 22% â€” "fio de luz" na borda
+          ctx.save()
+          ctx.strokeStyle = topColor + "38"
+          ctx.lineWidth   = 1
+          ctx.beginPath()
+          ctx.roundRect(x - w/2 + 0.5, y + 0.5, w - 1, height - 0.5, [6, 6, 2, 2])
+          ctx.stroke()
           ctx.restore()
         })
       }
