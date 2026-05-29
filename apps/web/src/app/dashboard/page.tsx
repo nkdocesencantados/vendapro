@@ -34,9 +34,19 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
     const max  = Math.max(...data, 1)
     const step = max<=100?10:max<=500?50:max<=2000?200:max<=5000?500:max<=10000?1000:2000
 
-    const isLight = document.documentElement.getAttribute("data-theme") === "light"
-    const glowBlur  = isLight ? 8 : 18
-    const glowAlpha = isLight ? "44" : "88"
+    // Lê brand-glow do tema (cor clara para o topo da barra)
+    const root = document.documentElement
+    const isLight  = root.getAttribute("data-theme") === "light"
+    const isWarm   = ["amber","crimson","rose"].includes(root.getAttribute("data-palette")||"")
+    // Glow: discreto em temas claros/quentes, mais intenso em escuros
+    const glowBlur    = isLight || isWarm ? 10 : 18
+    const glowOpacity = isLight || isWarm ? 0.35 : 0.55
+    // brand-glow: versão clara da cor (lida do CSS ou derivada)
+    const cssGlow = getComputedStyle(root).getPropertyValue("--brand-glow").trim()
+    // Se brand-glow for rgba (versão antiga), derivamos do color hex
+    const glowColor = cssGlow.startsWith("rgba") || cssGlow.startsWith("rgb")
+      ? color  // fallback: usa brand
+      : cssGlow || color
 
     const haloPlugin = {
       id: "halo",
@@ -44,19 +54,20 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         const { ctx } = chart
         chart.getDatasetMeta(0).data.forEach((bar: any) => {
           const { x, y, width, height } = bar.getProps(["x","y","width","height"])
-          const w = width * 0.7
+          const w = width * 0.72
+          // Gradiente to top: base 18%, meio 60%, topo brand-glow 100%
           const grad = ctx.createLinearGradient(x, y + height, x, y)
-          grad.addColorStop(0, color + "38")
-          grad.addColorStop(0.5, color + "99")
-          grad.addColorStop(1, color)
+          grad.addColorStop(0,   color + "2E")   // ~18% opacidade
+          grad.addColorStop(0.5, color + "99")   // ~60%
+          grad.addColorStop(1,   glowColor)      // topo: cor clara
           ctx.save()
-          ctx.shadowColor = color + glowAlpha
-          ctx.shadowBlur = glowBlur
+          ctx.shadowColor = color
+          ctx.shadowBlur  = glowBlur
           ctx.shadowOffsetX = 0
-          ctx.shadowOffsetY = 0
+          ctx.shadowOffsetY = 4
           ctx.fillStyle = grad
           ctx.beginPath()
-          ctx.roundRect(x - w/2, y, w, height, 5)
+          ctx.roundRect(x - w/2, y, w, height, [6, 6, 2, 2])
           ctx.fill()
           ctx.restore()
         })
@@ -200,7 +211,7 @@ export default function DashboardPage() {
         .d-seller-name{font-size:13px;font-weight:600;color:var(--text);}
         .d-seller-count{font-size:11px;color:var(--text-subtle);}
         .d-seller-bar{height:3px;background:var(--surface-3);border-radius:99px;margin-top:4px;overflow:hidden;}
-        .d-seller-bar span{display:block;height:100%;border-radius:99px;background:var(--brand);}
+        .d-seller-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-soft,var(--brand)));box-shadow:0 0 10px -2px color-mix(in srgb,var(--brand) 35%,transparent);}
         .d-seller-rev{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;}
         .d-sale-row{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border);transition:var(--transition);}
         .d-sale-row:last-child{border:0;}
