@@ -30,14 +30,14 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
 
   const prodRows = products.map((p:any,i:number) => {
     const pct2 = Math.round((Number(p.revenue)/Number(maxRev))*100)
-    const lucro = (Number(p.revenue)*margin/100).toFixed(2)
+    const lucro = Number(p.revenue)*margin/100
     const bg = i%2===0?'#fff':'#F9FBFA'
     return `<tr style="background:${bg}">
       <td style="padding:10px 14px;color:#888;font-size:12px;border-bottom:1px solid #E5EDE9;">#${i+1}</td>
       <td style="padding:10px 14px;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.name}</td>
       <td style="padding:10px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.quantity}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">R$ ${Number(p.revenue).toFixed(2)}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;color:#1D9E75;font-size:12px;border-bottom:1px solid #E5EDE9;">R$ ${lucro}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(p.revenue).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:600;color:#1D9E75;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(lucro).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
       <td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;">
         <div style="display:flex;align-items:center;gap:6px;">
           <div style="flex:1;height:6px;background:#E5EDE9;border-radius:999px;overflow:hidden;">
@@ -54,7 +54,7 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
     return `<tr>
       <td style="padding:8px 14px;font-size:12px;border-bottom:1px solid #E5EDE9;">${PAY[p.paymentMethod]||p.paymentMethod}</td>
       <td style="padding:8px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.count}</td>
-      <td style="padding:8px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">R$ ${Number(p.total).toFixed(2)}</td>
+      <td style="padding:8px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(p.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
       <td style="padding:8px 14px;text-align:right;font-size:12px;color:#888;border-bottom:1px solid #E5EDE9;">${payPct}%</td>
     </tr>`
   }).join('')
@@ -85,11 +85,27 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
   </div>
 
   <div style="display:grid;grid-template-columns:repeat(5,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;">
-    ${kpiCard('Faturamento',`R$ ${rev.toFixed(2)}`,`vs anterior: ${growthStr}`,growthPct>=0?'#1D9E75':'#ef4444')}
-    ${kpiCard('Lucro estimado',`R$ ${prof.toFixed(2)}`,`${margin}% margem`,'#1D9E75')}
-    ${kpiCard('Ticket médio',`R$ ${avg.toFixed(2)}`,`${tot} vendas`,'#1a1a1a')}
+    ${kpiCard('Faturamento',`${Number(rev).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`vs anterior: ${growthStr}`,growthPct>=0?'#1D9E75':'#ef4444')}
+    ${kpiCard('Lucro estimado',`${Number(prof).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`${margin}% margem`,'#1D9E75')}
+    ${kpiCard('Ticket médio',`${Number(avg).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`${tot} vendas`,'#1a1a1a')}
     ${kpiCard('Total vendas',String(tot),`${rev>0?Math.round(rev/tot):0} R$/venda`,'#1a1a1a')}
     ${kpiCard('Crescimento',growthStr,'vs período anterior',growthColor)}
+  </div>
+
+
+  <h3>Indicadores Chave</h3>
+  <div style="padding:0 32px 16px;">
+    <table style="border-collapse:collapse;width:100%;">
+      <tbody>
+        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Dias com venda</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${activeDays} dias</td></tr>
+        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Média por dia ativo</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1D9E75;border-bottom:1px solid #E5EDE9;">${activeDays>0?Number(rev/activeDays).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—'}</td></tr>
+        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Maior venda</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1D9E75;border-bottom:1px solid #E5EDE9;">${Number(maxSale||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
+        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Ticket médio</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(avg).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
+        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Lucro estimado</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1D9E75;border-bottom:1px solid #E5EDE9;">${Number(prof).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
+        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Margem</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${margin}%</td></tr>
+        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;">Taxa cancelamento</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;">0%</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <h3>Top Produtos</h3>
