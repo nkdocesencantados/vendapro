@@ -75,32 +75,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [cmdOpen,    setCmdOpen]    = useState(false)
   const [notifOpen,  setNotifOpen]  = useState(false)
 
-  const PALETTES: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
-    emerald:  { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
-    amber:    { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
-    crimson:  { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
-    violet:   { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },
-    ocean:    { brand:"#0EA5E9", brandDeep:"#082F49", brandGlow:"#7DD3FC" },
-    indigo:   { brand:"#6366F1", brandDeep:"#1E1B4B", brandGlow:"#A5B4FC" },
-    rose:     { brand:"#EC4899", brandDeep:"#3D0822", brandGlow:"#F9A8D4" },
-    ouro:     { brand:"#D4A24C", brandDeep:"#2A1B05", brandGlow:"#F5D78A" },
-    graphite: { brand:"#94A3B8", brandDeep:"#0F172A", brandGlow:"#CBD5E1" },
-  }
-
-  function applyPalette(name: string) {
-    const r = document.documentElement
-    r.setAttribute("data-palette", name)
-    const t = PALETTES[name] || PALETTES.emerald
-    r.style.setProperty("--brand",      t.brand)
-    r.style.setProperty("--brand-deep", t.brandDeep)
-    r.style.setProperty("--brand-glow", t.brandGlow)
-  }
-
   useEffect(() => {
     if (!authUser) { router.push("/login"); return }
     const saved = localStorage.getItem("vp-theme")
     const palette = localStorage.getItem("vp-palette") || "emerald"
-    applyPalette(palette)
+    document.documentElement.setAttribute("data-palette", palette)
     if (saved === "light") {
       setDark(false)
       document.documentElement.setAttribute("data-theme", "light")
@@ -113,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (s) {
         setStore(s)
         if (s.palette) {
-          applyPalette(s.palette)
+          document.documentElement.setAttribute("data-palette", s.palette)
           localStorage.setItem("vp-palette", s.palette)
         }
       }
