@@ -50,7 +50,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
 
     const haloPlugin = {
       id: "halo",
-      beforeDatasetsDraw(chart: any) {
+      afterDatasetsDraw(chart: any) {
         const { ctx } = chart
         chart.getDatasetMeta(0).data.forEach((bar: any) => {
           const { x, y, width, height } = bar.getProps(["x","y","width","height"])
@@ -81,11 +81,12 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         labels,
         datasets: [{
           data,
-          backgroundColor: color,
-          borderRadius: 5,
+          backgroundColor: "transparent",
+          borderColor: "transparent",
+          borderRadius: 6,
           borderSkipped: false,
-          barPercentage: 0.55,
-          categoryPercentage: 0.65,
+          barPercentage: 0.62,
+          categoryPercentage: 0.70,
         }]
       },
       options: {
@@ -98,11 +99,12 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         scales: {
           x: {
             ticks: {
-              color: "#ffffff",
+              color: "rgba(255,255,255,0.3)",
               font: { size: 9 },
-              maxRotation: 45,
-              minRotation: 45,
-              autoSkip: false,
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 8,
             },
             grid: { color: "rgba(255,255,255,0.04)" },
             border: { color: "rgba(255,255,255,0.08)" }
