@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 
@@ -208,9 +208,9 @@ export default function CashPage() {
         .vp-modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface-2);border-radius:0 0 18px 18px;}
 
                 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-        .kpi{padding:20px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);position:relative;overflow:hidden;transition:var(--transition);}
+        .kpi{padding:20px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);position:relative;overflow:hidden;transition:var(--transition);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--brand-glow) 8%,transparent),0 12px 28px -22px color-mix(in srgb,var(--brand) 50%,transparent);}
         .kpi:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow-md);}
-        .kpi-lbl{font-size:11px;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+        .kpi-lbl{font-size:11px;font-weight:600;color:var(--brand-glow);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;opacity:.7;}
         .kpi-val{font-family:var(--font-mono);font-size:clamp(20px,2.5vw,28px);font-weight:700;letter-spacing:-.03em;line-height:1;}
         .kpi-dlt{font-size:12px;color:var(--text-subtle);margin-top:8px;}
 

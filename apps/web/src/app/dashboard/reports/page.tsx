@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
@@ -186,15 +186,15 @@ export default function ReportsPage() {
         .r-btn-p{background:var(--brand);color:white;border-color:var(--brand);}
         .r-btn-p:hover{filter:brightness(1.1);}
         .r-kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
-        .r-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden;transition:var(--transition);}
+        .r-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden;transition:var(--transition);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--brand-glow) 8%,transparent),0 12px 28px -22px color-mix(in srgb,var(--brand) 50%,transparent);}
         .r-kpi:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow-md);}
-        .r-kpi-l{font-size:11px;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+        .r-kpi-l{font-size:11px;font-weight:600;color:var(--brand-glow);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;opacity:.7;}
         .r-kpi-v{font-family:var(--font-mono);font-size:clamp(18px,2vw,26px);font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1;}
         .r-kpi-d{font-size:11px;margin-top:6px;}
         .r-kpi-d.up{color:var(--success);}
         .r-kpi-d.dn{color:var(--danger);}
         .r-kpi-d.ne{color:var(--text-subtle);}
-        .r-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;}
+        .r-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--brand-glow) 8%,transparent),0 12px 28px -22px color-mix(in srgb,var(--brand) 50%,transparent);}
         .r-card-h{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
         .r-card-t{font-size:13px;font-weight:600;color:var(--text);}
         .r-card-s{font-size:11px;color:var(--text-subtle);}
