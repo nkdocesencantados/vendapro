@@ -11,7 +11,7 @@ const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Ag
 const DAYS = ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"]
 const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Credito",debit_card:"Debito"}
 
-function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, margin:number, cancelRate:number=0) {
+function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, margin:number, cancelRate:number=0, sellerRanking:any[]=[]) {
   const rev = d?.totalRevenue||0
   const prof = d?.estimatedProfit||0
   const tot = d?.totalSales||0
@@ -130,8 +130,17 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
 
   </body></html>`
 
+  // Inserir tabela de vendedores antes do fechamento
+  const sellerRows = sellerRanking.map((s:any, i:number) => {
+    const bg = i%2===0?'#fff':'#F9FBFA'
+    return `<tr style="background:${bg}"><td style="padding:9px 14px;color:#888;font-size:12px;border-bottom:1px solid #E5EDE9;">#${i+1}</td><td style="padding:9px 14px;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${s.name||s.sellerName||'—'}</td><td style="padding:9px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${s.count||s.salesCount||0}</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1D9E75;border-bottom:1px solid #E5EDE9;">${Number(s.total||s.revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>`
+  }).join('')
+
+  const sellersSection = sellerRanking.length > 0 ? `<h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;margin:20px 32px 10px;padding-bottom:8px;border-bottom:2px solid #E5EDE9;">Vendedores</h3><div style="padding:0 32px 20px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1D9E75;"><th style="color:white;padding:9px 14px;text-align:left;font-size:11px;">Rank</th><th style="color:white;padding:9px 14px;text-align:left;font-size:11px;">Vendedor</th><th style="color:white;padding:9px 14px;text-align:center;font-size:11px;">Vendas</th><th style="color:white;padding:9px 14px;text-align:right;font-size:11px;">Receita</th></tr></thead><tbody>${sellerRows}</tbody></table></div>` : ''
+
+  const finalHtml = html.replace('</body></html>', sellersSection + '</body></html>')
   const w = window.open('','_blank')
-  if(w){w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),600)}
+  if(w){w.document.write(finalHtml);w.document.close();w.focus();setTimeout(()=>w.print(),600)}
 }
 
 export default function ReportsPage() {
@@ -172,7 +181,7 @@ export default function ReportsPage() {
   const margin     = revenue>0?Math.round((profit/revenue)*100):0
   const products: any[]    = data?.topProducts||[]
   const payMethods: any[]  = data?.paymentMethods||[]
-  const sellers: any[]     = data?.topSellers||[]
+  const sellers: any[]     = data?.sellerRanking||[]
   const dailyChart: any[]  = data?.dailyChart||[]
 
   const prevRev    = prevData?.totalRevenue||0
@@ -191,7 +200,7 @@ export default function ReportsPage() {
   // Maior venda do período
   const maxSale = data?.maxSale||0
   const cancelRate = data?.cancelRate||0
-  const activeDays = data?.activeDays||0
+  const activeDays = data?.activeDays || (data?.dailyChart||[]).filter((d:any)=>d.value>0).length || 0
 
   const storeName = store?.name||"Minha Loja"
 
@@ -268,7 +277,7 @@ export default function ReportsPage() {
             const a = document.createElement('a'); a.href=url; a.download=`relatorio-${from}-${to}.csv`; a.click()
             URL.revokeObjectURL(url)
           }}>Excel</button>
-          <button className="r-btn r-btn-p" onClick={()=>exportRepPDF(data,prevData,from,to,storeName,margin,data?.cancelRate||0)}>
+          <button className="r-btn r-btn-p" onClick={()=>exportRepPDF(data,prevData,from,to,storeName,margin,data?.cancelRate||0,data?.sellerRanking||[])}>
             <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
             Exportar PDF completo
           </button>
