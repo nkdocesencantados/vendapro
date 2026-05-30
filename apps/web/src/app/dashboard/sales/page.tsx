@@ -438,7 +438,7 @@ export default function SalesPage() {
 
                   <span className={`vp-pill ${s.status==="completed"?"vp-pill-ok":"vp-pill-bad"}`}>
 
-                    {s.status==="completed"?"ConcluÃ­da":"Cancelada"}
+                    {s.status==="completed"?"Concluída":"Cancelada"}
 
                   </span>
 

@@ -221,8 +221,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Icon name={dark ? "sun" : "moon"} size={15}/>
             </button>
             <div style={{position:"relative"}}>
-              <button className="vp-icon-btn" title="Notificações" onClick={()=>setNotifOpen(o=>!o)}>
+              <button className="vp-icon-btn" title="Notificações" onClick={()=>setNotifOpen(o=>!o)} style={{position:"relative"}}>
                 <Icon name="bell" size={15}/>
+                {notifs.length>0&&<span style={{position:"absolute",top:2,right:2,width:8,height:8,borderRadius:"50%",background:"var(--danger)",border:"2px solid var(--bg-elevated)",display:"block"}}/>}
               </button>
               {notifOpen && (
                 <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:260,background:"var(--bg-elevated)",border:"1px solid var(--border)",borderRadius:12,boxShadow:"var(--shadow-lg)",zIndex:200,overflow:"hidden"}}>
