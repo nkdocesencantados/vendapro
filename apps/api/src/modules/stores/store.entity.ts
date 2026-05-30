@@ -38,6 +38,12 @@ export class Store {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   monthlyGoal: number;
 
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 26.30 })
+  profitMargin: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  margin: number;
+
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 15.00 })
   defaultCommissionRate: number;
 

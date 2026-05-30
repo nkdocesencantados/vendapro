@@ -12,7 +12,7 @@ export class StoresService {
   }
 
   async findOne(id: string) {
-    const r = await this.repo.query(`SELECT id, name, "primaryColor", phone, "monthlyGoal", plan FROM stores WHERE id = $1`, [id]);
+    const r = await this.repo.query(`SELECT id, name, "primaryColor", phone, "monthlyGoal", "profitMargin", margin, plan FROM stores WHERE id = $1`, [id]);
     if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
     return r[0];
   }
@@ -23,7 +23,8 @@ export class StoresService {
   }
 
   async update(id: string, data: any) {
-    await this.repo.query(`UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3 WHERE id = $4`, [data.name, data.primaryColor, data.monthlyGoal || 0, id]);
+    await this.repo.query(`UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3, "profitMargin" = $4, margin = $5 WHERE id = $6`,
+      [data.name, data.primaryColor || '#0F6E56', data.monthlyGoal || 0, data.profitMargin || data.margin || 26.30, data.margin || data.profitMargin || 26.30, id]);
     return this.findOne(id);
   }
 }

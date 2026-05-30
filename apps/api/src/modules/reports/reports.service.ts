@@ -96,22 +96,7 @@ export class ReportsService {
     const totalRevenue = sales.reduce((a, s) => a + Number(s.total), 0);
     const totalSales = sales.length;
     const avgTicket = totalSales ? totalRevenue / totalSales : 0;
-
-    // Cancelamentos no período
-    const cancelWhere: any = { storeId, status: SaleStatus.CANCELLED, saleDate: Between(fromDate, toDate) };
-    if (sellerId) cancelWhere.sellerId = sellerId;
-    const cancelledSales = await this.saleRepo.find({ where: cancelWhere });
-    const cancelCount = cancelledSales.length;
-    const cancelRate = (totalSales + cancelCount) > 0
-      ? Math.round((cancelCount / (totalSales + cancelCount)) * 100) : 0;
-
-    // Margem real da loja
-    const storeMarginRows = await this.storeRepo.query(
-      `SELECT "profitMargin" FROM stores WHERE id = $1`, [storeId]
-    );
-    const storeMarginPct = storeMarginRows?.[0]?.profitMargin
-      ? Number(storeMarginRows[0].profitMargin) / 100 : 0.263;
-    const estimatedProfit = totalRevenue * storeMarginPct;
+    const estimatedProfit = totalRevenue * 0.263;
     const maxSale = sales.length ? Math.max(...sales.map(s => Number(s.total))) : 0;
     const minSale = sales.length ? Math.min(...sales.map(s => Number(s.total))) : 0;
     const dailyMap: Record<string, { value: number; count: number }> = {};
@@ -122,15 +107,11 @@ export class ReportsService {
       dailyMap[day].count += 1;
     }
     const dailyChart = Object.entries(dailyMap).map(([day, v]) => ({ day, ...v })).sort((a, b) => { const [da, ma] = a.day.split("/").map(Number); const [db, mb] = b.day.split("/").map(Number); return new Date(2026, mb-1, db).getTime() - new Date(2026, ma-1, da).getTime(); });
-    const paymentMap: Record<string, { total: number; count: number }> = {};
+    const paymentMap: Record<string, number> = {};
     for (const s of sales) {
-      if (!paymentMap[s.paymentMethod]) paymentMap[s.paymentMethod] = { total: 0, count: 0 };
-      paymentMap[s.paymentMethod].total += Number(s.total);
-      paymentMap[s.paymentMethod].count += 1;
+      paymentMap[s.paymentMethod] = (paymentMap[s.paymentMethod] || 0) + Number(s.total);
     }
-    const paymentMethods = Object.entries(paymentMap).map(([paymentMethod, v]) => ({
-      paymentMethod, total: v.total, count: v.count,
-    }));
+    const paymentMethods = Object.entries(paymentMap).map(([method, total]) => ({ method, total }));
     let topProducts: any[] = [];
     if (sales.length > 0) {
       const saleIds = sales.map(s => s.id);
@@ -165,8 +146,7 @@ export class ReportsService {
     const sellerRanking = Object.values(sellerMap).sort((a: any, b: any) => b.total - a.total);
     const storeRows2 = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
     const monthlyGoal = storeRows2?.[0]?.monthlyGoal ? Number(storeRows2[0].monthlyGoal) : 20000;
-    const activeDays = Object.values(dailyMap).filter((v: any) => v.value > 0).length;
-    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal, cancelRate, cancelCount, activeDays };
+    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal };
   }
 
   async search(storeId: string, q: string) {

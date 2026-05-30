@@ -65,10 +65,10 @@ export default function SettingsPage() {
   async function saveStore(){
     setSaving(true)
     try{
-      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26 })
+      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26, profitMargin:+margin||26 })
       const sc = localStorage.getItem("storeConfig")
       const store = sc?JSON.parse(sc):{}
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26}))
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26,profitMargin:+margin||26}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     }catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
