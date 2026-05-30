@@ -227,10 +227,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {notifOpen && (
                 <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:260,background:"var(--bg-elevated)",border:"1px solid var(--border)",borderRadius:12,boxShadow:"var(--shadow-lg)",zIndex:200,overflow:"hidden"}}>
                   <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",fontSize:13,fontWeight:600,color:"var(--text)"}}>Notificações</div>
-                  <div style={{maxHeight:240,overflowY:"auto"}}>
-                    <div style={{padding:"10px 16px",fontSize:12,color:"var(--text-muted)"}}>
-                      Nenhuma notificação no momento.
-                    </div>
+                  <div style={{maxHeight:280,overflowY:"auto"}}>
+                    {notifs.length===0 ? (
+                      <div style={{padding:"10px 16px",fontSize:12,color:"var(--text-muted)"}}>Nenhuma notificação no momento.</div>
+                    ) : notifs.map((n:any,i:number)=>(
+                      <div key={i} style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",gap:8,alignItems:"flex-start"}}>
+                        <span style={{fontSize:14,color:n.type==="danger"?"var(--danger)":n.type==="ok"?"var(--success)":"var(--warning)",flexShrink:0}}>{n.type==="danger"?"⚠":n.type==="ok"?"✓":"!"}</span>
+                        <div><div style={{fontSize:12,fontWeight:600,color:"var(--text)"}}>{n.msg}</div>{n.detail&&<div style={{fontSize:11,color:"var(--text-muted)",marginTop:2}}>{n.detail}</div>}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
