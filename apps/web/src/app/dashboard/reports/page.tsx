@@ -20,6 +20,9 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
   const products: any[] = d?.topProducts||[]
   const payMethods: any[] = d?.paymentMethods||[]
   const maxRev = products[0]?.revenue||1
+  const dailyChart2: any[] = d?.dailyChart||[]
+  const activeDays = dailyChart2.filter((x:any)=>x.value>0).length||tot
+  const maxSale = d?.maxSale||0
 
   const kpiCard = (lbl:string,val:string,sub:string,color:string) =>
     `<div style="padding:16px 20px;border-right:1px solid #E5EDE9;">
