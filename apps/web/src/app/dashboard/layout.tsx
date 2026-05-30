@@ -74,6 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [search,     setSearch]     = useState("")
   const [cmdOpen,    setCmdOpen]    = useState(false)
   const [notifOpen,  setNotifOpen]  = useState(false)
+  const [notifs,     setNotifs]     = useState<any[]>([])
 
   const PALETTES: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
     emerald:  { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
