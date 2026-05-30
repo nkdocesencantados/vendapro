@@ -270,7 +270,7 @@ export default function ReportsPage() {
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           <button className="r-btn" onClick={()=>{
-            const rows = products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toFixed(2),(Number(p.revenue)*margin/100).toFixed(2)])
+            const rows = products.map((p:any)=>[p.name,p.quantity,Number(p.revenue).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),Number(p.revenue*margin/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})])
             const lines = [['Produto','Qtd','Receita','Lucro Est.'],...rows].map(r=>r.join(';')).join('\n')
             const blob = new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'})
             const url = URL.createObjectURL(blob)
