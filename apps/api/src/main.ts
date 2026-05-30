@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -18,6 +18,9 @@ async function runMigrations(dataSource: DataSource) {
     END $$;
   `);
   console.log('Migration saleDate: OK');
+
+  await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='profitMargin') THEN ALTER TABLE stores ADD COLUMN "profitMargin" DECIMAL(5,2) DEFAULT 26.30; END IF; END $$;`);
+  console.log('Migration profitMargin: OK');
 }
 
 async function bootstrap() {

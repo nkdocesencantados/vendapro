@@ -146,7 +146,7 @@ export class ReportsService {
     const sellerRanking = Object.values(sellerMap).sort((a: any, b: any) => b.total - a.total);
     const storeRows2 = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
     const monthlyGoal = storeRows2?.[0]?.monthlyGoal ? Number(storeRows2[0].monthlyGoal) : 20000;
-    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal };
+    const activeDays = Object.values(dailyMap).filter((v:any) => v.value > 0).length; return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal, cancelRate: 0, cancelCount: 0, activeDays };
   }
 
   async search(storeId: string, q: string) {
