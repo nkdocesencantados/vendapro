@@ -56,7 +56,7 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
     const payPct = rev>0?Math.round((Number(p.total)/rev)*100):0
     return `<tr>
       <td style="padding:8px 14px;font-size:12px;border-bottom:1px solid #E5EDE9;">${PAY[p.paymentMethod]||p.paymentMethod}</td>
-      <td style="padding:8px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.count}</td>
+      <td style="padding:8px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.count||0}</td>
       <td style="padding:8px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(p.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
       <td style="padding:8px 14px;text-align:right;font-size:12px;color:#888;border-bottom:1px solid #E5EDE9;">${payPct}%</td>
     </tr>`
@@ -106,7 +106,7 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
         <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Ticket médio</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(avg).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
         <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Lucro estimado</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1D9E75;border-bottom:1px solid #E5EDE9;">${Number(prof).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
         <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Margem</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${margin}%</td></tr>
-        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;">Taxa cancelamento</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;">0%</td></tr>
+        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;">Taxa cancelamento</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:${cancelRate>10?'#ef4444':'#1a1a1a'}">${cancelRate}%</td></tr>
       </tbody>
     </table>
   </div>
