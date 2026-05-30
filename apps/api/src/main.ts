@@ -1,10 +1,11 @@
-﻿import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 
 async function runMigrations(dataSource: DataSource) {
+  // Adiciona coluna saleDate se não existir
   await dataSource.query(`
     DO $$ BEGIN
       IF NOT EXISTS (
@@ -33,8 +34,11 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+
+  // Roda migration antes de subir
   const dataSource = app.get(DataSource);
   await runMigrations(dataSource);
+
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`VendaPro API rodando em: http://localhost:${port}`);
