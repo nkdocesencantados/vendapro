@@ -11,7 +11,7 @@ const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Ag
 const DAYS = ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"]
 const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Credito",debit_card:"Debito"}
 
-function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, margin:number) {
+function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, margin:number, cancelRate:number=0) {
   const rev = d?.totalRevenue||0
   const prof = d?.estimatedProfit||0
   const tot = d?.totalSales||0
@@ -268,7 +268,7 @@ export default function ReportsPage() {
             const a = document.createElement('a'); a.href=url; a.download=`relatorio-${from}-${to}.csv`; a.click()
             URL.revokeObjectURL(url)
           }}>Excel</button>
-          <button className="r-btn r-btn-p" onClick={()=>exportRepPDF(data,prevData,from,to,storeName,margin)}>
+          <button className="r-btn r-btn-p" onClick={()=>exportRepPDF(data,prevData,from,to,storeName,margin,data?.cancelRate||0)}>
             <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
             Exportar PDF completo
           </button>
