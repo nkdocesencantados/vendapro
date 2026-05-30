@@ -118,6 +118,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
       }
     }).catch(() => {})
+
+    Promise.all([api.get("/products").catch(()=>({data:[]})),api.get("/reports/dashboard").catch(()=>({data:{}}))]).then(([pr,dr])=>{const nl:any[]=[],ps=Array.isArray(pr.data)?pr.data:[],d=dr.data||{},out=ps.filter((p:any)=>p.stock===0),low=ps.filter((p:any)=>p.stock>0&&p.stock<=(p.minStock||5));if(out.length>0)nl.push({type:"danger",msg:out.length+' produto(s) esgotado(s)',detail:out.slice(0,3).map((p:any)=>p.name).join(', ')});if(low.length>0)nl.push({type:"warn",msg:low.length+' com estoque baixo',detail:low.slice(0,3).map((p:any)=>p.name).join(', ')});const gp=d.monthGoalPct||0;if(gp>=90)nl.push({type:"ok",msg:'Meta quase atingida '+gp+'%',detail:'Faturamento do mes'});else if(gp>0&&gp<30)nl.push({type:"warn",msg:'Meta em '+gp+'% abaixo do esperado',detail:'Faturamento do mes'});setNotifs(nl)}).catch(()=>{})
   }, [authUser])
 
   function toggleDark() {
