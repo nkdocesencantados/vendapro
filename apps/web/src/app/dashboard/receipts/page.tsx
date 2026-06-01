@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 
@@ -22,8 +22,8 @@ export default function ReceiptsPage() {
   const [search,      setSearch]      = useState("")
   const [selected,    setSelected]    = useState<any>(null)
   const [showPreview, setShowPreview] = useState(false)
-  const [monthFilter, setMonthFilter] = useState(() => {
-    const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  const [monthFilter, setMonthFilter] = useState<string>(() => {
+    const n = new Date(); return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")
   })
   const [page, setPage] = useState(1)
   const PER_PAGE = 20
@@ -40,8 +40,7 @@ export default function ReceiptsPage() {
   const P          = PALETTES[paletteKey] || PALETTES.emerald
   const byMonth = sales.filter(s => {
     const d = new Date(s.saleDate||s.createdAt)
-    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
-    return ym === monthFilter
+    return (d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")) === monthFilter
   })
   const filtered   = byMonth.filter(s => !search || (s.customerName||"").toLowerCase().includes(search.toLowerCase()) || (s.id||"").toLowerCase().includes(search.toLowerCase()))
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
@@ -123,11 +122,10 @@ export default function ReceiptsPage() {
             style={{background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:8,padding:"7px 12px",fontSize:13,color:"var(--text)",outline:"none"}}/>
           <span style={{fontSize:13,color:"var(--text-muted)"}}>{filtered.length} recibo{filtered.length!==1?"s":""}</span>
         </div>
-
         {loading ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
         ) : filtered.length===0 ? (
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum recibo encontrado neste mês.</div>
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum recibo encontrado.</div>
         ) : paginated.map((s:any)=>(
           <div key={s.id} className={`rec-item${selected?.id===s.id?" active":""}`} onClick={()=>{setSelected(s);setShowPreview(true)}}>
             <div>
@@ -143,7 +141,7 @@ export default function ReceiptsPage() {
       </div>
 
       {totalPages > 1 && (
-        <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:6,padding:"14px 0"}}>
+        <div style={{display:"flex",justifyContent:"center",gap:6,padding:"14px 0"}}>
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
             style={{padding:"5px 14px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===1?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===1?"default":"pointer"}}>← Anterior</button>
           <span style={{fontSize:12,color:"var(--text-muted)",padding:"0 8px"}}>{page} / {totalPages}</span>
