@@ -50,7 +50,7 @@ export default function SettingsPage() {
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
-        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id); if(s.phone)setPhone(s.phone); if(s.cnpj)setCnpj(s.cnpj)
+        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); if(s.cnpj)setCnpj(s.cnpj)
         if(s.palette){ setPalette(s.palette); applyPalette(s.palette) }
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }

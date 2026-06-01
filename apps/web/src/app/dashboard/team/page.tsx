@@ -34,7 +34,7 @@ export default function TeamPage() {
     try {
       await api.post("/users", { ...form, role:"seller" })
       setShowForm(false); setForm({name:"",email:"",password:""}); load()
-    } catch(e:any) { setError(e?.response?.data?.message||"Erro ao cadastrar") }
+    } catch(e:any) { setError(e?.response?.data?.message||e?.message||"Erro ao cadastrar vendedor. Verifique se o e-mail já está em uso.") }
     finally { setSaving(false) }
   }
 
