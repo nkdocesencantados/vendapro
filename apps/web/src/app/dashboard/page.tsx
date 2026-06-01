@@ -352,7 +352,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="d-card-body">
-              <BarChart data={chartData} labels={chartLabels} color={(() => { try { return getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9" } catch { return "#0EA5E9" } })()}/>
+              <BarChart data={chartData} labels={chartLabels} color={(() => { try { return getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#0EA5E9" } catch { return "#0EA5E9" } })()} mode={chartMode}/>
             </div>
           </div>
 
