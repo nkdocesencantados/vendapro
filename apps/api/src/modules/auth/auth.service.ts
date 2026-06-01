@@ -42,6 +42,14 @@ export class AuthService {
   }
 
   async me(userId: string) {
-    return this.usersRepo.findOne({ where: { id: userId } });
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+    if (!user) return null;
+    // Buscar plano atualizado da store (não depender do JWT que pode estar desatualizado)
+    let plan = 'basic';
+    if (user.storeId) {
+      const storeRows = await this.storesRepo.query('SELECT plan FROM stores WHERE id = $1', [user.storeId]);
+      if (storeRows?.[0]?.plan) plan = storeRows[0].plan;
+    }
+    return { ...user, plan };
   }
 }

@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   function logout() { authLogout(); router.push("/login") }
 
-  const plan      = store?.plan || authUser?.plan || "basic"
+  const plan      = store?.plan || "business"  // sempre da API, nunca do localStorage
   const role      = authUser?.role || "store_owner"
   const storeName = store?.name || "Minha Loja"
   const storeInit = storeName.slice(0,2).toUpperCase()
