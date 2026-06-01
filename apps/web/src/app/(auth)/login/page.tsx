@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/contexts/auth.store"
@@ -172,8 +172,8 @@ export default function LoginPage() {
     setLoading(true); setError("")
     try {
       await login(email, password)
-      const u = useAuthStore.getState().user
-      if(u?.role === "super_admin") { router.push("/superadmin") } else { router.push("/dashboard") }
+      const authU = useAuthStore.getState().user
+      if(authU?.role === "super_admin") { router.push("/superadmin") } else { router.push("/dashboard") }
     } catch(err: any) {
       setError(err?.response?.data?.message || "Credenciais inválidas")
     } finally { setLoading(false) }
