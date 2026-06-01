@@ -38,22 +38,7 @@ async function runMigrations(dataSource: DataSource) {
   } else { console.log('Super Admin ja existe'); }
 
   // Garantir que o super admin existe
-  const bcrypt = require('bcrypt');
-  const existingAdmin = await dataSource.query(
-    `SELECT id FROM users WHERE role = 'super_admin' LIMIT 1`
-  );
-  if (!existingAdmin || existingAdmin.length === 0) {
-    const hash = await bcrypt.hash('VendaPro@Admin2026!', 10);
-    await dataSource.query(
-      `INSERT INTO users (id, name, email, password, role, status, "createdAt", "updatedAt")
-       VALUES (gen_random_uuid(), 'Super Admin', 'admin@vendapro.com.br', $1, 'super_admin', 'active', NOW(), NOW())
-       ON CONFLICT (email) DO UPDATE SET role = 'super_admin', status = 'active'`,
-      [hash]
-    );
-    console.log('Super Admin criado: admin@vendapro.com.br / VendaPro@Admin2026!');
-  } else {
-    console.log('Super Admin ja existe.');
-  }
+
 }
 
 async function bootstrap() {
