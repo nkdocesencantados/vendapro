@@ -6,7 +6,7 @@ import { api } from "@/lib/api"
 
 
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"CrÃ©dito", debit_card:"DÃ©bito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -504,9 +504,9 @@ export default function SalesPage() {
 
                     <option value="cash">Dinheiro</option>
 
-                    <option value="credit_card">CartÃ£o CrÃ©dito</option>
+                    <option value="credit_card">Cartão Crédito</option>
 
-                    <option value="debit_card">CartÃ£o DÃ©bito</option>
+                    <option value="debit_card">Cartão Débito</option>
 
                   </select>
 
@@ -604,7 +604,7 @@ export default function SalesPage() {
 
             <div className="vp-modal-body">
 
-              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta aÃ§Ã£o nÃ£o pode ser desfeita.</p>
+              <p style={{margin:0,fontSize:14,color:"var(--text-muted)"}}>Esta ação não pode ser desfeita.</p>
 
             </div>
 
