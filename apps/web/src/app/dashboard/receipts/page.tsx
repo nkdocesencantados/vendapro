@@ -22,6 +22,11 @@ export default function ReceiptsPage() {
   const [search,      setSearch]      = useState("")
   const [selected,    setSelected]    = useState<any>(null)
   const [showPreview, setShowPreview] = useState(false)
+  const [monthFilter, setMonthFilter] = useState(() => {
+    const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+  })
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 20
   const [store,       setStore]       = useState<any>(null)
 
   useEffect(() => {
@@ -33,7 +38,14 @@ export default function ReceiptsPage() {
   const storeInit  = storeName.slice(0,2).toUpperCase()
   const paletteKey = (typeof window!=="undefined"?localStorage.getItem("vp-palette"):null) || store?.palette || "emerald"
   const P          = PALETTES[paletteKey] || PALETTES.emerald
-  const filtered   = sales.filter(s => !search || (s.customerName||"").toLowerCase().includes(search.toLowerCase()) || (s.id||"").toLowerCase().includes(search.toLowerCase()))
+  const byMonth = sales.filter(s => {
+    const d = new Date(s.saleDate||s.createdAt)
+    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+    return ym === monthFilter
+  })
+  const filtered = byMonth.filter(s => !search || (s.customerName||"").toLowerCase().includes(search.toLowerCase()) || (s.id||"").toLowerCase().includes(search.toLowerCase()))
+  const totalPages = Math.ceil(filtered.length / PER_PAGE)
+  const paginated  = filtered.slice((page-1)*PER_PAGE, page*PER_PAGE)
   const receiptNum = selected ? (selected.id||"").slice(-8).toUpperCase() : ""
 
   function openPDF() {
@@ -108,9 +120,16 @@ export default function ReceiptsPage() {
         </div>
         {loading ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
-        ) : filtered.length===0 ? (
+        ) : (
+          <>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+            <input type="month" value={monthFilter} onChange={e=>{setMonthFilter(e.target.value);setPage(1)}}
+              style={{background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:8,padding:"7px 12px",fontSize:13,color:"var(--text)",outline:"none"}}/>
+            <span style={{fontSize:13,color:"var(--text-muted)"}}>{filtered.length} recibo{filtered.length!==1?"s":""}</span>
+          </div>
+          {paginated.length===0 ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum recibo encontrado.</div>
-        ) : filtered.map((s:any)=>(
+          ) : paginated.map((s:any)=>(
           <div key={s.id} className={`rec-item${selected?.id===s.id?" active":""}`} onClick={()=>{setSelected(s);setShowPreview(true)}}>
             <div>
               <div className="rec-name">{s.customerName||"Cliente avulso"}</div>
@@ -123,6 +142,16 @@ export default function ReceiptsPage() {
           </div>
         ))}
       </div>
+
+          {totalPages > 1 && (
+            <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:6,padding:"14px 0",borderTop:"1px solid var(--border)"}}>
+              <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===1?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===1?"default":"pointer"}}>← Anterior</button>
+              <span style={{fontSize:12,color:"var(--text-muted)",padding:"0 8px"}}>{page} / {totalPages}</span>
+              <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===totalPages?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===totalPages?"default":"pointer"}}>Próximo →</button>
+            </div>
+          )}
+          </>
+        )}
 
       {showPreview && selected && (
         <div className="vp-modal-bg" onClick={()=>setShowPreview(false)}>

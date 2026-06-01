@@ -11,6 +11,9 @@ export default function TeamPage() {
   const [primary, setPrimary] = useState("#1D9E75")
   const [plan, setPlan] = useState("basic")
   const [error, setError] = useState("")
+  const [editing, setEditing] = useState<any>(null)
+  const [editForm, setEditForm] = useState({name:"",email:"",commissionRate:""})
+  const [showEdit, setShowEdit] = useState(false)
 
   useEffect(() => {
     load()
@@ -33,6 +36,24 @@ export default function TeamPage() {
       setShowForm(false); setForm({name:"",email:"",password:""}); load()
     } catch(e:any) { setError(e?.response?.data?.message||"Erro ao cadastrar") }
     finally { setSaving(false) }
+  }
+
+  function openEdit(m:any) {
+    setEditing(m)
+    setEditForm({name:m.name||"",email:m.email||"",commissionRate:String(m.commissionRate||"")})
+    setShowEdit(true)
+  }
+
+  async function saveEdit() {
+    if(!editForm.name) return setError("Nome obrigatório")
+    try {
+      await api.patch(`/users/${editing.id}`, {
+        name: editForm.name,
+        email: editForm.email,
+        commissionRate: +editForm.commissionRate||0
+      })
+      setShowEdit(false); setEditing(null); load()
+    } catch { setError("Erro ao salvar") }
   }
 
   async function remove(id:string) {
@@ -144,15 +165,37 @@ export default function TeamPage() {
                   <div className="mc-name">{m.name}</div>
                   <div className="mc-email">{m.email}</div>
                 </div>
-                <button className="vp-btn vp-btn-sm vp-btn-danger" onClick={()=>remove(m.id)}>Remover</button>
+                <div style={{display:"flex",gap:6,flexDirection:"column"}}>
+                  <button className="vp-btn vp-btn-sm vp-btn-secondary" onClick={()=>openEdit(m)}>Editar</button>
+                  <button className="vp-btn vp-btn-sm vp-btn-danger" onClick={()=>remove(m.id)}>Remover</button>
+                </div>
               </div>
               <div className="mc-pills">
                 <span className="pill pill-grey">Vendedor</span>
                 <span className={`pill ${m.status==="active"?"pill-ok":"pill-grey"}`}>{m.status==="active"?"Ativo":"Inativo"}</span>
+                {m.commissionRate>0&&<span className="pill" style={{background:"color-mix(in srgb,var(--brand) 12%,transparent)",color:"var(--brand)"}}>{m.commissionRate}% comissão</span>}
               </div>
             </div>
           ))}
         </>
+      )}
+
+      {showEdit && editing && (
+        <div className="vp-modal-bg" onClick={e=>{if(e.target===e.currentTarget){setShowEdit(false);setEditing(null)}}}>
+          <div className="vp-modal" onClick={e=>e.stopPropagation()}>
+            <div className="vp-modal-head"><h2>Editar vendedor</h2><button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>{setShowEdit(false);setEditing(null)}}>✕</button></div>
+            <div className="vp-modal-body">
+              {error&&<div style={{padding:"8px 12px",background:"var(--danger-bg)",color:"var(--danger)",borderRadius:8,fontSize:13,marginBottom:8}}>{error}</div>}
+              <div className="vp-field"><label>Nome</label><input className="vp-input" value={editForm.name} onChange={e=>setEditForm({...editForm,name:e.target.value})} placeholder="Nome completo"/></div>
+              <div className="vp-field"><label>E-mail</label><input className="vp-input" type="email" value={editForm.email} onChange={e=>setEditForm({...editForm,email:e.target.value})}/></div>
+              <div className="vp-field"><label>Taxa de comissão (%)</label><input className="vp-input" type="number" min="0" max="100" step="0.5" value={editForm.commissionRate} onChange={e=>setEditForm({...editForm,commissionRate:e.target.value})} placeholder="Ex: 10"/></div>
+              <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:4}}>
+                <button className="vp-btn vp-btn-secondary" onClick={()=>{setShowEdit(false);setEditing(null)}}>Cancelar</button>
+                <button className="vp-btn vp-btn-primary" onClick={saveEdit}>Salvar</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {showForm && (
