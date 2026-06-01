@@ -172,7 +172,8 @@ export default function LoginPage() {
     setLoading(true); setError("")
     try {
       await login(email, password)
-      if(user?.role === "super_admin") { router.push("/superadmin") } else { router.push("/dashboard") }
+      const u = useAuthStore.getState().user
+      if(u?.role === "super_admin") { router.push("/superadmin") } else { router.push("/dashboard") }
     } catch(err: any) {
       setError(err?.response?.data?.message || "Credenciais inválidas")
     } finally { setLoading(false) }
