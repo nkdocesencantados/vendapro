@@ -78,6 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [seenCount,  setSeenCount]  = useState(0)
   const [trialDaysLeft, setTrialDaysLeft] = useState<number|null>(null)
   const [trialExpired,  setTrialExpired]  = useState(false)
+  const [trialExpired,  setTrialExpired]  = useState(false)
 
   const PALETTES: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
     emerald:  { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
