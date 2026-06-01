@@ -21,6 +21,15 @@ async function runMigrations(dataSource: DataSource) {
 
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='profitMargin') THEN ALTER TABLE stores ADD COLUMN "profitMargin" DECIMAL(5,2) DEFAULT 26.30; END IF; END $$;`);
   console.log('Migration profitMargin: OK');
+
+  await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='margin') THEN ALTER TABLE stores ADD COLUMN margin DECIMAL(5,2) DEFAULT 26.30; END IF; END $$;`);
+  console.log('Migration margin: OK');
+
+  await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='phone') THEN ALTER TABLE stores ADD COLUMN phone VARCHAR(30); END IF; END $$;`);
+  console.log('Migration phone: OK');
+
+  await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='cnpj') THEN ALTER TABLE stores ADD COLUMN cnpj VARCHAR(30); END IF; END $$;`);
+  console.log('Migration cnpj: OK');
 }
 
 async function bootstrap() {

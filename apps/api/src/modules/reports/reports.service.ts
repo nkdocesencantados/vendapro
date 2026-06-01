@@ -29,7 +29,7 @@ export class ReportsService {
     const todayTotal = todaySales.reduce((a, s) => a + Number(s.total), 0);
     const monthTotal = monthSales.reduce((a, s) => a + Number(s.total), 0);
     const avgTicket = monthSales.length ? monthTotal / monthSales.length : 0;
-    const storeRows = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
+    const storeRows = await this.storeRepo.query(`SELECT "monthlyGoal", "profitMargin", margin FROM stores WHERE id = $1`, [storeId]);
     const monthGoal = storeRows?.[0]?.monthlyGoal ? Number(storeRows[0].monthlyGoal) : 20000;
     const weeklyChart = [];
     const today = new Date();
@@ -83,7 +83,8 @@ export class ReportsService {
     const recentUserMap: Record<string, string> = {};
     recentUsers.forEach((u: any) => recentUserMap[u.id] = u.name);
     const recentSalesData = recentSales.map(s => ({ ...s, sellerName: recentUserMap[s.sellerId] || null }));
-    const storeMargin = storeRows?.[0]?.margin ? Number(storeRows[0].margin) / 100 : 0.263;
+    const rawMarginD = storeRows?.[0]?.profitMargin || storeRows?.[0]?.margin;
+    const storeMargin = rawMarginD ? Number(rawMarginD) / 100 : 0.263;
     return { todaySales: todayTotal, monthSales: monthTotal, profit: Math.round(monthTotal * storeMargin), avgTicket: Math.round(avgTicket), totalSalesToday: todaySales.length, monthSalesCount: monthSales.length, monthGoal, monthGoalPct: Math.min(Math.round((monthTotal / monthGoal) * 100), 100), lowStock, weeklyChart, topSellers, topProducts, recentSales: recentSalesData };
   }
 
