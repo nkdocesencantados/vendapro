@@ -10,7 +10,7 @@ function BRLshort(v:number){ return v>=1000?"R$ "+(v/1000).toFixed(1)+"k":BRL(v)
 const MONTHS = ["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
 const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
 
-function BarChart({ data, labels, color }: { data:number[], labels:string[], color:string }) {
+function BarChart({ data, labels, color, mode }: { data:number[], labels:string[], color:string, mode?:string }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const chartRef  = React.useRef<any>(null)
   const [ready, setReady] = React.useState(false)
@@ -101,7 +101,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: (c:any) => chartMode==="count" ? `${c.parsed.y} vendas` : `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
+          tooltip: { callbacks: { label: (c:any) => mode==="count" ? `${c.parsed.y} vendas` : `R$ ${Number(c.parsed.y).toLocaleString("pt-BR",{minimumFractionDigits:2})}` } }
         },
         scales: {
           x: {
@@ -121,7 +121,7 @@ function BarChart({ data, labels, color }: { data:number[], labels:string[], col
               color: "rgba(255,255,255,0.3)",
               font: { size: 9 },
               stepSize: step,
-              callback: (v:any) => { const n=Number(v); if(chartMode==="count") return `${n}`; return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
+              callback: (v:any) => { const n=Number(v); if(mode==="count") return `${n}`; return n>=1000?`R$${(n/1000).toFixed(n%1000===0?0:1)}k`:`R$${n}` }
             },
             grid: { color: "rgba(255,255,255,0.06)" },
             border: { display: false }
