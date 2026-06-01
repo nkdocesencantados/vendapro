@@ -31,6 +31,12 @@ async function runMigrations(dataSource: DataSource) {
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='cnpj') THEN ALTER TABLE stores ADD COLUMN cnpj VARCHAR(30); END IF; END $$;`);
   console.log('Migration cnpj: OK');
 
+  const existingAdmin = await dataSource.query(`SELECT id FROM users WHERE role = 'super_admin' LIMIT 1`);
+  if (!existingAdmin || existingAdmin.length === 0) {
+    await dataSource.query(`UPDATE users SET role = 'super_admin', status = 'active' WHERE email = 'admin@vendapro.com.br'`);
+    console.log('Super Admin role atualizado');
+  } else { console.log('Super Admin ja existe'); }
+
   // Garantir que o super admin existe
   const bcrypt = require('bcrypt');
   const existingAdmin = await dataSource.query(
