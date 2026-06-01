@@ -156,9 +156,12 @@ export default function DashboardPage() {
   const monthLabel = MONTHS[now.getMonth()]
   const year       = now.getFullYear()
 
+  const loaded = React.useRef(false)
   useEffect(() => {
+    if (loaded.current) return
+    loaded.current = true
     api.get("/stores").then(r=>{ const s=Array.isArray(r.data)?r.data[0]:r.data; if(s) setStore(s) }).catch(()=>{})
-    api.get("/reports/dashboard").then(r=>setData(r.data)).catch(()=>{}).finally(()=>setLoading(false))
+    api.get("/reports/dashboard").then(r=>{ if(r.data) setData(r.data) }).catch(()=>{}).finally(()=>setLoading(false))
   }, [])
 
   const storeName  = store?.name || "Minha Loja"
