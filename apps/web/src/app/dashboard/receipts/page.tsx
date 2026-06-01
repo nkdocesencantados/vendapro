@@ -43,7 +43,7 @@ export default function ReceiptsPage() {
     const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
     return ym === monthFilter
   })
-  const filtered = byMonth.filter(s => !search || (s.customerName||"").toLowerCase().includes(search.toLowerCase()) || (s.id||"").toLowerCase().includes(search.toLowerCase()))
+  const filtered   = byMonth.filter(s => !search || (s.customerName||"").toLowerCase().includes(search.toLowerCase()) || (s.id||"").toLowerCase().includes(search.toLowerCase()))
   const totalPages = Math.ceil(filtered.length / PER_PAGE)
   const paginated  = filtered.slice((page-1)*PER_PAGE, page*PER_PAGE)
   const receiptNum = selected ? (selected.id||"").slice(-8).toUpperCase() : ""
@@ -118,18 +118,17 @@ export default function ReceiptsPage() {
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" strokeWidth={2}><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input placeholder="Buscar por cliente ou ID..." value={search} onChange={e=>setSearch(e.target.value)}/>
         </div>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+          <input type="month" value={monthFilter} onChange={e=>{setMonthFilter(e.target.value);setPage(1)}}
+            style={{background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:8,padding:"7px 12px",fontSize:13,color:"var(--text)",outline:"none"}}/>
+          <span style={{fontSize:13,color:"var(--text-muted)"}}>{filtered.length} recibo{filtered.length!==1?"s":""}</span>
+        </div>
+
         {loading ? (
           <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div>
-        ) : (
-          <>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,flexWrap:"wrap"}}>
-            <input type="month" value={monthFilter} onChange={e=>{setMonthFilter(e.target.value);setPage(1)}}
-              style={{background:"var(--surface-2)",border:"1px solid var(--border)",borderRadius:8,padding:"7px 12px",fontSize:13,color:"var(--text)",outline:"none"}}/>
-            <span style={{fontSize:13,color:"var(--text-muted)"}}>{filtered.length} recibo{filtered.length!==1?"s":""}</span>
-          </div>
-          {paginated.length===0 ? (
-          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum recibo encontrado.</div>
-          ) : paginated.map((s:any)=>(
+        ) : filtered.length===0 ? (
+          <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Nenhum recibo encontrado neste mês.</div>
+        ) : paginated.map((s:any)=>(
           <div key={s.id} className={`rec-item${selected?.id===s.id?" active":""}`} onClick={()=>{setSelected(s);setShowPreview(true)}}>
             <div>
               <div className="rec-name">{s.customerName||"Cliente avulso"}</div>
@@ -143,15 +142,15 @@ export default function ReceiptsPage() {
         ))}
       </div>
 
-          {totalPages > 1 && (
-            <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:6,padding:"14px 0",borderTop:"1px solid var(--border)"}}>
-              <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===1?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===1?"default":"pointer"}}>← Anterior</button>
-              <span style={{fontSize:12,color:"var(--text-muted)",padding:"0 8px"}}>{page} / {totalPages}</span>
-              <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===totalPages?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===totalPages?"default":"pointer"}}>Próximo →</button>
-            </div>
-          )}
-          </>
-        )}
+      {totalPages > 1 && (
+        <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:6,padding:"14px 0"}}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}
+            style={{padding:"5px 14px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===1?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===1?"default":"pointer"}}>← Anterior</button>
+          <span style={{fontSize:12,color:"var(--text-muted)",padding:"0 8px"}}>{page} / {totalPages}</span>
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages}
+            style={{padding:"5px 14px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface-2)",color:page===totalPages?"var(--text-subtle)":"var(--text)",fontSize:12,cursor:page===totalPages?"default":"pointer"}}>Próximo →</button>
+        </div>
+      )}
 
       {showPreview && selected && (
         <div className="vp-modal-bg" onClick={()=>setShowPreview(false)}>
