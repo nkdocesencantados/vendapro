@@ -12,9 +12,17 @@ export class StoresService {
   }
 
   async findOne(id: string) {
-    const r = await this.repo.query(`SELECT id, name, "primaryColor", phone, "monthlyGoal", "profitMargin", margin, plan FROM stores WHERE id = $1`, [id]);
+    const r = await this.repo.query(
+      `SELECT id, name, "primaryColor", phone, "monthlyGoal", "profitMargin", margin, plan, status, "createdAt", palette FROM stores WHERE id = $1`, [id]
+    );
     if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
-    return r[0];
+    const store = r[0];
+    const TRIAL_DAYS = 7;
+    const created = new Date(store.createdAt);
+    const diffDays = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+    const trialDaysLeft = store.status === 'trial' ? Math.max(0, TRIAL_DAYS - diffDays) : null;
+    const trialExpired  = store.status === 'trial' && diffDays >= TRIAL_DAYS;
+    return { ...store, trialDaysLeft, trialExpired };
   }
 
   async create(data: Partial<Store>) {
