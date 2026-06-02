@@ -1,4 +1,5 @@
 ﻿import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole, UserStatus } from './user.entity';
@@ -39,6 +40,7 @@ export class UsersService {
         }
       }
     }
+    if (data.password) data.password = await bcrypt.hash(data.password, 10);
     const user = this.repo.create({ ...data, status: UserStatus.ACTIVE });
     return this.repo.save(user);
   }
