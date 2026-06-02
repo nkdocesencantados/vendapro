@@ -31,6 +31,22 @@ async function runMigrations(dataSource: DataSource) {
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='cnpj') THEN ALTER TABLE stores ADD COLUMN cnpj VARCHAR(30); END IF; END $$;`);
   console.log('Migration cnpj: OK');
 
+  // Migrations para colunas da tabela stores que podem não existir
+  const storeMigrations = [
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='status') THEN ALTER TABLE stores ADD COLUMN status VARCHAR(20) DEFAULT 'trial'; END IF; END $$;`, 'stores.status'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='segment') THEN ALTER TABLE stores ADD COLUMN segment VARCHAR(100); END IF; END $$;`, 'stores.segment'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='palette') THEN ALTER TABLE stores ADD COLUMN palette VARCHAR(50) DEFAULT 'emerald'; END IF; END $$;`, 'stores.palette'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='logoUrl') THEN ALTER TABLE stores ADD COLUMN "logoUrl" VARCHAR(255); END IF; END $$;`, 'stores.logoUrl'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='email') THEN ALTER TABLE stores ADD COLUMN email VARCHAR(150); END IF; END $$;`, 'stores.email'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='settings') THEN ALTER TABLE stores ADD COLUMN settings JSONB; END IF; END $$;`, 'stores.settings'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='defaultCommissionRate') THEN ALTER TABLE stores ADD COLUMN "defaultCommissionRate" DECIMAL(5,2) DEFAULT 15.00; END IF; END $$;`, 'stores.defaultCommissionRate'],
+    [`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='commissionRate') THEN ALTER TABLE users ADD COLUMN "commissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`, 'users.commissionRate'],
+  ];
+  for (const [sql, name] of storeMigrations) {
+    try { await dataSource.query(sql as string); console.log('Migration ' + name + ': OK'); }
+    catch(e) { console.log('Migration ' + name + ': SKIP - ' + (e as any).message); }
+  }
+
   // Migration commissionRate na tabela users
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='commissionRate') THEN ALTER TABLE users ADD COLUMN "commissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`);
   console.log('Migration commissionRate: OK');
