@@ -32,7 +32,7 @@ export default function TeamPage() {
     if(!form.name||!form.email||!form.password) return setError("Preencha todos os campos")
     setSaving(true); setError("")
     try {
-      await api.post("/users", { ...form, role:"seller" })
+      await api.post("/users", { ...form, role:"seller", storeId: authUser?.storeId })
       setShowForm(false); setForm({name:"",email:"",password:""}); load()
     } catch(e:any) { setError(e?.response?.data?.message||e?.message||"Erro ao cadastrar vendedor. Verifique se o e-mail já está em uso.") }
     finally { setSaving(false) }
