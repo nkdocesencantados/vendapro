@@ -26,7 +26,10 @@ export class StoresService {
   }
 
   async create(data: Partial<Store>) {
-    const store = this.repo.create(data);
+    // Se plano pago, status já nasce como active. Só trial se não tiver plano definido.
+    const paidPlans = ['business', 'pro', 'starter', 'basic', 'BUSINESS', 'PRO', 'STARTER', 'BASIC'];
+    const status = data.plan && paidPlans.includes(data.plan as string) ? 'active' : (data.status || 'trial');
+    const store = this.repo.create({ ...data, status });
     return this.repo.save(store);
   }
 
