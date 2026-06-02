@@ -147,7 +147,17 @@ export class ReportsService {
     const sellerRanking = Object.values(sellerMap).sort((a: any, b: any) => b.total - a.total);
     const storeRows2 = await this.storeRepo.query(`SELECT "monthlyGoal" FROM stores WHERE id = $1`, [storeId]);
     const monthlyGoal = storeRows2?.[0]?.monthlyGoal ? Number(storeRows2[0].monthlyGoal) : 20000;
-    const activeDays = Object.values(dailyMap).filter((v:any) => v.value > 0).length; return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal, cancelRate: 0, cancelCount: 0, activeDays };
+    const activeDays = Object.values(dailyMap).filter((v:any) => v.value > 0).length;
+
+    // Buscar cancelamentos reais no período
+    const cancelWhere: any = { storeId, status: SaleStatus.CANCELLED, saleDate: Between(fromDate, toDate) };
+    if (sellerId) cancelWhere.sellerId = sellerId;
+    const cancelledSales = await this.saleRepo.find({ where: cancelWhere });
+    const cancelCount = cancelledSales.length;
+    const cancelRate = (totalSales + cancelCount) > 0
+      ? Math.round((cancelCount / (totalSales + cancelCount)) * 100) : 0;
+
+    return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal, cancelRate, cancelCount, activeDays };
   }
 
   async search(storeId: string, q: string) {

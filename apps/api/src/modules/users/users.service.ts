@@ -41,7 +41,14 @@ export class UsersService {
       }
     }
     if (data.password) data.password = await bcrypt.hash(data.password, 10);
-    const user = this.repo.create({ ...data, status: UserStatus.ACTIVE });
+    // Garantir valores padrão para evitar constraint violation
+    const userData = {
+      ...data,
+      role: data.role || 'seller',
+      commissionRate: Number(data.commissionRate) || 0,
+      status: UserStatus.ACTIVE,
+    };
+    const user = this.repo.create(userData);
     return this.repo.save(user);
   }
 
