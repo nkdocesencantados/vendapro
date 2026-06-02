@@ -41,15 +41,15 @@ export class UsersService {
         }
       }
     }
-    // Hash feito pelo @BeforeInsert da entidade — não fazer hash duplo aqui
-    const userData = {
-      ...data,
-      role: data.role || 'seller',
-      commissionRate: Number(data.commissionRate) || 0,
-      status: UserStatus.ACTIVE,
-    };
-    const user = this.repo.create(userData);
-    return this.repo.save(user);
+    // Usar query raw para evitar falha em colunas que podem não existir ainda no banco
+    const id = require('crypto').randomUUID();
+    const hashedPw = await require('bcryptjs').hash(data.password || '123456', 12);
+    await this.repo.query(
+      `INSERT INTO users (id, name, email, password, role, status, "storeId", "createdAt", "updatedAt")
+       VALUES ($1,$2,$3,$4,$5,'active',$6,NOW(),NOW())`,
+      [id, data.name, data.email, hashedPw, data.role || 'seller', data.storeId || null]
+    );
+    return this.repo.findOne({ where: { id } });
   }
 
   async update(id: string, data: Partial<User>) {
