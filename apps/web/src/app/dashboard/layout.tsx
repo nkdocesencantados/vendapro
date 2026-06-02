@@ -135,7 +135,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     localStorage.setItem("vp-theme", next ? "dark" : "light")
   }
 
-  function logout() { authLogout(); router.push("/login") }
+  function logout() { authLogout(); window.location.href = "/login" }
 
   const plan      = store?.plan || "business"  // sempre da API, nunca do localStorage
   const role      = authUser?.role || "store_owner"
