@@ -13,7 +13,8 @@ export class UsersService {
   ) {}
 
   private planLimits: Record<string, number> = {
-    basic: 3, trial: 1, starter: 3, pro: 5, business: 20
+    basic: 3, trial: 1, starter: 3, pro: 5, business: 20,
+    BASIC: 3, TRIAL: 1, STARTER: 3, PRO: 5, BUSINESS: 20,
   }
 
   async findAll(storeId?: string) {
@@ -33,7 +34,7 @@ export class UsersService {
     if (data.storeId && data.role === 'seller') {
       const store = await this.storeRepo.findOne({ where: { id: data.storeId } });
       if (store) {
-        const limit = this.planLimits[store.plan] ?? 0;
+        const limit = this.planLimits[String(store.plan).toLowerCase()] ?? this.planLimits[String(store.plan)] ?? 999;
         const count = await this.repo.count({ where: { storeId: data.storeId, role: 'seller', status: UserStatus.ACTIVE } });
         if (count >= limit) {
           throw new BadRequestException('Plano ' + store.plan + ' permite no maximo ' + limit + ' vendedor(es). Faca upgrade para adicionar mais.');
