@@ -67,13 +67,14 @@ export class CompaniesService {
   }
 
   async updatePlan(id: string, plan: string) {
+    const planLower = plan.toLowerCase();
     const paidPlans = ['business', 'pro', 'starter', 'basic'];
-    const newStatus = paidPlans.includes(plan.toLowerCase()) ? 'active' : 'trial';
-    await this.repo.update(id, { plan, status: newStatus })
-    // Atualizar plan E status na tabela stores
+    const newStatus = paidPlans.includes(planLower) ? 'active' : 'trial';
+    await this.repo.update(id, { plan: planLower, status: newStatus })
+    // Atualizar plan E status na tabela stores (usar planLower para consistência com enum)
     await this.repo.query(
       `UPDATE stores SET plan = $1, status = $2 WHERE "companyId" = $3`,
-      [plan, newStatus, id]
+      [planLower, newStatus, id]
     )
     return { message: 'Plano atualizado com sucesso' }
   }
