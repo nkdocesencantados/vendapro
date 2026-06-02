@@ -40,8 +40,7 @@ export class UsersService {
         }
       }
     }
-    if (data.password) data.password = await bcrypt.hash(data.password, 10);
-    // Garantir valores padrão para evitar constraint violation
+    // Hash feito pelo @BeforeInsert da entidade — não fazer hash duplo aqui
     const userData = {
       ...data,
       role: data.role || 'seller',
