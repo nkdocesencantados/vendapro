@@ -35,7 +35,7 @@ export default function SuperAdminPage() {
   function showToast(msg:string) { setToast(msg); setTimeout(()=>setToast(""),3000) }
 
   async function toggleStatus(c:any) {
-    const next = c.status==="active" ? "blocked" : "active"
+    const next = c.status==="active" ? "inactive" : "active"
     try {
       await api.patch(`/companies/${c.id}/status`, { status: next })
       setCompanies(prev => prev.map(x => x.id===c.id ? {...x,status:next} : x))
@@ -73,7 +73,7 @@ export default function SuperAdminPage() {
   const filtered = companies.filter(c => {
     if(filter==="active")  return c.status==="active"
     if(filter==="trial")   return c.plan==="trial"
-    if(filter==="blocked") return c.status==="blocked"
+    if(filter==="inactive") return c.status==="inactive"
     return true
   })
 
@@ -81,7 +81,7 @@ export default function SuperAdminPage() {
     total:   companies.length,
     active:  companies.filter(c=>c.status==="active").length,
     trial:   companies.filter(c=>c.plan==="trial").length,
-    blocked: companies.filter(c=>c.status==="blocked").length,
+    blocked: companies.filter(c=>c.status==="inactive").length,
   }
 
   const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:100,starter:100,pro:150,business:200}[c.plan]||0),0)
@@ -193,7 +193,7 @@ export default function SuperAdminPage() {
             <div className="sa-card">
               {/* FILTROS */}
               <div style={{padding:"14px 18px",borderBottom:"1px solid #1F3A33",display:"flex",gap:6}}>
-                {[["all","Todas"],["active","Ativas"],["trial","Trial"],["blocked","Bloqueadas"]].map(([v,l])=>(
+                {[["all","Todas"],["active","Ativas"],["trial","Trial"],["inactive","Bloqueadas"]].map(([v,l])=>(
                   <button key={v} className={`sa-btn sa-btn-sm ${filter===v?"sa-btn-primary":"sa-btn-ghost"}`} onClick={()=>setFilter(v)}>{l}</button>
                 ))}
               </div>

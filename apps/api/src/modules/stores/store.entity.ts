@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
-export enum StoreStatus { ACTIVE = 'active', INACTIVE = 'inactive', TRIAL = 'trial' }
+export enum StoreStatus { ACTIVE = 'active', INACTIVE = 'inactive', BLOCKED = 'blocked', TRIAL = 'trial' }
 export enum StorePlan { STARTER = 'starter', PRO = 'pro', BUSINESS = 'business' }
 
 @Entity('stores')
