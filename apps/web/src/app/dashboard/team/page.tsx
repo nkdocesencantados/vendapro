@@ -1,8 +1,10 @@
 ﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/contexts/auth.store"
 
 export default function TeamPage() {
+  const { user: authUser } = useAuthStore()
   const [members, setMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
