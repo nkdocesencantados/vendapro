@@ -51,6 +51,16 @@ async function runMigrations(dataSource: DataSource) {
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='commissionRate') THEN ALTER TABLE users ADD COLUMN "commissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`);
   console.log('Migration commissionRate: OK');
 
+  // Corrigir status de todas as lojas com plano pago que estão como trial
+  try {
+    await dataSource.query(`
+      UPDATE stores SET status = 'active'
+      WHERE LOWER(plan) IN ('business', 'pro', 'starter', 'basic')
+      AND (status IS NULL OR status = 'trial')
+    `);
+    console.log('Migration fix status lojas pagas: OK');
+  } catch(e) { console.log('Migration fix status lojas pagas: SKIP - ' + (e as any).message); }
+
   // Migration defaultCommissionRate na tabela stores
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='defaultCommissionRate') THEN ALTER TABLE stores ADD COLUMN "defaultCommissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`);
   console.log('Migration defaultCommissionRate: OK');

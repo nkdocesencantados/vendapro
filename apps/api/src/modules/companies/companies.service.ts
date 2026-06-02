@@ -46,6 +46,8 @@ export class CompaniesService {
 
   async updateStatus(id: string, status: string) {
     await this.repo.update(id, { status })
+    // Atualizar stores vinculadas para refletir imediatamente no frontend
+    await this.repo.query(`UPDATE stores SET status = $1 WHERE "companyId" = $2`, [status, id])
     return this.repo.findOne({ where:{ id } })
   }
 
@@ -65,9 +67,15 @@ export class CompaniesService {
   }
 
   async updatePlan(id: string, plan: string) {
-    await this.repo.update(id, { plan })
-    await this.repo.query(`UPDATE stores SET plan = $1 WHERE "companyId" = $2`, [plan, id])
-    return { message: "Plano atualizado com sucesso" }
+    const paidPlans = ['business', 'pro', 'starter', 'basic'];
+    const newStatus = paidPlans.includes(plan.toLowerCase()) ? 'active' : 'trial';
+    await this.repo.update(id, { plan, status: newStatus })
+    // Atualizar plan E status na tabela stores
+    await this.repo.query(
+      `UPDATE stores SET plan = $1, status = $2 WHERE "companyId" = $3`,
+      [plan, newStatus, id]
+    )
+    return { message: 'Plano atualizado com sucesso' }
   }
 
   async remove(id: string) {
