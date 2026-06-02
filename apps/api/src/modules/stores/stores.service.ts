@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Store, StoreStatus } from './store.entity';
@@ -26,9 +26,9 @@ export class StoresService {
   }
 
   async create(data: Partial<Store>) {
-    // Se plano pago, status já nasce como active. Só trial se não tiver plano definido.
-    const paidPlans = ['business', 'pro', 'starter', 'basic', 'BUSINESS', 'PRO', 'STARTER', 'BASIC'];
-    const status = data.plan && paidPlans.includes(data.plan as string) ? StoreStatus.ACTIVE : (data.status || StoreStatus.TRIAL);
+    const paidPlans = ['business', 'pro', 'starter', 'basic'];
+    const isPaid = data.plan && paidPlans.includes((data.plan as string).toLowerCase());
+    const status: StoreStatus = isPaid ? StoreStatus.ACTIVE : StoreStatus.TRIAL;
     const store = this.repo.create({ ...data, status });
     return this.repo.save(store);
   }
@@ -38,7 +38,6 @@ export class StoresService {
       `UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3 WHERE id = $4`,
       [data.name, data.primaryColor || '#0F6E56', data.monthlyGoal || 0, id]
     );
-    // Atualizar colunas opcionais separadamente para evitar erro se não existirem
     try { await this.repo.query(`UPDATE stores SET "profitMargin" = $1, margin = $2 WHERE id = $3`, [data.profitMargin || data.margin || 26.30, data.margin || data.profitMargin || 26.30, id]); } catch(e) {}
     try { await this.repo.query(`UPDATE stores SET phone = $1, cnpj = $2 WHERE id = $3`, [data.phone || null, data.cnpj || null, id]); } catch(e) {}
     try { await this.repo.query(`UPDATE stores SET palette = $1 WHERE id = $2`, [data.palette || 'emerald', id]); } catch(e) {}
