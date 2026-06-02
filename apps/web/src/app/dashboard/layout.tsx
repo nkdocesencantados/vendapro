@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           localStorage.setItem("vp-palette", s.palette)
         }
         if (s.trialDaysLeft !== null && s.trialDaysLeft !== undefined) setTrialDaysLeft(s.trialDaysLeft)
-        if (s.trialExpired) setTrialExpired(true)
+        if (s.trialExpired || s.status === 'inactive' || s.status === 'blocked') setTrialExpired(true)
       }
     }).catch(() => {})
 
@@ -156,8 +156,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (trialExpired) return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"var(--bg)",flexDirection:"column",gap:16,padding:24,textAlign:"center"}}>
       <div style={{width:56,height:56,borderRadius:16,background:"var(--danger-bg)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>🔒</div>
-      <h1 style={{fontSize:22,fontWeight:700,color:"var(--text)",margin:0}}>Período de trial encerrado</h1>
-      <p style={{fontSize:14,color:"var(--text-muted)",maxWidth:380,lineHeight:1.6,margin:0}}>Seus 7 dias gratuitos chegaram ao fim. Para continuar usando o VendaPro, entre em contato para ativar seu plano.</p>
+      <h1 style={{fontSize:22,fontWeight:700,color:"var(--text)",margin:0}}>{trialDaysLeft===0?"Período de trial encerrado":"Acesso suspenso"}</h1>
+      <p style={{fontSize:14,color:"var(--text-muted)",maxWidth:380,lineHeight:1.6,margin:0}}>{trialDaysLeft===0?"Seus 7 dias gratuitos chegaram ao fim. Para continuar usando o VendaPro, entre em contato para ativar seu plano.":"Sua conta foi suspensa. Entre em contato para regularizar o acesso."}</p>
       <a href="https://wa.me/5511958924764?text=Quero+ativar+meu+plano+VendaPro" target="_blank" rel="noopener noreferrer"
         style={{display:"inline-flex",alignItems:"center",gap:8,background:"#25D366",color:"white",padding:"12px 24px",borderRadius:12,fontWeight:600,fontSize:14,textDecoration:"none",marginTop:8}}>
         💬 Falar no WhatsApp
