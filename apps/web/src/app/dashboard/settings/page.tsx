@@ -47,6 +47,8 @@ export default function SettingsPage() {
   useEffect(()=>{
     const saved = localStorage.getItem("vp-palette") || "emerald"
     setPalette(saved)
+    // Aplicar paleta salva imediatamente sem esperar a API
+    applyPalette(saved)
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
