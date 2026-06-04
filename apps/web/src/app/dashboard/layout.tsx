@@ -101,6 +101,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     r.style.setProperty("--brand-glow", t.brandGlow)
   }
 
+  // Recarregar store ao voltar para a janela (reflete mudança de plano imediatamente)
+  useEffect(() => {
+    const onFocus = () => {
+      api.get("/stores").then(r => {
+        const s = Array.isArray(r.data) ? r.data[0] : r.data
+        if (s) { setStore(s) }
+      }).catch(() => {})
+    }
+    window.addEventListener("focus", onFocus)
+    return () => window.removeEventListener("focus", onFocus)
+  }, [])
+
   useEffect(() => {
     if (!authUser) { router.push("/login"); return }
     const saved = localStorage.getItem("vp-theme")
