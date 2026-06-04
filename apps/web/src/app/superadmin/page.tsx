@@ -84,7 +84,7 @@ export default function SuperAdminPage() {
     blocked: companies.filter(c=>c.status==="inactive").length,
   }
 
-  const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:100,starter:100,pro:150,business:200}[c.plan]||0),0)
+  const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:100,starter:100,pro:150,business:200}[(c.plan||'').toLowerCase()]||0),0)
 
   return (
     <div style={{minHeight:"100vh",background:"#04130F",color:"#E5F2EC",fontFamily:'"Geist",ui-sans-serif,system-ui,sans-serif'}}>

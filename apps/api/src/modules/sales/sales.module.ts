@@ -7,9 +7,10 @@ import { SaleItem } from './sale-item.entity';
 import { Product } from '../products/product.entity';
 import { FinancialEntry } from '../financial/financial-entry.entity';
 import { User } from '../users/user.entity';
+import { StockMovement } from '../stock/stock-movement.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Sale, SaleItem, Product, FinancialEntry, User])],
+  imports: [TypeOrmModule.forFeature([Sale, SaleItem, Product, FinancialEntry, User, StockMovement])],
   controllers: [SalesController],
   providers: [SalesService],
   exports: [SalesService],

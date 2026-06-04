@@ -333,7 +333,7 @@ export default function StockPage() {
             <button className="vp-btn vp-btn-primary" onClick={()=>setShowMovForm(true)} style={{marginLeft:"auto"}}>+ Lançar entrada</button>
           </div>
           {movLoading ? <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div> : (
-            <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,overflow:"hidden"}}>
+            <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,overflow:"hidden",overflowX:"auto"}}>
               {movements.length===0 ? (
                 <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)",fontSize:13}}>Nenhum movimento encontrado.</div>
               ) : (

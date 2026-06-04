@@ -3,6 +3,7 @@ import { Injectable, NotFoundException, BadRequestException } from "@nestjs/comm
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "./sale.entity";
+import { StockMovement, MovementType } from "../stock/stock-movement.entity";
 import { SaleItem } from "./sale-item.entity";
 import { Product } from "../products/product.entity";
 import { FinancialEntry, EntryType, EntryCategory } from "../financial/financial-entry.entity";
@@ -14,6 +15,8 @@ export class SalesService {
     @InjectRepository(Sale) private saleRepo: Repository<Sale>,
     @InjectRepository(SaleItem) private itemRepo: Repository<SaleItem>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
+    @InjectRepository(StockMovement) private movRepo: Repository<StockMovement>,
+    @InjectRepository(StockMovement) private movRepo: Repository<StockMovement>,
     @InjectRepository(FinancialEntry) private financialRepo: Repository<FinancialEntry>,
     @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
@@ -66,8 +69,9 @@ export class SalesService {
     }));
 
     const subtotal = processedItems.reduce((a: number, i: any) => a + i.total, 0);
-    const discount = Number(saleData.discount) || 0;
-    const total = subtotal - discount;
+    const discount = Math.min(Number(saleData.discount) || 0, subtotal); // desconto não pode ser maior que subtotal
+    if (discount < 0) throw new BadRequestException('Desconto não pode ser negativo');
+    const total = Math.max(subtotal - discount, 0); // total nunca negativo
     const commission = total * ((Number(saleData.commissionRate) || 15) / 100);
     const saleDate = saleData.saleDate ? new Date(saleData.saleDate) : new Date();
     const { saleDate: _sd, createdAt: _ca, ...cleanSaleData } = saleData;
@@ -84,7 +88,12 @@ export class SalesService {
         saleId, productId: item.productId || null, productName: item.productName,
         quantity: item.quantity, unitPrice: item.unitPrice, total: item.total, isManual: item.isManual,
       }));
-      if (item.productId) await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
+      if (item.productId) {
+        const prod = await this.productRepo.findOne({ where: { id: item.productId } });
+        const before = prod ? Number(prod.stock) : 0;
+        await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
+        try { await this.movRepo.save(this.movRepo.create({ type: MovementType.SALE, productId: item.productId, storeId, quantity: item.quantity, stockBefore: before, stockAfter: before - item.quantity, reason: `Venda #${saleId.slice(0,8)}` })); } catch(e) {}
+      }
     }
 
     await this.financialRepo.save(this.financialRepo.create({
