@@ -19,8 +19,9 @@ const NAV_ALL = [
 ]
 
 const PLAN_MENU: Record<string,string[]> = {
-  trial:    ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
-  basic:    ["dashboard","vendas","estoque","recibos","config"],
+  trial:    ["dashboard","vendas","estoque","recibos","config"],
+  basic:    ["dashboard","vendas","recibos","config"],
+  starter:  ["dashboard","vendas","recibos","config"],
   pro:      ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
   business: ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
 }
