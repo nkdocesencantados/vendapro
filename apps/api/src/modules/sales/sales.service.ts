@@ -16,7 +16,6 @@ export class SalesService {
     @InjectRepository(SaleItem) private itemRepo: Repository<SaleItem>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(StockMovement) private movRepo: Repository<StockMovement>,
-    @InjectRepository(StockMovement) private movRepo: Repository<StockMovement>,
     @InjectRepository(FinancialEntry) private financialRepo: Repository<FinancialEntry>,
     @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
