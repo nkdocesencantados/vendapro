@@ -508,7 +508,7 @@ export default function ReportsPage() {
                           <span style={{fontSize:11,color:"var(--success)",fontFamily:"var(--font-mono)"}}>+{BRL(lucro)} lucro</span>
                         </div>
                       </div>
-                      <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden"}}>
+                      <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden",overflowX:"auto"}}>
                         <div style={{height:"100%",width:`${barW}%`,background:"var(--brand)",borderRadius:99}}/>
                       </div>
                       <div style={{fontSize:10,color:"var(--text-subtle)",marginTop:3,textAlign:"right"}}>{barW}% do faturamento</div>
@@ -549,7 +549,7 @@ export default function ReportsPage() {
                             <span style={{fontSize:12,fontWeight:600,fontFamily:"var(--font-mono)"}}>{BRL(Number(p.total))}</span>
                           </div>
                         </div>
-                        <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden"}}>
+                        <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden",overflowX:"auto"}}>
                           <div style={{height:"100%",width:`${payPct}%`,background:"var(--brand)",borderRadius:99}}/>
                         </div>
                         <div style={{fontSize:10,color:"var(--text-subtle)",marginTop:2,textAlign:"right"}}>{payPct}%</div>
@@ -578,7 +578,7 @@ export default function ReportsPage() {
                       <div style={{width:36,height:36,borderRadius:"50%",background:bgs[i]||"var(--surface-3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"white",flexShrink:0}}>{init}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:4}}>{s.sellerName||s.name}</div>
-                        <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden"}}>
+                        <div style={{height:5,background:"var(--surface-3)",borderRadius:99,overflow:"hidden",overflowX:"auto"}}>
                           <div style={{height:"100%",width:`${barW}%`,background:"var(--brand)",borderRadius:99}}/>
                         </div>
                       </div>
