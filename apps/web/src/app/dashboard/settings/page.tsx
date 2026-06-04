@@ -60,8 +60,24 @@ export default function SettingsPage() {
 
   function applyPalette(id: string){
     setPalette(id)
-    document.documentElement.setAttribute("data-palette", id)
     localStorage.setItem("vp-palette", id)
+    const r = document.documentElement
+    r.setAttribute("data-palette", id)
+    // Aplicar variáveis CSS imediatamente sem precisar recarregar
+    const themes: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
+      emerald: { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
+      amber:   { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
+      crimson: { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
+      violet:  { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },
+      ocean:   { brand:"#0EA5E9", brandDeep:"#082F49", brandGlow:"#7DD3FC" },
+      indigo:  { brand:"#6366F1", brandDeep:"#1E1B4B", brandGlow:"#A5B4FC" },
+      rose:    { brand:"#F43F5E", brandDeep:"#4C0519", brandGlow:"#FDA4AF" },
+      graphite:{ brand:"#64748B", brandDeep:"#0F172A", brandGlow:"#CBD5E1" },
+    }
+    const t = themes[id] || themes.emerald
+    r.style.setProperty("--brand",      t.brand)
+    r.style.setProperty("--brand-deep", t.brandDeep)
+    r.style.setProperty("--brand-glow", t.brandGlow)
   }
 
   async function saveStore(){
