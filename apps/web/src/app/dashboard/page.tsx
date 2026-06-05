@@ -158,10 +158,21 @@ export default function DashboardPage() {
 
   const loaded = React.useRef(false)
   useEffect(() => {
+    // Carregar do cache primeiro para evitar flash vazio
+    try {
+      const cached = sessionStorage.getItem("vp-dashboard")
+      if (cached) { setData(JSON.parse(cached)); setLoading(false) }
+    } catch(e) {}
+
     if (loaded.current) return
     loaded.current = true
     api.get("/stores").then(r=>{ const s=Array.isArray(r.data)?r.data[0]:r.data; if(s) setStore(s) }).catch(()=>{})
-    api.get("/reports/dashboard").then(r=>{ if(r.data) setData(r.data) }).catch(()=>{}).finally(()=>setLoading(false))
+    api.get("/reports/dashboard").then(r=>{
+      if(r.data) {
+        setData(r.data)
+        try { sessionStorage.setItem("vp-dashboard", JSON.stringify(r.data)) } catch(e) {}
+      }
+    }).catch(()=>{}).finally(()=>setLoading(false))
   }, [])
 
   const storeName  = store?.name || "Minha Loja"
