@@ -112,7 +112,7 @@ export class ReportsService {
     for (const s of sales) {
       paymentMap[s.paymentMethod] = (paymentMap[s.paymentMethod] || 0) + Number(s.total);
     }
-    const paymentMethods = Object.entries(paymentMap).map(([method, total]) => ({ method, total }));
+    const paymentMethods = Object.entries(paymentMap).map(([paymentMethod, total]) => ({ paymentMethod, total }));
     let topProducts: any[] = [];
     if (sales.length > 0) {
       const saleIds = sales.map(s => s.id);
