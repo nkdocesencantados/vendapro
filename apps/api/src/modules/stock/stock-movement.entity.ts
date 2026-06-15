@@ -13,8 +13,8 @@ export class StockMovement {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'enum', enum: MovementType })
-  type: MovementType;
+  @Column({ type: 'varchar', length: 20 })
+  type: string;
 
   @Column({ type: 'int' })
   quantity: number;

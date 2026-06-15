@@ -51,6 +51,18 @@ async function runMigrations(dataSource: DataSource) {
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='commissionRate') THEN ALTER TABLE users ADD COLUMN "commissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`);
   console.log('Migration commissionRate: OK');
 
+  // Fix enum stock_movements: adicionar 'sale' se não existir
+  try {
+    await dataSource.query(`ALTER TYPE stock_movements_type_enum ADD VALUE IF NOT EXISTS 'sale'`);
+    console.log('Migration stock_movements sale: OK');
+  } catch(e) {
+    // Se não conseguir alterar o enum, converter coluna para varchar
+    try {
+      await dataSource.query(`ALTER TABLE stock_movements ALTER COLUMN type TYPE VARCHAR(20)`);
+      console.log('Migration stock_movements type->varchar: OK');
+    } catch(e2) { console.log('Migration stock_movements: SKIP'); }
+  }
+
   // Adicionar valor 'sale' ao enum de movimentos se não existir
   try {
     await dataSource.query(`ALTER TYPE stock_movements_type_enum ADD VALUE IF NOT EXISTS 'sale'`);
