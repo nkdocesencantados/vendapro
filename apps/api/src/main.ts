@@ -51,6 +51,12 @@ async function runMigrations(dataSource: DataSource) {
   await dataSource.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='commissionRate') THEN ALTER TABLE users ADD COLUMN "commissionRate" DECIMAL(5,2) DEFAULT 0; END IF; END $$;`);
   console.log('Migration commissionRate: OK');
 
+  // Adicionar valor 'sale' ao enum de movimentos se não existir
+  try {
+    await dataSource.query(`ALTER TYPE stock_movements_type_enum ADD VALUE IF NOT EXISTS 'sale'`);
+    console.log('Migration stock_movements sale enum: OK');
+  } catch(e) { console.log('Migration stock_movements sale: SKIP - ' + (e as any).message); }
+
   // Corrigir status de todas as lojas com plano pago que estão como trial
   try {
     await dataSource.query(`
