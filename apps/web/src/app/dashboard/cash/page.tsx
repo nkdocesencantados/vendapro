@@ -16,7 +16,8 @@ function vpCSV(headers: string[], rows: any[][], filename: string) {
 
   const lines = [headers, ...rows].map(r => r.map((c:any) => String(c)).join(';')).join('\n');
 
-  const blob = new Blob([lines], {type: 'text/csv;charset=utf-8'});
+  const BOM = '\uFEFF'; // BOM para Excel reconhecer UTF-8
+  const blob = new Blob([BOM + lines], {type: 'text/csv;charset=utf-8'});
 
   const url = URL.createObjectURL(blob);
 
@@ -56,7 +57,7 @@ function exportCashCSV(entries: any[], month: number, year: number) {
 
   vpCSV(['Data','Descricao','Categoria','Tipo','Valor'],
 
-    entries.map((e:any)=>[new Date(e.date||e.createdAt).toLocaleDateString('pt-BR'),e.description||C[e.category]||e.category,C[e.category]||e.category,e.type==='income'?'Receita':'Despesa',(e.type==='income'?'+':'-')+Number(e.amount).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})]),
+    entries.map((e:any)=>[new Date(e.date||e.createdAt).toLocaleDateString('pt-BR'),e.description||C[e.category]||e.category,C[e.category]||e.category,e.type==='income'?'Receita':'Despesa',(e.type==='income'?'+':'-')+Number(e.amount).toFixed(2).replace('.',',')]),
 
     'caixa-'+M[month-1]+'-'+year);
 
