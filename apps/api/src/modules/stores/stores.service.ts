@@ -13,7 +13,7 @@ export class StoresService {
 
   async findOne(id: string) {
     const r = await this.repo.query(
-      `SELECT id, name, "primaryColor", phone, "monthlyGoal", COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette FROM stores WHERE id = $1`, [id]
+      `SELECT id, name, "primaryColor", phone, "monthlyGoal", address, COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette FROM stores WHERE id = $1`, [id]
     );
     if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
     const store = r[0];
@@ -35,8 +35,8 @@ export class StoresService {
 
   async update(id: string, data: any) {
     await this.repo.query(
-      `UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3 WHERE id = $4`,
-      [data.name, data.primaryColor || '#0F6E56', data.monthlyGoal || 0, id]
+      `UPDATE stores SET name = $1, "primaryColor" = $2, "monthlyGoal" = $3, address = $4 WHERE id = $5`,
+      [data.name, data.primaryColor || '#0F6E56', data.monthlyGoal || 0, data.address || null, id]
     );
     try { await this.repo.query(`UPDATE stores SET "profitMargin" = $1, margin = $2 WHERE id = $3`, [data.profitMargin || data.margin || 26.30, data.margin || data.profitMargin || 26.30, id]); } catch(e) {}
     try { await this.repo.query(`UPDATE stores SET phone = $1, cnpj = $2 WHERE id = $3`, [data.phone || null, data.cnpj || null, id]); } catch(e) {}
