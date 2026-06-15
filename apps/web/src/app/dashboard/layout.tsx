@@ -99,6 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     r.style.setProperty("--brand",      t.brand)
     r.style.setProperty("--brand-deep", t.brandDeep)
     r.style.setProperty("--brand-glow", t.brandGlow)
+    localStorage.setItem("vp-palette", name)
   }
 
   // Recarregar store ao voltar para a janela (reflete mudança de plano imediatamente)
