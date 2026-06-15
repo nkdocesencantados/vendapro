@@ -91,7 +91,15 @@ export class SalesService {
         const prod = await this.productRepo.findOne({ where: { id: item.productId } });
         const before = prod ? Number(prod.stock) : 0;
         await this.productRepo.decrement({ id: item.productId }, "stock", item.quantity);
-        try { await this.movRepo.save(this.movRepo.create({ type: MovementType.SALE, productId: item.productId, storeId, quantity: item.quantity, stockBefore: before, stockAfter: before - item.quantity, reason: `Venda #${saleId.slice(0,8)}` })); } catch(e) {}
+        try {
+          await this.movRepo.save(this.movRepo.create({
+            type: 'sale', productId: item.productId, storeId,
+            quantity: item.quantity, stockBefore: before, stockAfter: before - item.quantity,
+            reason: `Venda #${saleId.slice(0,8)}`
+          }));
+        } catch(e: any) {
+          console.error('[StockMovement] Erro ao salvar movimento:', e?.message);
+        }
       }
     }
 
