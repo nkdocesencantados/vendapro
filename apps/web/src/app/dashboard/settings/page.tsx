@@ -53,7 +53,8 @@ export default function SettingsPage() {
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
         setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); if(s.cnpj)setCnpj(s.cnpj)
-        if(s.palette){ setPalette(s.palette); applyPalette(s.palette) }
+        // Setar estado mas NÃO reaplicar paleta — respeitar o que está ativo visualmente
+        if(s.palette) setPalette(s.palette)
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
     }).catch(()=>{})
