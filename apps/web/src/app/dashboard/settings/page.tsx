@@ -36,7 +36,6 @@ export default function SettingsPage() {
   const [margin,   setMargin]   = useState("26")
   const [address,  setAddress]  = useState("")
   const [phone,    setPhone]    = useState("")
-  const [cnpj,     setCnpj]     = useState("")
   const [userName, setUserName] = useState("")
   const [userEmail,setUserEmail]= useState("")
   const [newPwd,   setNewPwd]   = useState("")
@@ -52,7 +51,7 @@ export default function SettingsPage() {
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
-        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); if(s.cnpj)setCnpj(s.cnpj)
+        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone)
         // Setar estado mas NÃO reaplicar paleta — respeitar o que está ativo visualmente
          localStorage.setItem("storeConfig", JSON.stringify(s))
       }
@@ -85,10 +84,10 @@ export default function SettingsPage() {
   async function saveStore(){
     setSaving(true)
     try{
-      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26, profitMargin:+margin||26, phone, cnpj })
+      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26, profitMargin:+margin||26, phone })
       const sc = localStorage.getItem("storeConfig")
       const store = sc?JSON.parse(sc):{}
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26,profitMargin:+margin||26,phone,cnpj}))
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26,profitMargin:+margin||26,phone}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     }catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
@@ -184,15 +183,9 @@ export default function SettingsPage() {
               <input className="st-input" value={address} onChange={e=>setAddress(e.target.value)} placeholder="R. das Flores, 142 — São Paulo/SP"/>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <div className="st-field" style={{marginBottom:0}}>
-                <label className="st-label">CPF / CNPJ</label>
-                <input className="st-input" value={cnpj} onChange={e=>setCnpj(e.target.value)} placeholder="000.000.000-00 ou 00.000.000/0001-00"/>
-              </div>
-              <div className="st-field" style={{marginBottom:0}}>
-                <label className="st-label">Telefone / WhatsApp</label>
-                <input className="st-input" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="(11) 9 0000-0000"/>
-              </div>
+            <div className="st-field">
+              <label className="st-label">Telefone / WhatsApp</label>
+              <input className="st-input" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="(11) 9 0000-0000"/>
             </div>
 
             <div className="st-row">
