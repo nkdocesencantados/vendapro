@@ -186,8 +186,8 @@ export default function SettingsPage() {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               <div className="st-field" style={{marginBottom:0}}>
-                <label className="st-label">CNPJ / CPF</label>
-                <input className="st-input" value={cnpj} onChange={e=>setCnpj(e.target.value)} placeholder="00.000.000/0001-00"/>
+                <label className="st-label">CPF / CNPJ</label>
+                <input className="st-input" value={cnpj} onChange={e=>setCnpj(e.target.value)} placeholder="000.000.000-00 ou 00.000.000/0001-00"/>
               </div>
               <div className="st-field" style={{marginBottom:0}}>
                 <label className="st-label">Telefone / WhatsApp</label>
