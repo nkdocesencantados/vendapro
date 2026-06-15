@@ -99,12 +99,6 @@ export default function StockPage() {
   const [primary, setPrimary] = useState("#1D9E75")
 
   const [threshold, setThreshold] = useState(5)
-  const [mainTab,   setMainTab]   = useState<"produtos"|"movimentos">("produtos")
-  const [movements, setMovements] = useState<any[]>([])
-  const [movLoading,setMovLoading]= useState(false)
-  const [movProduct,setMovProduct]= useState("")
-  const [showMovForm,setShowMovForm]= useState(false)
-  const [movForm,   setMovForm]   = useState({type:"in",productId:"",quantity:"1",reason:""})
 
 
 
@@ -113,37 +107,8 @@ export default function StockPage() {
     try { const sc=localStorage.getItem("storeConfig"); if(sc){const p=JSON.parse(sc);if(p.primaryColor)setPrimary(p.primaryColor);if(p.lowStockThreshold)setThreshold(+p.lowStockThreshold||5)} } catch{}
   }, [])
 
-  useEffect(() => {
-    if(mainTab === "movimentos") loadMovements(movProduct||undefined)
-  }, [mainTab, movProduct])
 
 
-
-  async function loadMovements(productId?:string) {
-    setMovLoading(true)
-    try {
-      const url = productId ? `/stock?productId=${productId}` : "/stock"
-      const r = await api.get(url)
-      setMovements(Array.isArray(r.data) ? r.data : [])
-    } catch { setMovements([]) }
-    finally { setMovLoading(false) }
-  }
-
-  async function saveMovement() {
-    if(!movForm.productId||!movForm.quantity) return alert("Selecione o produto e quantidade")
-    try {
-      await api.post("/stock/movement", {
-        type: movForm.type,
-        productId: movForm.productId,
-        quantity: +movForm.quantity,
-        reason: movForm.reason||undefined
-      })
-      setShowMovForm(false)
-      setMovForm({type:"in",productId:"",quantity:"1",reason:""})
-      load()
-      loadMovements(movProduct||undefined)
-    } catch(e:any) { alert(e?.response?.data?.message||"Erro ao salvar") }
-  }
 
   async function load() {
 
@@ -313,97 +278,7 @@ export default function StockPage() {
       </div>
 
 
-      {/* abas principais */}
-      <div style={{display:"flex",gap:4,borderBottom:"1px solid var(--border)",marginBottom:16}}>
-        {(["produtos","movimentos"] as const).map(t=>(
-          <button key={t} onClick={()=>setMainTab(t)} style={{padding:"9px 16px",fontSize:13,fontWeight:mainTab===t?600:400,color:mainTab===t?"var(--brand)":"var(--text-subtle)",background:"transparent",border:"none",borderBottom:mainTab===t?"2px solid var(--brand)":"2px solid transparent",marginBottom:-1,cursor:"pointer",transition:"var(--transition)"}}>
-            {t==="produtos"?"Produtos":"Movimentos"}
-          </button>
-        ))}
-      </div>
-
-      {/* aba movimentos */}
-      {mainTab==="movimentos" && (
-        <div>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,flexWrap:"wrap"}}>
-            <select className="vp-input" style={{width:200,flex:"none"}} value={movProduct} onChange={e=>setMovProduct(e.target.value)}>
-              <option value="">Todos os produtos</option>
-              {products.map((p:any)=><option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <button className="vp-btn vp-btn-primary" onClick={()=>setShowMovForm(true)} style={{marginLeft:"auto"}}>+ Lançar entrada</button>
-          </div>
-          {movLoading ? <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)"}}>Carregando...</div> : (
-            <div style={{background:"var(--surface)",border:"1px solid var(--border)",borderRadius:12,overflow:"hidden",overflowX:"auto"}}>
-              {movements.length===0 ? (
-                <div style={{textAlign:"center",padding:40,color:"var(--text-subtle)",fontSize:13}}>Nenhum movimento encontrado.</div>
-              ) : (
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
-                  <thead><tr style={{background:"var(--surface-2)"}}>
-                    {["Data","Produto","Tipo","Qtd","Antes","Depois","Motivo"].map(h=>(
-                      <th key={h} style={{padding:"10px 14px",textAlign:"left",fontSize:11,fontWeight:600,color:"var(--text-muted)",textTransform:"uppercase",letterSpacing:".05em"}}>{h}</th>
-                    ))}
-                  </tr></thead>
-                  <tbody>
-                    {movements.map((m:any,i:number)=>{
-                      const TL:Record<string,string>={in:"Entrada",out:"Saída",adjust:"Ajuste",sale:"Venda",return:"Devolução"}
-                      const TC:Record<string,string>={in:"var(--success)",out:"var(--danger)",adjust:"var(--warning)",sale:"var(--danger)",return:"var(--success)"}
-                      const pName=products.find((p:any)=>p.id===m.productId)?.name||"—"
-                      const isPositive=["in","return"].includes(m.type)
-                      return (
-                        <tr key={m.id} style={{borderBottom:"1px solid var(--border)",background:i%2===0?"transparent":"var(--surface-2)"}}>
-                          <td style={{padding:"10px 14px",fontSize:12,color:"var(--text-muted)"}}>{new Date(m.createdAt).toLocaleDateString("pt-BR")}</td>
-                          <td style={{padding:"10px 14px",fontSize:12,fontWeight:500,color:"var(--text)"}}>{pName}</td>
-                          <td style={{padding:"10px 14px"}}><span style={{fontSize:11,fontWeight:600,color:TC[m.type]||"var(--text)",background:`${TC[m.type]||"var(--brand)"}22`,padding:"2px 8px",borderRadius:99}}>{TL[m.type]||m.type}</span></td>
-                          <td style={{padding:"10px 14px",fontSize:12,fontWeight:600,color:isPositive?"var(--success)":"var(--danger)"}}>{isPositive?"+":"-"}{m.quantity}</td>
-                          <td style={{padding:"10px 14px",fontSize:12,color:"var(--text-muted)"}}>{m.stockBefore}</td>
-                          <td style={{padding:"10px 14px",fontSize:12,fontWeight:600,color:"var(--text)"}}>{m.stockAfter}</td>
-                          <td style={{padding:"10px 14px",fontSize:12,color:"var(--text-muted)"}}>{m.reason||"—"}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-          {showMovForm && (
-            <div className="vp-modal-bg" onClick={e=>{if(e.target===e.currentTarget)setShowMovForm(false)}}>
-              <div className="vp-modal">
-                <div className="vp-modal-head"><h2>Lançar Movimento</h2><button className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>setShowMovForm(false)}>✕</button></div>
-                <div className="vp-modal-body">
-                  <div className="vp-field"><label>Tipo</label>
-                    <select className="vp-input" value={movForm.type} onChange={e=>setMovForm({...movForm,type:e.target.value})}>
-                      <option value="in">Entrada de mercadoria</option>
-                      <option value="adjust">Ajuste de estoque</option>
-                      <option value="return">Devolução</option>
-                      <option value="out">Saída manual</option>
-                    </select>
-                  </div>
-                  <div className="vp-field"><label>Produto</label>
-                    <select className="vp-input" value={movForm.productId} onChange={e=>setMovForm({...movForm,productId:e.target.value})}>
-                      <option value="">Selecione o produto</option>
-                      {products.map((p:any)=><option key={p.id} value={p.id}>{p.name} (estoque: {p.stock})</option>)}
-                    </select>
-                  </div>
-                  <div className="vp-field"><label>Quantidade</label>
-                    <input className="vp-input" type="number" min="1" value={movForm.quantity} onChange={e=>setMovForm({...movForm,quantity:e.target.value})} placeholder="Ex: 10"/>
-                  </div>
-                  <div className="vp-field"><label>Motivo (opcional)</label>
-                    <input className="vp-input" value={movForm.reason} onChange={e=>setMovForm({...movForm,reason:e.target.value})} placeholder="Ex: Compra fornecedor, Recontagem..."/>
-                  </div>
-                  <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:4}}>
-                    <button className="vp-btn vp-btn-secondary" onClick={()=>setShowMovForm(false)}>Cancelar</button>
-                    <button className="vp-btn vp-btn-primary" onClick={saveMovement}>Confirmar</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* aba produtos */}
-      {mainTab==="produtos" && <div>
             <div style={{display:"flex",gap:8,marginBottom:16,alignItems:"center",justifyContent:"space-between",flexWrap:"wrap"}}><div style={{display:"flex",gap:8}}><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvCSV(filtered,threshold)}>Exportar Excel</button><button className="vp-btn vp-btn-secondary vp-btn-sm" onClick={()=>exportInvPDF(filtered,threshold)}>Exportar PDF</button></div><button className="vp-btn vp-btn-primary" onClick={()=>{setEditing(null);setShowForm(true)}}>+ Novo produto</button></div>
 
 
@@ -492,8 +367,6 @@ export default function StockPage() {
       ))}
 
 
-
-      </div>}
 
       {showForm && (
 
