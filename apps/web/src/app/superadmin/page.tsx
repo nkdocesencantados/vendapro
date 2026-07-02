@@ -25,7 +25,7 @@ export default function SuperAdminPage() {
   const [saving, setSaving]       = useState(false)
   const [toast, setToast]         = useState("")
   const [showNew, setShowNew]      = useState(false)
-  const [newForm, setNewForm]      = useState({name:"",email:"",password:"",plan:"basic"})
+  const [newForm, setNewForm]      = useState({name:"",email:"",password:"",plan:"pro"})
   const [newSaving, setNewSaving]  = useState(false)
 
   useEffect(() => { load() }, [])
@@ -43,7 +43,7 @@ export default function SuperAdminPage() {
     try {
       await api.post("/companies", newForm)
       setShowNew(false)
-      setNewForm({name:"",email:"",password:"",plan:"basic"})
+      setNewForm({name:"",email:"",password:"",plan:"pro"})
       showToast("Empresa criada com sucesso!")
       const r = await api.get("/companies"); setCompanies(r.data)
     } catch(e:any) { alert(e?.response?.data?.message||"Erro ao criar empresa") }
@@ -100,7 +100,7 @@ export default function SuperAdminPage() {
     blocked: companies.filter(c=>c.status==="inactive").length,
   }
 
-  const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:100,starter:100,pro:150,business:200}[(c.plan||'').toLowerCase()]||0),0)
+  const mrr = companies.filter(c=>c.status==="active").reduce((a,c)=>a+({basic:150,starter:150,pro:150,business:200}[(c.plan||'').toLowerCase()]||0),0)
 
   return (
     <div style={{minHeight:"100vh",background:"#04130F",color:"#E5F2EC",fontFamily:'"Geist",ui-sans-serif,system-ui,sans-serif'}}>
@@ -389,7 +389,6 @@ export default function SuperAdminPage() {
                   <input value={newForm.password} onChange={e=>setNewForm({...newForm,password:e.target.value})} placeholder="Senha de acesso" type="password" style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
                 <div><label style={{fontSize:12,color:"#7A8480",display:"block",marginBottom:4}}>Plano</label>
                   <select value={newForm.plan} onChange={e=>setNewForm({...newForm,plan:e.target.value})} style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}>
-                    <option value="basic">Basic — R$ 100/mês</option>
                     <option value="pro">Pro — R$ 150/mês</option>
                     <option value="business">Business — R$ 200/mês</option>
                     <option value="trial">Trial — 7 dias grátis</option>

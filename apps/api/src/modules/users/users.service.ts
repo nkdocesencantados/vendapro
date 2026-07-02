@@ -13,8 +13,8 @@ export class UsersService {
   ) {}
 
   private planLimits: Record<string, number> = {
-    basic: 0, trial: 0, starter: 0, pro: 1, business: 10,
-    BASIC: 0, TRIAL: 0, STARTER: 0, PRO: 1, BUSINESS: 10,
+    basic: 0, trial: 0, starter: 0, pro: 0, business: 10,
+    BASIC: 0, TRIAL: 0, STARTER: 0, PRO: 0, BUSINESS: 10,
   }
 
   async findAll(storeId?: string) {

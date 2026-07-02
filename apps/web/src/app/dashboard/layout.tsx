@@ -19,13 +19,13 @@ const NAV_ALL = [
 ]
 
 const PLAN_MENU: Record<string,string[]> = {
-  trial:    ["dashboard","vendas","estoque","recibos","config"],
-  basic:    ["dashboard","vendas","recibos","config"],
-  starter:  ["dashboard","vendas","recibos","config"],
-  pro:      ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
+  trial:    ["dashboard","vendas","estoque","recibos","relatórios","config"],
+  basic:    ["dashboard","vendas","estoque","recibos","relatórios","config"],
+  starter:  ["dashboard","vendas","estoque","recibos","relatórios","config"],
+  pro:      ["dashboard","vendas","estoque","recibos","relatórios","config"],
   business: ["dashboard","vendas","estoque","recibos","caixa","relatórios","equipe","config"],
 }
-const PLAN_LABEL: Record<string,string> = { trial:"Trial", basic:"Basic", pro:"Pro", business:"Business" }
+const PLAN_LABEL: Record<string,string> = { trial:"Trial", basic:"Pro", starter:"Pro", pro:"Pro", business:"Business" }
 
 const ICONS: Record<string, string> = {
   dashboard: "M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z",
