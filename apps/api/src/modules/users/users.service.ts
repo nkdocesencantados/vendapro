@@ -18,7 +18,7 @@ export class UsersService {
   }
 
   async findAll(storeId?: string) {
-    const where = storeId ? { storeId } : {};
+    const where: any = storeId ? { storeId, status: UserStatus.ACTIVE } : { status: UserStatus.ACTIVE };
     return this.repo.find({ where, order: { createdAt: 'DESC' } });
   }
 
@@ -60,7 +60,7 @@ export class UsersService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.repo.update(id, { status: UserStatus.INACTIVE });
-    return { message: 'Usuario desativado com sucesso' };
+    await this.repo.delete(id);
+    return { message: 'Usuario removido com sucesso' };
   }
 }
