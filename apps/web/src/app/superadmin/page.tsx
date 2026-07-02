@@ -24,6 +24,9 @@ export default function SuperAdminPage() {
   const [newPwd, setNewPwd]       = useState("")
   const [saving, setSaving]       = useState(false)
   const [toast, setToast]         = useState("")
+  const [showNew, setShowNew]      = useState(false)
+  const [newForm, setNewForm]      = useState({name:"",email:"",password:"",plan:"basic"})
+  const [newSaving, setNewSaving]  = useState(false)
 
   useEffect(() => { load() }, [])
 
