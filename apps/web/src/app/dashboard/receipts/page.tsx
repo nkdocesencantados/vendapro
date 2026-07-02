@@ -31,7 +31,7 @@ export default function ReceiptsPage() {
 
   useEffect(() => {
     api.get("/stores").then(r => { const s=Array.isArray(r.data)?r.data[0]:r.data; if(s) setStore(s) }).catch(()=>{})
-    api.get("/sales?status=completed&limit=200").then(r => { setSales(Array.isArray(r.data)?r.data:r.data?.data||[]) }).catch(()=>{}).finally(()=>setLoading(false))
+    api.get("/sales?limit=500").then(r => { setSales(Array.isArray(r.data)?r.data:r.data?.data||[]) }).catch(()=>{}).finally(()=>setLoading(false))
   }, [])
 
   const storeName  = store?.name || "Minha Loja"
@@ -130,11 +130,13 @@ export default function ReceiptsPage() {
           <div key={s.id} className={`rec-item${selected?.id===s.id?" active":""}`} onClick={()=>{setSelected(s);setShowPreview(true)}}>
             <div>
               <div className="rec-name">{s.customerName||"Cliente avulso"}</div>
-              <div className="rec-meta">#{(s.id||"").slice(-8).toUpperCase()} · {new Date(s.createdAt).toLocaleDateString("pt-BR")}</div>
+              <div className="rec-meta">#{(s.id||"").slice(-8).toUpperCase()} · {new Date(s.saleDate||s.createdAt).toLocaleDateString("pt-BR")}</div>
+              {s.sellerName&&<div style={{fontSize:11,color:"var(--brand)",marginTop:2}}>👤 {s.sellerName}</div>}
             </div>
             <div style={{textAlign:"right"}}>
-              <div className="rec-val">{BRL(s.total)}</div>
+              <div className="rec-val" style={{color:s.status==="cancelled"?"var(--danger)":"inherit"}}>{BRL(s.total)}</div>
               <div className="rec-pay">{PAY[s.paymentMethod]||s.paymentMethod}</div>
+              {s.status==="cancelled"&&<div style={{fontSize:10,color:"var(--danger)",fontWeight:600}}>CANCELADO</div>}
             </div>
           </div>
         ))}
