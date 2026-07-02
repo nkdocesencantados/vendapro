@@ -27,9 +27,11 @@ export class CompaniesService {
       trialEndsAt: data.plan === "trial" ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null,
     }))
 
+    const storePlan = data.plan || "basic"
+    const storeStatus = storePlan === "trial" ? "trial" : "active"
     const storeData = await this.storeRepo.query(
-      `INSERT INTO stores (id, name, "companyId", "createdAt", "updatedAt") VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) RETURNING id`,
-      [data.name, company.id]
+      `INSERT INTO stores (id, name, "companyId", plan, status, "createdAt", "updatedAt") VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW(), NOW()) RETURNING id`,
+      [data.name, company.id, storePlan, storeStatus]
     )
     const storeId = storeData[0].id
 
