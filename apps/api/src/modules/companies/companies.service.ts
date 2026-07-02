@@ -4,6 +4,7 @@ import { Repository } from "typeorm"
 import { Company } from "./company.entity"
 import { User } from "../users/user.entity"
 import { Store } from "../stores/store.entity"
+import * as bcrypt from "bcryptjs"
 
 @Injectable()
 export class CompaniesService {
@@ -32,10 +33,12 @@ export class CompaniesService {
     )
     const storeId = storeData[0].id
 
+    const rawPassword = data.password || "VendaPro@2026!"
+    const hashedPassword = await bcrypt.hash(rawPassword, 12)
     const user = this.userRepo.create({
       name: data.name,
       email: data.email,
-      password: data.password || "VendaPro@2026!",
+      password: hashedPassword,
       role: "store_owner",
       storeId: storeId,
     })
