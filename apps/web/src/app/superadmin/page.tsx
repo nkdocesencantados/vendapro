@@ -208,10 +208,13 @@ export default function SuperAdminPage() {
           {tab === "empresas" && (
             <div className="sa-card">
               {/* FILTROS */}
-              <div style={{padding:"14px 18px",borderBottom:"1px solid #1F3A33",display:"flex",gap:6}}>
+              <div style={{padding:"14px 18px",borderBottom:"1px solid #1F3A33",display:"flex",gap:6,alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{display:"flex",gap:6}}>
                 {[["all","Todas"],["active","Ativas"],["trial","Trial"],["inactive","Bloqueadas"]].map(([v,l])=>(
                   <button key={v} className={`sa-btn sa-btn-sm ${filter===v?"sa-btn-primary":"sa-btn-ghost"}`} onClick={()=>setFilter(v)}>{l}</button>
                 ))}
+                </div>
+                <button onClick={()=>setShowNew(true)} style={{padding:"8px 16px",background:"#1D9E75",color:"white",border:"none",borderRadius:8,fontWeight:600,fontSize:13,cursor:"pointer",whiteSpace:"nowrap"}}>+ Nova empresa</button>
               </div>
 
               {loading ? (
