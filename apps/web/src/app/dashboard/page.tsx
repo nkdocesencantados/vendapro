@@ -259,7 +259,7 @@ export default function DashboardPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:24,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:"clamp(22px,3vw,30px)",fontWeight:700,letterSpacing:"-.03em",color:"var(--text)"}}>
-            Olá, {firstName} 👋
+            Olá, {storeName} 👋
           </h1>
           <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:4}}>
             Visão geral da {storeName} — {monthLabel} de {year}
