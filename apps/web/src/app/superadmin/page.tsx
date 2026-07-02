@@ -34,6 +34,19 @@ export default function SuperAdminPage() {
 
   function showToast(msg:string) { setToast(msg); setTimeout(()=>setToast(""),3000) }
 
+  async function createCompany() {
+    if(!newForm.name||!newForm.email||!newForm.password) return alert("Preencha todos os campos")
+    setNewSaving(true)
+    try {
+      await api.post("/companies", newForm)
+      setShowNew(false)
+      setNewForm({name:"",email:"",password:"",plan:"basic"})
+      showToast("Empresa criada com sucesso!")
+      const r = await api.get("/companies"); setCompanies(r.data)
+    } catch(e:any) { alert(e?.response?.data?.message||"Erro ao criar empresa") }
+    finally { setNewSaving(false) }
+  }
+
   async function toggleStatus(c:any) {
     const next = c.status==="active" ? "inactive" : "active"
     try {
@@ -353,6 +366,38 @@ export default function SuperAdminPage() {
           </div>
         </div>
       )}
+    {showNew && (
+        <div className="sa-modal-bg" onClick={()=>setShowNew(false)}>
+          <div className="sa-modal" onClick={e=>e.stopPropagation()}>
+            <div className="sa-modal-head">
+              <h2>Nova Empresa</h2>
+              <button onClick={()=>setShowNew(false)} style={{background:"none",border:"none",color:"#7A8480",fontSize:20,cursor:"pointer"}}>✕</button>
+            </div>
+            <div className="sa-modal-body">
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                <div><label style={{fontSize:12,color:"#7A8480",display:"block",marginBottom:4}}>Nome da empresa</label>
+                  <input value={newForm.name} onChange={e=>setNewForm({...newForm,name:e.target.value})} placeholder="Ex: Mercadinho da Maria" style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
+                <div><label style={{fontSize:12,color:"#7A8480",display:"block",marginBottom:4}}>E-mail do proprietário</label>
+                  <input value={newForm.email} onChange={e=>setNewForm({...newForm,email:e.target.value})} placeholder="email@exemplo.com" type="email" style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
+                <div><label style={{fontSize:12,color:"#7A8480",display:"block",marginBottom:4}}>Senha inicial</label>
+                  <input value={newForm.password} onChange={e=>setNewForm({...newForm,password:e.target.value})} placeholder="Senha de acesso" type="password" style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
+                <div><label style={{fontSize:12,color:"#7A8480",display:"block",marginBottom:4}}>Plano</label>
+                  <select value={newForm.plan} onChange={e=>setNewForm({...newForm,plan:e.target.value})} style={{width:"100%",padding:"10px 14px",background:"#0A1412",border:"1px solid #1F3A33",borderRadius:8,color:"#F0F7F4",fontSize:14,outline:"none",boxSizing:"border-box"}}>
+                    <option value="basic">Basic — R$ 100/mês</option>
+                    <option value="pro">Pro — R$ 150/mês</option>
+                    <option value="business">Business — R$ 200/mês</option>
+                    <option value="trial">Trial — 7 dias grátis</option>
+                  </select></div>
+              </div>
+            </div>
+            <div className="sa-modal-foot">
+              <button onClick={()=>setShowNew(false)} style={{padding:"9px 18px",background:"transparent",border:"1px solid #1F3A33",borderRadius:8,color:"#7A8480",fontSize:13,cursor:"pointer"}}>Cancelar</button>
+              <button onClick={createCompany} disabled={newSaving} style={{padding:"9px 18px",background:"#1D9E75",border:"none",borderRadius:8,color:"white",fontWeight:600,fontSize:13,cursor:"pointer"}}>{newSaving?"Criando...":"Criar empresa"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
