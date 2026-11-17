@@ -56,15 +56,15 @@ for (let i = 0; i < G; i++) {
       const dist = Math.hypot(vx, vy) || 1;
       const rel = dist / R;
       // contained separation: outer shards drift a little further, nothing flies off
-      const push = 6 + rel * 24 + random(`p${k}`) * 8;
+      const push = 10 + rel * 42 + random(`p${k}`) * 12;
       FRAGS.push({
         pts, minX, minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY, cx, cy,
         dx: (vx / dist) * push,
         dy: (vy / dist) * push,
-        dz: 10 + random(`z${k}`) * 90 * (0.4 + rel),
-        rx: (random(`rx${k}`) - 0.5) * 16,
-        ry: (random(`ry${k}`) - 0.5) * 16,
-        rz: (random(`rz${k}`) - 0.5) * 5,
+        dz: 30 + random(`z${k}`) * 150 * (0.4 + rel),
+        rx: (random(`rx${k}`) - 0.5) * 38,
+        ry: (random(`ry${k}`) - 0.5) * 38,
+        rz: (random(`rz${k}`) - 0.5) * 12,
         delayOut: rel * 22,
         delayIn: rel * 28, // trunk first, canopy edge last
         phase: random(`ph${k}`),
@@ -169,6 +169,36 @@ const PARTICLES = Array.from({ length: 28 }, (_, k) => ({
   x: random(`px${k}`) * W, y: random(`py${k}`) * W, s: 0.8 + random(`ps${k}`) * 1.6, p: random(`pp${k}`),
 }));
 
+// ---- Piso em grade em perspectiva: anda exatamente 4 células por loop -> emenda perfeita ----
+const FLOOR_CELL = 80;
+const Floor: React.FC<{ t: number }> = ({ t }) => (
+  <div style={{ position: 'absolute', left: -W, right: -W, top: W * 0.62, height: W * 1.2, perspective: 700, perspectiveOrigin: '50% 0%', overflow: 'hidden',
+    maskImage: 'linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%)' }}>
+    <div style={{ position: 'absolute', inset: 0, transform: 'rotateX(72deg)', transformOrigin: '50% 0%',
+      backgroundImage: `linear-gradient(rgba(126,232,168,0.28) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(126,232,168,0.28) 1.5px, transparent 1.5px)`,
+      backgroundSize: `${FLOOR_CELL}px ${FLOOR_CELL}px`, backgroundPosition: `0px ${(t * 4 * FLOOR_CELL).toFixed(2)}px` }} />
+  </div>
+);
+
+// ---- Anéis orbitais em 3D com nós de dados (voltas inteiras por loop) ----
+const ORBITS = [
+  { r: 360, tiltX: 72, tiltY: -14, turns: 1, nodes: 3, w: 1.6 },
+  { r: 420, tiltX: 64, tiltY: 22, turns: -1, nodes: 4, w: 1.1 },
+  { r: 305, tiltX: 80, tiltY: 4, turns: 2, nodes: 2, w: 1 },
+];
+const Orbit: React.FC<{ o: (typeof ORBITS)[number]; t: number; z: number }> = ({ o, t, z }) => (
+  <div style={{ position: 'absolute', left: C - o.r, top: C - o.r, width: 2 * o.r, height: 2 * o.r, transformStyle: 'preserve-3d',
+    transform: `translateZ(${z}px) rotateY(${o.tiltY}deg) rotateX(${o.tiltX}deg) rotateZ(${(o.turns * 360 * t).toFixed(3)}deg)` }}>
+    <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `${o.w}px solid rgba(126,232,168,0.42)`, boxShadow: '0 0 18px rgba(45,190,96,0.35), inset 0 0 18px rgba(45,190,96,0.2)' }} />
+    <div style={{ position: 'absolute', inset: 14, borderRadius: '50%', border: '1px dashed rgba(126,232,168,0.18)' }} />
+    {Array.from({ length: o.nodes }, (_, k) => {
+      const a = (2 * Math.PI * k) / o.nodes;
+      return <div key={k} style={{ position: 'absolute', left: o.r + o.r * Math.cos(a) - 7, top: o.r + o.r * Math.sin(a) - 7, width: 14, height: 14, borderRadius: '50%',
+        background: NEON, boxShadow: `0 0 14px ${NEON}, 0 0 34px ${BRAND}` }} />;
+    })}
+  </div>
+);
+
 export const HeroLoop: React.FC = () => {
   const f = useCurrentFrame();
   const t = f / LOOP_FRAMES;
@@ -176,8 +206,8 @@ export const HeroLoop: React.FC = () => {
 
   const open = interpolate(f, [SPLIT, SPLIT + 70, RETURN + 10, WELD], [0, 1, 1, 0], { ...clamp, easing: smooth });
   // slow parallax of the whole tree; both terms are 0 at f=0 and f=LOOP_FRAMES
-  const camY = 9 * wave + 6 * open;
-  const camX = 3 * Math.sin(4 * Math.PI * t) + 4 * open;
+  const camY = 26 * wave + 10 * open;
+  const camX = 10 * Math.sin(4 * Math.PI * t) + 8 * open;
   const showFrags = f > SPLIT && f < WELD + 28;
 
   const crack =
@@ -207,6 +237,16 @@ export const HeroLoop: React.FC = () => {
         ))}
       </svg>
 
+      <Floor t={t} />
+
+      {/* pulsos de energia saindo do centro (3 defasados, periódicos) */}
+      {[0, 1 / 3, 2 / 3].map((ph, k) => {
+        const p = (t * 2 + ph) % 1;
+        const r = R * 0.9 + p * 430;
+        return <div key={k} style={{ position: 'absolute', left: C - r, top: C - r, width: 2 * r, height: 2 * r, borderRadius: '50%',
+          border: `2px solid rgba(126,232,168,${(0.45 * (1 - p) * Math.min(1, p * 6)).toFixed(3)})`, boxShadow: `0 0 24px rgba(45,190,96,${(0.25 * (1 - p)).toFixed(3)})` }} />;
+      })}
+
       <div style={{ position: 'absolute', left: C - 460, top: C - 460, width: 920, height: 920, borderRadius: '50%',
         background: `radial-gradient(circle, rgba(45,190,96,${glow}) 0%, rgba(45,190,96,${glow * 0.3}) 38%, rgba(45,190,96,0) 68%)` }} />
 
@@ -217,12 +257,20 @@ export const HeroLoop: React.FC = () => {
             {GEARS.map((g, k) => <Gear key={k} g={g} angle={gearAngle} />)}
           </svg>
 
+          {/* metade de trás dos anéis fica atrás do emblema */}
+          {ORBITS.map((o, k) => <Orbit key={k} o={o} t={t} z={-20} />)}
+
           <div style={{ position: 'absolute', left: C - R, top: C - R, width: S, height: S, transformStyle: 'preserve-3d' }}>
             {showFrags ? (
               FRAGS.map((fr, k) => <Fragment key={k} fr={fr} f={f} />)
             ) : (
-              <Img src={EMBLEM} style={{ width: S, height: S, display: 'block', filter: 'brightness(1.06)' }} />
+              <Img src={EMBLEM} style={{ position: 'relative', width: S, height: S, display: 'block', borderRadius: '50%', filter: 'brightness(1.08)' }} />
             )}
+            {/* feixe de varredura holográfico: 2 passadas por loop */}
+            <div style={{ position: 'absolute', inset: 0, clipPath: 'circle(48% at 50% 50%)', transform: 'translateZ(3px)', pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', left: 0, right: 0, height: 90, top: -90 + ((t * 2) % 1) * (S + 180),
+                background: 'linear-gradient(180deg, rgba(126,232,168,0) 0%, rgba(126,232,168,0.10) 55%, rgba(200,255,220,0.55) 92%, rgba(126,232,168,0) 100%)', mixBlendMode: 'screen' }} />
+            </div>
             {crack > 0.001 && (
               <svg width={S} height={S} style={{ position: 'absolute', inset: 0, opacity: Math.min(1, crack), filter: 'drop-shadow(0 0 3px rgba(126,232,168,0.8))' }}>
                 <defs><clipPath id="disc"><circle cx={R} cy={R} r={R * 0.95} /></clipPath></defs>

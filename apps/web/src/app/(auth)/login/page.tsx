@@ -31,7 +31,7 @@ function BrandMedia() {
       <img className="lg-emblem" src="/brand/haux-emblem.png" alt="" />
       {!reduce && !videoFailed ? (
         <video className="lg-video" autoPlay muted loop playsInline poster={posterFailed ? undefined : POSTER} onError={() => setVideoFailed(true)}>
-          <source src="/brand/login-hero.webm" type="video/webm" />
+          {/* só MP4 (H.264): toca em todos os navegadores; o WebM antigo falhava ao decodificar e derrubava para a foto */}
           <source src="/brand/login-hero.mp4" type="video/mp4" onError={() => setVideoFailed(true)} />
         </video>
       ) : !posterFailed ? (
