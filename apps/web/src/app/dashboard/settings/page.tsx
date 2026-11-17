@@ -4,6 +4,20 @@ import { api } from "@/lib/api"
 import { PIX_TYPES, pixKeyError } from "@/lib/pix"
 import { useAuthStore } from "@/contexts/auth.store"
 
+// abas que o lojista pode esconder (ids iguais aos do menu em dashboard/layout.tsx)
+const MODULES = [
+  { id:"vendas",     label:"Vendas",      desc:"Registrar vendas" },
+  { id:"clientes",   label:"Clientes",    desc:"Cadastro de clientes" },
+  { id:"fiado",      label:"Fiado",       desc:"Vendas a prazo e cobranças" },
+  { id:"pix",        label:"Cobrar PIX",  desc:"QR Code e PIX copia e cola" },
+  { id:"estoque",    label:"Estoque",     desc:"Produtos e quantidades" },
+  { id:"caixa",      label:"Caixa",       desc:"Abertura e fechamento", business:true },
+  { id:"recibos",    label:"Recibos",     desc:"Comprovantes de venda" },
+  { id:"relatórios", label:"Relatórios",  desc:"Gráficos e exportação" },
+  { id:"comissoes",  label:"Comissões",   desc:"Comissão de vendedores", business:true },
+  { id:"equipe",     label:"Equipe",      desc:"Usuários da loja", business:true },
+]
+
 const PALETTES = [
   { id:"emerald",  name:"Verde Haux (padrão)", color:"#2DBE60", desc:"Identidade padrão" },
   { id:"indigo",   name:"Índigo",    color:"#6366F1", desc:"Sério, tecnológico" },
@@ -49,6 +63,20 @@ export default function SettingsPage() {
   const [storeId,  setStoreId]  = useState("")
   const [logo,     setLogo]     = useState("")
   const [logoMsg,  setLogoMsg]  = useState("")
+  const [hidden,   setHidden]   = useState<string[]>([])
+  const [plan,     setPlan]     = useState("")
+  const [modMsg,   setModMsg]   = useState("")
+
+  async function toggleModule(id: string){
+    const prev = hidden
+    const next = hidden.includes(id) ? hidden.filter(m=>m!==id) : [...hidden, id]
+    setHidden(next); setModMsg("Salvando…")
+    try{
+      await api.patch(`/stores/${storeId}`,{ hiddenModules: next })
+      setModMsg("Menu atualizado.")
+      window.dispatchEvent(new Event("storeConfigUpdated"))
+    }catch(e:any){ setHidden(prev); setModMsg(e?.response?.data?.message || "Não foi possível salvar.") }
+  }
 
   // reduz para 256px no navegador: a logo vira um data URL pequeno salvo junto da loja
   async function onLogoFile(file?: File){
@@ -79,7 +107,7 @@ export default function SettingsPage() {
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
-        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); setLogo(s.logoUrl||"")
+        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); setLogo(s.logoUrl||""); setHidden(s.settings?.hiddenModules||[]); setPlan(s.plan||"")
         setPixKeyType(s.pixKeyType||"cpf"); setPixKey(s.pixKey||""); setPixName(s.pixMerchantName||""); setPixCity(s.pixCity||"")
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
@@ -239,6 +267,28 @@ export default function SettingsPage() {
               {logo && <button type="button" className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>saveLogo("")}>Remover</button>}
               {logoMsg && <span role="status" style={{fontSize:12,color:"var(--text-muted)"}}>{logoMsg}</span>}
             </div>
+          </div>
+
+          {/* ABAS DO MENU */}
+          <div className="st-section">
+            <div className="st-section-title">Abas do menu</div>
+            <div className="st-section-sub">Desligue o que sua loja não usa. Nada é apagado: ligue de novo quando quiser e a aba volta com todos os dados.</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:8,marginTop:12}}>
+              {MODULES.map(m=>{
+                const locked = m.business && plan!=="business"
+                const on = !hidden.includes(m.id) && !locked
+                return (
+                  <label key={m.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",border:"1px solid var(--border)",borderRadius:"var(--r-md)",background:"var(--surface-2)",cursor:locked?"not-allowed":"pointer",opacity:locked?.55:1}}>
+                    <input type="checkbox" role="switch" checked={on} disabled={locked||!storeId} onChange={()=>toggleModule(m.id)} style={{accentColor:"var(--brand)",width:18,height:18}}/>
+                    <span style={{display:"flex",flexDirection:"column",minWidth:0}}>
+                      <span style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{m.label}</span>
+                      <span style={{fontSize:11,color:"var(--text-subtle)"}}>{locked ? "Disponível no Plano Business" : m.desc}</span>
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+            {modMsg && <div role="status" style={{fontSize:12,color:"var(--text-muted)",marginTop:8}}>{modMsg}</div>}
           </div>
 
           {/* PALETAS */}
