@@ -14,11 +14,15 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { CompaniesModule } from './modules/companies/companies.module'
 import { ScheduleModule } from '@nestjs/schedule'
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { ReceivablesModule } from './modules/receivables/receivables.module';
+import { GoalsModule } from './modules/goals/goals.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env.local', '.env'] }),
-    ThrottlerModule.forRoot([{ name: 'short', ttl: 60000, limit: 10 }, { name: 'login', ttl: 900000, limit: 5 }]),
+    // one global limiter; throttler v6 applies every named limiter to every route, so the strict login limit lives on the login route only
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60000, limit: 120 }]),
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
@@ -38,6 +42,9 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     CompaniesModule,
     ScheduleModule.forRoot(),
     SchedulerModule,
+    CustomersModule,
+    ReceivablesModule,
+    GoalsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

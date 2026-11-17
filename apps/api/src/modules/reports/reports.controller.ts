@@ -22,6 +22,18 @@ export class ReportsController {
     return this.service.advanced(req.user.storeId, from || defaultFrom, to || defaultTo, sellerId);
   }
 
+  @Get("commissions")
+  commissions(@Request() req, @Query("from") from: string, @Query("to") to: string) {
+    const now = new Date();
+    const sellerId = req.user.role === "seller" ? req.user.id : undefined;
+    return this.service.commissions(
+      req.user.storeId,
+      from || new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("sv-SE"),
+      to || now.toLocaleDateString("sv-SE"),
+      sellerId,
+    );
+  }
+
   @Get('search')
   search(@Request() req, @Query('q') q: string) {
     return this.service.search(req.user.storeId, q)

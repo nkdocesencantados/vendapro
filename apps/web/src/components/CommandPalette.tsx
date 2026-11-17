@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
+import { ShoppingCart, Users, HandCoins, QrCode, Package, BarChart3, Percent, Settings, Wallet, Receipt, type LucideIcon } from "lucide-react"
 
 function BRL(v: number) { return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -91,11 +92,17 @@ export default function CommandPalette() {
   const hasProducts = results.products.length > 0
   const hasAny      = hasSales || hasProducts
 
-  const shortcuts = [
-    { label: "Nova venda",    href: "/dashboard/sales",     icon: "🛍️" },
-    { label: "Ver estoque",   href: "/dashboard/inventory", icon: "📦" },
-    { label: "Relatórios",    href: "/dashboard/reports",   icon: "📊" },
-    { label: "Configurações", href: "/dashboard/settings",  icon: "⚙️" },
+  const shortcuts: { label: string; href: string; icon: LucideIcon }[] = [
+    { label: "Nova venda",      href: "/dashboard/sales",       icon: ShoppingCart },
+    { label: "Clientes",        href: "/dashboard/customers",   icon: Users },
+    { label: "Fiado a receber", href: "/dashboard/receivables", icon: HandCoins },
+    { label: "Cobrar com PIX",  href: "/dashboard/pix",         icon: QrCode },
+    { label: "Ver estoque",     href: "/dashboard/inventory",   icon: Package },
+    { label: "Caixa",           href: "/dashboard/cash",        icon: Wallet },
+    { label: "Recibos",         href: "/dashboard/receipts",    icon: Receipt },
+    { label: "Relatórios",      href: "/dashboard/reports",     icon: BarChart3 },
+    { label: "Comissões",       href: "/dashboard/commissions", icon: Percent },
+    { label: "Configurações",   href: "/dashboard/settings",    icon: Settings },
   ]
 
   return (
@@ -144,16 +151,17 @@ export default function CommandPalette() {
             <div style={{ padding:"16px" }}>
               <div style={{ fontSize:11, color:"var(--text-subtle)", textTransform:"uppercase", letterSpacing:".08em", marginBottom:10 }}>Atalhos rápidos</div>
               {shortcuts.map(item => (
-                <div
+                <button
+                  type="button"
                   key={item.href}
                   onClick={() => { router.push(item.href); setOpen(false) }}
-                  style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px", borderRadius:8, cursor:"pointer" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "var(--surface-2)" }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = "transparent" }}
+                  style={{ display:"flex", alignItems:"center", gap:10, width:"100%", padding:"9px 12px", borderRadius:8, cursor:"pointer", background:"transparent", border:0, font:"inherit", textAlign:"left" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--surface-2)" }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
                 >
-                  <span style={{ fontSize:16 }}>{item.icon}</span>
+                  <item.icon size={16} strokeWidth={1.8} color="var(--brand-neon)" aria-hidden />
                   <span style={{ fontSize:13, color:"var(--text)" }}>{item.label}</span>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -170,14 +178,14 @@ export default function CommandPalette() {
                     onMouseEnter={() => setSel(i)}
                     style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 16px", cursor:"pointer", background: isSel ? "var(--surface-2)" : "transparent" }}
                   >
-                    <div style={{ width:32, height:32, borderRadius:8, background:"var(--brand)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"white", flexShrink:0 }}>
+                    <div style={{ width:32, height:32, borderRadius:8, background:"var(--surface-3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"var(--brand-neon)", flexShrink:0 }}>
                       {(s.customerName || "AV").slice(0,2).toUpperCase()}
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, fontWeight:600, color:"var(--text)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{s.customerName || "Cliente avulso"}</div>
                       <div style={{ fontSize:11, color:"var(--text-subtle)" }}>{s.createdAt ? new Date(s.createdAt).toLocaleDateString("pt-BR") : ""}</div>
                     </div>
-                    <div style={{ fontFamily:"var(--font-mono)", fontSize:13, fontWeight:700, color:"var(--brand)" }}>{BRL(s.total || 0)}</div>
+                    <div style={{ fontFamily:"var(--font-mono)", fontSize:13, fontWeight:600, color:"var(--brand-neon)" }}>{BRL(s.total || 0)}</div>
                   </div>
                 )
               })}

@@ -6,3 +6,7 @@ backups/
 backup.js
 apps/web/.next/
 apps/api/dist/
+
+# Remotion (login animation) build output
+brand-video/out/
+apps/web/tsconfig.tsbuildinfo

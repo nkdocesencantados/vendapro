@@ -1,0 +1,17 @@
+{
+  "name": "vendapro-brand-video",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render:mp4": "remotion render src/index.ts LoginHero ../apps/web/public/brand/login-hero.mp4 --codec=h264 --crf=24 --pixel-format=yuv420p --muted",
+    "render:webm": "remotion render src/index.ts LoginHero ../apps/web/public/brand/login-hero.webm --codec=vp9 --crf=36 --muted",
+    "render:poster": "remotion still src/index.ts LoginHero ../apps/web/public/brand/login-hero-poster.jpg --frame=0 --image-format=jpeg --jpeg-quality=88",
+    "render": "npm run render:mp4 && npm run render:webm && npm run render:poster"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.544",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.544"
+  }
+}

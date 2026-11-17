@@ -17,8 +17,8 @@ export class StockService {
     return this.movRepo.find({ where, order: { createdAt: 'DESC' }, take: 100 });
   }
 
-  async addMovement(data: any, userId: string) {
-    const product = await this.productRepo.findOne({ where: { id: data.productId } });
+  async addMovement(data: any, userId: string, storeId: string) {
+    const product = await this.productRepo.findOne({ where: { id: data.productId, storeId } });
     if (!product) throw new NotFoundException('Produto nao encontrado');
     const stockBefore = product.stock;
     let stockAfter = stockBefore;
@@ -31,7 +31,7 @@ export class StockService {
     }
     await this.productRepo.update(product.id, { stock: stockAfter });
     const movement = this.movRepo.create({
-      ...data, stockBefore, stockAfter, userId, storeId: product.storeId,
+      ...data, id: undefined, stockBefore, stockAfter, userId, storeId: product.storeId,
     });
     return this.movRepo.save(movement);
   }

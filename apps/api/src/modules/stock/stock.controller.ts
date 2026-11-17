@@ -17,6 +17,6 @@ export class StockController {
 
   @Post('movement')
   addMovement(@Body() body: any, @Request() req) {
-    return this.service.addMovement(body, req.user.id);
+    return this.service.addMovement(body, req.user.id, req.user.storeId);
   }
 }

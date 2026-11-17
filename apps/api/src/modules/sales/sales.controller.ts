@@ -18,15 +18,15 @@ export class SalesController {
     return this.service.todaySummary(req.user.storeId);
   }
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  findOne(@Param("id") id: string, @Request() req) {
+    return this.service.findOne(id, req.user.storeId);
   }
   @Post()
   create(@Body() body: any, @Request() req) {
     return this.service.create(body, req.user.storeId, req.user.id);
   }
   @Patch(':id/cancel')
-  cancel(@Param('id') id: string) {
-    return this.service.cancel(id);
+  cancel(@Param("id") id: string, @Request() req) {
+    return this.service.cancel(id, req.user.storeId);
   }
 }

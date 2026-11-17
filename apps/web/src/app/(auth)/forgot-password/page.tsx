@@ -1,29 +1,28 @@
-"use client";
+import Link from "next/link"
+import { ArrowLeft, KeyRound, MessageCircle } from "lucide-react"
+import { VendaProLogo } from "@/components/logo"
+
+const WHATS_SUPPORT = "https://wa.me/5511958924764?text=Ol%C3%A1%2C+esqueci+minha+senha+do+VendaPro+e+preciso+de+ajuda"
 
 export default function ForgotPasswordPage() {
   return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#0A0F0D", fontFamily:"DM Sans, sans-serif" }}>
-      <div style={{ width:"100%", maxWidth:"400px", padding:"32px", textAlign:"center" }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"10px", marginBottom:"40px" }}>
-          <div style={{ width:"36px", height:"36px", background:"#1D9E75", borderRadius:"9px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>V</div>
-          <span style={{ fontSize:"16px", fontWeight:500, color:"#fff" }}>VendaPro</span>
+    <main data-theme="dark" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "var(--bg)", color: "var(--text)" }}>
+      <div style={{ width: "100%", maxWidth: 400, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16 }}>
+        <VendaProLogo size={40} />
+        <div className="vp-card glow" style={{ width: "100%", padding: 28, marginTop: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          <span style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--surface-3)", color: "var(--brand-neon)", display: "grid", placeItems: "center" }}>
+            <KeyRound size={22} aria-hidden />
+          </span>
+          <h1 style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em" }}>Esqueceu sua senha?</h1>
+          <p style={{ color: "var(--text-muted)", fontSize: 14, lineHeight: 1.6 }}>
+            Fale com o suporte pelo WhatsApp e redefinimos sua senha o mais rápido possível.
+          </p>
+          <a href={WHATS_SUPPORT} target="_blank" rel="noopener noreferrer" className="vp-btn vp-btn-primary vp-btn-lg" style={{ width: "100%", marginTop: 6 }}>
+            <MessageCircle size={18} aria-hidden /> Falar com o suporte
+          </a>
         </div>
-        <div style={{ fontSize:"48px", marginBottom:"16px" }}>🔐</div>
-        <h2 style={{ fontSize:"22px", fontWeight:600, marginBottom:"10px", color:"#fff" }}>Esqueceu sua senha?</h2>
-        <p style={{ color:"#888", fontSize:"14px", marginBottom:"28px", lineHeight:1.6 }}>
-          Para redefinir sua senha entre em contato com o suporte pelo WhatsApp. Responderemos o mais rápido possível.
-        </p>
-        <a
-          href="https://wa.me/5511958924764?text=Ol%C3%A1%2C+esqueci+minha+senha+do+VendaPro+e+preciso+de+ajuda"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display:"inline-flex", alignItems:"center", gap:"8px", background:"#25D366", color:"white", padding:"13px 28px", borderRadius:"12px", fontWeight:600, fontSize:"14px", textDecoration:"none", marginBottom:"20px" }}>
-          💬 Falar com suporte
-        </a>
-        <div style={{ marginTop:"8px" }}>
-          <a href="/login" style={{ color:"#1D9E75", fontSize:"13px" }}>← Voltar ao login</a>
-        </div>
+        <Link href="/login" className="vp-btn vp-btn-ghost vp-btn-sm"><ArrowLeft size={14} aria-hidden /> Voltar ao login</Link>
       </div>
-    </div>
-  );
+    </main>
+  )
 }

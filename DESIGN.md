@@ -1,6 +1,6 @@
 # DESIGN.md — identidade visual do VendaPro
 
-Direção: profissional, tecnológica, discreta. Nada infantil. Fundo grafite escuro, vidro sutil, uma única cor de destaque que o cliente escolhe.
+Direção: profissional, tecnológica, discreta. Nada infantil. Fundo escuro com leve tom da cor de destaque, cartões discretos, uma única cor de destaque que o cliente escolhe. Primeiro contato (login, telas públicas, loja sem escolha) é sempre o Verde Haux.
 
 ## Cores
 - Fundo `#08090B`, superfície `#101216`, superfície 2 `#14171C`, borda `#1F232B` / forte `#2B313B`.
@@ -32,4 +32,4 @@ Pouca informação, em ordem: 4 indicadores, meta do mês, vendas por dia, "Prec
 - Uma cor de destaque por vez; o resto é neutro.
 - Contraste mínimo AA; foco visível; animações desligam com movimento reduzido.
 - Layout responsivo: grades caem para 2 colunas e depois 1.
-- Logo: só o emblema Haux ao lado de "VendaPro". Não escrever "por HAUX WEB".
+- Logo: emblema Haux + "Venda**Pro**" + "BY HAUX WEB" pequeno (aprovado pelo dono em 16/11/2026, mockup da identidade Haux).

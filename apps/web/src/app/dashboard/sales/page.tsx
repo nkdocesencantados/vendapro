@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import toast, { Toaster } from "react-hot-toast"
 
 
 
-const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito" }
+const PAY: Record<string,string> = { cash:"Dinheiro", pix:"PIX", credit_card:"Crédito", debit_card:"Débito", fiado:"Fiado" }
 
 function BRL(v:number){ return (v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 
@@ -66,7 +67,7 @@ function vpTable(title: string, headers: string[], rows: string[][]) {
 
 function exportSalesCSV(sales: any[]) {
 
-  const PAY2: Record<string,string> = {cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito'};
+  const PAY2: Record<string,string> = {cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito',fiado:'Fiado'};
 
   vpCSV(['Cliente','Vendedor','Pagamento','Status','Total','Data'],
 
@@ -77,14 +78,14 @@ function exportSalesCSV(sales: any[]) {
 }
 
 function exportSalesPDF(sales: any[]) {
-  const PAY2: Record<string,string>={cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito'};
+  const PAY2: Record<string,string>={cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito',fiado:'Fiado'};
   const rows=sales.map((s:any,i:number)=>{const bg=i%2===0?'#fff':'#F8FAF9';return '<tr style="background:'+bg+';"><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+new Date(s.saleDate||s.createdAt).toLocaleDateString('pt-BR')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.customerName||'Avulso')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.sellerName||'-')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( PAY2[s.paymentMethod]||s.paymentMethod)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;font-weight:600;color:#1D9E75;">R$ '+Number(s.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</td></tr>';}).join('');
   const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
   const total=sales.reduce((a:number,s:any)=>a+Number(s.total),0);
-  const header='<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;">'+logo+'</div><div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">N&K Doces Encantados</div></div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:white;">Relatorio de Vendas</div><div style="font-size:12px;color:#8DA39A;">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>';
+  const header='<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;">'+logo+'</div><div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">'+((()=>{try{return JSON.parse(localStorage.getItem("storeConfig")||"{}").name||"Minha Loja"}catch{return "Minha Loja"}})())+'</div></div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:white;">Relatorio de Vendas</div><div style="font-size:12px;color:#8DA39A;">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>';
   const kpis='<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;"><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Total vendas</div><div style="font-size:22px;font-weight:700;color:#1D9E75;">'+sales.length+'</div></div><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Faturamento</div><div style="font-size:22px;font-weight:700;">'+Number(total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</div></div><div style="padding:16px 20px;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Ticket médio</div><div style="font-size:22px;font-weight:700;">'+( sales.length>0?Number(total/sales.length).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'R$ 0,00')+'</div></div></div>';
   const table='<div style="padding:20px 32px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1D9E75;"><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Data</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Cliente</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Vendedor</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Pagamento</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Total</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  const footer='<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;"><div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br</div><div style="font-size:11px;color:#1D9E75;font-weight:700;">N&K Doces Encantados</div></div>';
+  const footer='<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;"><div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br</div><div style="font-size:11px;color:#1F8A47;font-weight:700;">'+((()=>{try{return JSON.parse(localStorage.getItem("storeConfig")||"{}").name||"Minha Loja"}catch{return "Minha Loja"}})())+'</div></div>';
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style></head><body>'+header+kpis+table+footer+'</body></html>';
   vpPDF(html);
 }
@@ -92,7 +93,9 @@ function exportSalesPDF(sales: any[]) {
 
 const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
 
-const emptyForm = () => ({ customerName:"", paymentMethod:"pix", discount:0, installments:1, saleDate:new Date().toISOString().split("T")[0], items:[emptyItem()] })
+const in30 = () => { const d=new Date(); d.setDate(d.getDate()+30); return d.toISOString().split("T")[0] }
+
+const emptyForm = () => ({ customerName:"", customerId:"", dueDate:in30(), paymentMethod:"pix", discount:0, installments:1, saleDate:new Date().toISOString().split("T")[0], items:[emptyItem()] })
 
 
 
@@ -154,11 +157,15 @@ export default function SalesPage() {
 
     if(!valid.length) return alert("Adicione ao menos um produto")
 
+    if(form.paymentMethod==="fiado" && !form.customerId) return alert("Venda fiado precisa de um cliente cadastrado")
+
     setSaving(true)
 
     try {
 
-      await api.post("/sales", { ...form, items: valid.map((i:any) => ({ productId:i.productId||null, name:i.name, quantity:+i.quantity||1, unitPrice:+i.unitPrice||0, isManual:!i.productId })) })
+      const { dueDate, customerId, ...rest } = form
+
+      await api.post("/sales", { ...rest, ...(customerId?{customerId}:{}), ...(form.paymentMethod==="fiado"?{dueDate}:{}), items: valid.map((i:any) => ({ productId:i.productId||null, name:i.name, quantity:+i.quantity||1, unitPrice:+i.unitPrice||0, isManual:!i.productId })) })
 
       setShowForm(false); setForm(emptyForm()); load(); loadProducts()
 
@@ -206,7 +213,7 @@ export default function SalesPage() {
 
     <div style={{padding:"clamp(12px,3vw,28px)",maxWidth:1440,margin:"0 auto"}}>
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
 
         .vp-input{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;color:var(--text);width:100%;transition:border-color .12s,box-shadow .12s;}
 
@@ -322,7 +329,7 @@ export default function SalesPage() {
 
         }
 
-      `}</style>
+      ` }} />
 
 
 
@@ -488,9 +495,9 @@ export default function SalesPage() {
 
                 <div className="vp-field">
 
-                  <label>Cliente</label>
+                  <label>Cliente{form.paymentMethod==="fiado"?" *":""}</label>
 
-                  <input className="vp-input" value={form.customerName} onChange={e=>setForm({...form,customerName:e.target.value})} placeholder="Nome do cliente" />
+                  <CustomerPicker form={form} setForm={setForm} />
 
                 </div>
 
@@ -508,6 +515,8 @@ export default function SalesPage() {
 
                     <option value="debit_card">Cartão Débito</option>
 
+                    <option value="fiado">Fiado (pagar depois)</option>
+
                   </select>
 
                 </div>
@@ -519,6 +528,13 @@ export default function SalesPage() {
                   <input className="vp-input" type="date" value={form.saleDate} onChange={e=>setForm({...form,saleDate:e.target.value})} />
 
                 </div>
+
+                {form.paymentMethod==="fiado" && (
+                  <div className="vp-field">
+                    <label>Vencimento</label>
+                    <input className="vp-input" type="date" value={form.dueDate} min={form.saleDate} onChange={e=>setForm({...form,dueDate:e.target.value})} />
+                  </div>
+                )}
 
               </div>
 
@@ -532,9 +548,13 @@ export default function SalesPage() {
 
               <div style={{background:"var(--surface-2)",borderRadius:10,padding:10}}>
 
+                <div aria-hidden style={{display:"grid",gridTemplateColumns:"2fr 70px 110px 30px",gap:6,marginBottom:4,fontSize:11,fontWeight:600,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".04em"}}>
+                  <span>Produto</span><span style={{textAlign:"center"}}>Quantidade</span><span>Preço unit. (R$)</span><span/>
+                </div>
+
                 {form.items.map((item:any,i:number)=>(
 
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 60px 90px 30px",gap:6,marginBottom:6}}>
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 70px 110px 30px",gap:6,marginBottom:6}}>
 
                     {item.isManual ? (
 
@@ -554,11 +574,11 @@ export default function SalesPage() {
 
                     )}
 
-                    <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} />
+                    <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} aria-label="Quantidade" title="Quantidade de unidades" />
 
-                    <input className="vp-input" type="number" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" />
+                    <input className="vp-input" type="number" min="0" step="0.01" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" aria-label="Preço unitário em reais" title="Preço de uma unidade, em reais" />
 
-                    <button onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>x</button>
+                    <button aria-label="Remover item" title="Remover item" onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>x</button>
 
                   </div>
 
@@ -628,13 +648,56 @@ export default function SalesPage() {
 
 }
 
+// Busca em /customers; "Cadastrar" cria só com nome + telefone. Nome digitado sem cadastro segue como texto livre (exceto fiado).
+function CustomerPicker({ form, setForm }: { form:any, setForm:(f:any)=>void }) {
+  const [q, setQ] = useState(form.customerName||"")
+  const [opts, setOpts] = useState<any[]>([])
+  const [open, setOpen] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [adding, setAdding] = useState(false)
 
+  useEffect(() => {
+    if (!open || q.trim().length < 2) { setOpts([]); return }
+    const t = setTimeout(() => api.get("/customers", { params: { search: q.trim() } }).then(r => setOpts(Array.isArray(r.data) ? r.data.slice(0, 6) : [])).catch(() => setOpts([])), 250)
+    return () => clearTimeout(t)
+  }, [q, open])
 
+  function pick(c:any) { setForm({ ...form, customerId:c.id, customerName:c.name }); setQ(c.name); setOpen(false); setAdding(false) }
 
+  async function quickAdd() {
+    if (!q.trim()) return toast.error("Digite o nome do cliente")
+    try { pick((await api.post("/customers", { name:q.trim(), phone:phone.trim()||undefined })).data); toast.success("Cliente cadastrado") }
+    catch(e:any) { toast.error(e?.response?.data?.message||"Não foi possível cadastrar") }
+  }
 
-
-
-
-
-
-
+  return (
+    <div style={{position:"relative"}}>
+      <Toaster position="top-center" />
+      <input className="vp-input" value={q} placeholder="Buscar ou digitar nome" aria-label="Cliente" autoComplete="off"
+        onFocus={()=>setOpen(true)} onBlur={()=>{ if(!adding) setTimeout(()=>setOpen(false),150) }}
+        onChange={e=>{ setQ(e.target.value); setOpen(true); setForm({ ...form, customerId:"", customerName:e.target.value }) }} />
+      {form.customerId && <span className="vp-pill vp-pill-ok" style={{position:"absolute",right:8,top:9}}>cadastrado</span>}
+      {open && q.trim().length >= 2 && !form.customerId && (
+        <div style={{position:"absolute",zIndex:5,left:0,right:0,top:"calc(100% + 4px)",background:"var(--bg-elevated)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"var(--shadow-lg)",overflow:"hidden"}}>
+          {opts.map(c => (
+            <button key={c.id} type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>pick(c)}
+              style={{display:"flex",justifyContent:"space-between",width:"100%",padding:"9px 12px",background:"transparent",border:0,borderBottom:"1px solid var(--border)",color:"var(--text)",fontSize:13,cursor:"pointer",textAlign:"left"}}>
+              <span>{c.name}</span><span style={{color:"var(--text-subtle)"}}>{c.phone||""}</span>
+            </button>
+          ))}
+          {adding ? (
+            <div style={{display:"flex",gap:6,padding:8}}>
+              <input className="vp-input" autoFocus inputMode="tel" placeholder="WhatsApp (opcional)" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter") quickAdd() }} />
+              <button type="button" className="vp-btn vp-btn-primary vp-btn-sm" onClick={quickAdd}>Salvar</button>
+            </div>
+          ) : (
+            <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>setAdding(true)}
+              style={{width:"100%",padding:"9px 12px",background:"transparent",border:0,color:"var(--brand-glow)",fontSize:13,fontWeight:600,cursor:"pointer",textAlign:"left"}}>
+              + Cadastrar "{q.trim()}"
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

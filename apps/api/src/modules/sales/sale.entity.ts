@@ -5,6 +5,7 @@ export enum PaymentMethod {
   DEBIT_CARD = 'debit_card',
   PIX = 'pix',
   CASH = 'cash',
+  FIADO = 'fiado',
 }
 
 export enum SaleStatus {
@@ -41,6 +42,18 @@ export class Sale {
 
   @Column({ nullable: true })
   customerName: string;
+
+  @Column({ type: 'uuid', nullable: true })
+  customerId: string;
+
+  @Column({ type: 'date', nullable: true })
+  dueDate: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 })
+  paidAmount: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  paidAt: Date;
 
   @Column({ nullable: true })
   notes: string;

@@ -22,8 +22,8 @@ export class UsersService {
     return this.repo.find({ where, order: { createdAt: 'DESC' } });
   }
 
-  async findOne(id: string) {
-    const user = await this.repo.findOne({ where: { id } });
+  async findOne(id: string, storeId?: string) {
+    const user = await this.repo.findOne({ where: storeId ? { id, storeId } : { id } });
     if (!user) throw new NotFoundException('Usuario nao encontrado');
     return user;
   }
@@ -52,14 +52,16 @@ export class UsersService {
     return this.repo.findOne({ where: { id } });
   }
 
-  async update(id: string, data: Partial<User>) {
-    await this.findOne(id);
+  async update(id: string, data: Partial<User>, storeId?: string) {
+    await this.findOne(id, storeId);
+    // repo.update não dispara @BeforeUpdate: sem isso a senha seria gravada em texto puro
+    if (data.password) data.password = await bcrypt.hash(data.password, 12);
     await this.repo.update(id, data);
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, storeId?: string) {
+    await this.findOne(id, storeId);
     await this.repo.delete(id);
     return { message: 'Usuario removido com sucesso' };
   }

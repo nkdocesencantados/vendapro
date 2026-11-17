@@ -21,22 +21,23 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  findOne(@Param("id") id: string, @Request() req) {
+    return this.service.findOne(id, req.user.storeId);
   }
 
   @Post()
   create(@Body() body: any, @Request() req) {
-    return this.service.create({ ...body, storeId: req.user.storeId });
+    const { id: _id, ...data } = body || {};
+    return this.service.create({ ...data, storeId: req.user.storeId });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param("id") id: string, @Body() body: any, @Request() req) {
+    return this.service.update(id, body, req.user.storeId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  remove(@Param("id") id: string, @Request() req) {
+    return this.service.remove(id, req.user.storeId);
   }
 }

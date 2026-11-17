@@ -27,6 +27,7 @@ export class FinancialController {
 
   @Post()
   create(@Body() body: any, @Request() req) {
-    return this.service.create({ ...body, storeId: req.user.storeId, createdById: req.user.id });
+    const { id: _id, ...data } = body || {};
+    return this.service.create({ ...data, storeId: req.user.storeId, createdById: req.user.id });
   }
 }

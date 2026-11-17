@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtStrategy, jwtSecret } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { User } from '../users/user.entity';
 import { Store } from '../stores/store.entity';
@@ -13,9 +13,9 @@ import { Store } from '../stores/store.entity';
   imports: [
     PassportModule,
     TypeOrmModule.forFeature([User, Store]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'vendapro-secret',
-      signOptions: { expiresIn: '24h' },
+    // registerAsync: read the secret after ConfigModule loads .env files (register() ran at import time and signed with a different key than JwtStrategy)
+    JwtModule.registerAsync({
+      useFactory: () => ({ secret: jwtSecret(), signOptions: { expiresIn: '24h' } }),
     }),
   ],
   controllers: [AuthController],

@@ -6,15 +6,16 @@ Leia este arquivo primeiro. Para visual veja `DESIGN.md`; para textos da interfa
 VendaPro: sistema SaaS de gestão de vendas para lojas físicas (vendas, estoque, caixa, equipe, comissões, recibos, relatórios). Faz parte da empresa **HAUX WEB**.
 
 ## Stack
-- `apps/web`: Next.js 14 (App Router, componentes client), Tailwind + `globals.css` com design system próprio, Zustand (auth), axios (`src/lib/api.ts`), Chart.js via `next/script`, jsPDF.
-- `apps/api`: NestJS + PostgreSQL. Módulos em `src/modules`: auth, companies, employees, financial, products, reports, sales, scheduler, stock, stores, users.
+- `apps/web`: Next.js 14 (App Router, componentes client), Tailwind + `globals.css` com design system próprio, Zustand (auth), axios (`src/lib/api.ts`), recharts (gráficos), jsPDF, qrcode (QR PIX).
+- `apps/api`: NestJS + PostgreSQL. Módulos em `src/modules`: auth, companies, customers, employees, financial, goals, products, receivables (fiado), reports, sales, scheduler, stock, stores, users. Todo dado é filtrado pelo `storeId` do usuário logado.
 - Deploy: Railway, automático a cada push na `main`. **Nunca dar push direto na `main` sem o dono aprovar.** Trabalhe em branch e abra pull request.
 
 ## Comandos
 - `npm install` na raiz (workspaces); `npm run dev` sobe API (3001) e web (3000).
 - `npm run build:web` / `build:api`; `npm run db:seed`.
 - Antes de commitar mudanças no web: `cd apps/web && npx tsc --noEmit && npx next build`.
-- API precisa de `apps/api/.env` (copie de `.env.example`). Nunca commitar `.env`.
+- API precisa de `apps/api/.env` (copie de `.env.example`). Nunca commitar `.env`. `JWT_SECRET` é obrigatório: sem ele a API não sobe.
+- Em produção `synchronize` é falso: mudança de schema exige SQL em `apps/api/migrations-manual/` rodado no banco antes do deploy.
 
 ## Regras
 - Idioma da interface: português do Brasil.
@@ -24,8 +25,9 @@ VendaPro: sistema SaaS de gestão de vendas para lojas físicas (vendas, estoque
 - Não colocar senhas, tokens ou chaves em arquivos versionados.
 
 ## Mapa rápido do web
-- `src/app/(auth)/login`: login com cena 3D em CSS.
-- `src/app/dashboard`: layout (menu, topo, paletas), `page.tsx` (Resumo), `sales`, `inventory`, `cash`, `team`, `commissions`, `receipts`, `reports`, `settings`.
+- `src/app/(auth)/login`: login com vídeo em loop da árvore Haux (`public/brand/login-hero.*`, gerado em `brand-video/` com Remotion: `npm run render`).
+- `src/app/dashboard`: layout (menu, topo, paletas), `page.tsx` (Resumo), `sales`, `customers`, `receivables` (Fiado), `pix` (Cobrar com PIX), `inventory`, `cash`, `team`, `commissions`, `receipts`, `reports`, `settings`.
+- `src/lib/pix.ts`: gera o PIX copia e cola (BR Code do Banco Central) e links de WhatsApp; autoteste `pixSelfTest()`.
 - `src/app/superadmin`: painel do administrador da plataforma.
 - `public/brand/haux-emblem.png`: emblema da Haux (recorte provisório; trocar pela logo original).
 
