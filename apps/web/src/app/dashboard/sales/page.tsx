@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import { BRLpdf, exportReport, table } from "@/lib/pdf"
 import toast, { Toaster } from "react-hot-toast"
 
 
@@ -45,23 +46,6 @@ function vpCSV(headers: string[], rows: any[][], filename: string) {
 
 }
 
-function vpPDF(html: string) {
-
-  const w = window.open('', '_blank');
-
-  if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 600); }
-
-}
-
-function vpTable(title: string, headers: string[], rows: string[][]) {
-
-  const th = headers.map(h => '<th style="background:#1D9E75;color:white;padding:8px;font-size:11px;">' + h + '</th>').join('');
-
-  const tr = rows.map(r => '<tr>' + r.map(c => '<td style="padding:7px;border-bottom:1px solid #eee;font-size:11px;">' + c + '</td>').join('') + '</tr>').join('');
-
-  return '<html><head><style>body{font-family:Arial,sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}.f{margin-top:16px;font-size:10px;color:#999;text-align:center;}</style></head><body><h2>' + title + '</h2><p style="color:#666;font-size:11px;">Gerado em ' + new Date().toLocaleString('pt-BR') + ' - VendaPro</p><table><thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table><div class="f">VendaPro - vendapro.com.br</div></body></html>';
-
-}
 
 
 
@@ -78,17 +62,16 @@ function exportSalesCSV(sales: any[]) {
 }
 
 function exportSalesPDF(sales: any[]) {
-  const PAY2: Record<string,string>={cash:'Dinheiro',pix:'PIX',credit_card:'Credito',debit_card:'Debito',fiado:'Fiado'};
-  const rows=sales.map((s:any,i:number)=>{const bg=i%2===0?'#fff':'#F8FAF9';return '<tr style="background:'+bg+';"><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+new Date(s.saleDate||s.createdAt).toLocaleDateString('pt-BR')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.customerName||'Avulso')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( s.sellerName||'-')+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( PAY2[s.paymentMethod]||s.paymentMethod)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;font-weight:600;color:#1D9E75;">R$ '+Number(s.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</td></tr>';}).join('');
-  const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
+  const PAY2: Record<string,string>={cash:'Dinheiro',pix:'PIX',credit_card:'Crédito',debit_card:'Débito',fiado:'Fiado'};
   const total=sales.reduce((a:number,s:any)=>a+Number(s.total),0);
-  const header='<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;">'+logo+'</div><div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">'+((()=>{try{return JSON.parse(localStorage.getItem("storeConfig")||"{}").name||"Minha Loja"}catch{return "Minha Loja"}})())+'</div></div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:white;">Relatorio de Vendas</div><div style="font-size:12px;color:#8DA39A;">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>';
-  const kpis='<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;"><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Total vendas</div><div style="font-size:22px;font-weight:700;color:#1D9E75;">'+sales.length+'</div></div><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Faturamento</div><div style="font-size:22px;font-weight:700;">'+Number(total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</div></div><div style="padding:16px 20px;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Ticket médio</div><div style="font-size:22px;font-weight:700;">'+( sales.length>0?Number(total/sales.length).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'R$ 0,00')+'</div></div></div>';
-  const table='<div style="padding:20px 32px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1D9E75;"><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Data</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Cliente</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Vendedor</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Pagamento</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Total</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  const footer='<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;"><div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br</div><div style="font-size:11px;color:#1F8A47;font-weight:700;">'+((()=>{try{return JSON.parse(localStorage.getItem("storeConfig")||"{}").name||"Minha Loja"}catch{return "Minha Loja"}})())+'</div></div>';
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style></head><body>'+header+kpis+table+footer+'</body></html>';
-  vpPDF(html);
+  const rows=sales.map((s:any)=>[new Date(s.saleDate||s.createdAt).toLocaleDateString('pt-BR'),s.customerName||'Avulso',s.sellerName||'—',PAY2[s.paymentMethod]||s.paymentMethod,{html:BRLpdf(s.total),strong:true}]);
+  exportReport({
+    title:'Relatório de Vendas',
+    kpis:[{label:'Vendas',value:String(sales.length)},{label:'Faturamento',value:BRLpdf(total),tone:'pos'},{label:'Ticket médio',value:BRLpdf(sales.length?total/sales.length:0)}],
+    body:table([{label:'Data'},{label:'Cliente'},{label:'Vendedor'},{label:'Pagamento'},{label:'Total',align:'right'}],rows,'Vendas'),
+  });
 }
+
 
 
 const PAY_OPTIONS: [string,string][] = [["pix","PIX"],["cash","Dinheiro"],["credit_card","Crédito"],["debit_card","Débito"],["fiado","Fiado"]]

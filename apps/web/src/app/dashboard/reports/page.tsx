@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
+import { BRLpdf, esc, exportReport, table } from "@/lib/pdf"
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle2, Download, FileText, Info, TrendingDown, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
@@ -21,129 +22,47 @@ function exportRepPDF(d:any, d2:any, from:string, to:string, storeName:string, m
   const prevRev = d2?.totalRevenue||0
   const products: any[] = d?.topProducts||[]
   const payMethods: any[] = d?.paymentMethods||[]
-  const maxRev = products[0]?.revenue||1
-  const dailyChart2: any[] = d?.dailyChart||[]
-  const activeDays = dailyChart2.filter((x:any)=>x.value>0).length||tot
-  const maxSale = d?.maxSale||0
+  const maxRev = Number(products[0]?.revenue)||1
+  const activeDays = (d?.dailyChart||[]).filter((x:any)=>x.value>0).length||tot
+  const g = pct(rev, prevRev)
+  const growth = prevRev>0 ? (g>=0?`+${g}%`:`${g}%`) : 'N/A'
+  const fmtD = (s:string) => s ? new Date(s+'T12:00:00').toLocaleDateString('pt-BR') : ''
+  const bar = (p:number) => `<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:#E6EEE9;border-radius:99px;overflow:hidden"><div style="height:6px;width:${p}%;background:linear-gradient(90deg,#1F8A47,#7EE8A8);border-radius:99px"></div></div><span class="muted num" style="width:32px;text-align:right">${p}%</span></div>`
 
-  const kpiCard = (lbl:string,val:string,sub:string,color:string) =>
-    `<div style="padding:16px 20px;border-right:1px solid #E5EDE9;">
-      <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">${lbl}</div>
-      <div style="font-size:20px;font-weight:700;color:${color};">${val}</div>
-      <div style="font-size:11px;color:#888;margin-top:4px;">${sub}</div>
-    </div>`
+  const indicators = table([{label:'Indicador'},{label:'Valor',align:'right'}],[
+    ['Dias com venda', `${activeDays} dias`],
+    ['Média por dia ativo', {html:activeDays>0?BRLpdf(rev/activeDays):'—',tone:'pos',strong:true}],
+    ['Maior venda', {html:BRLpdf(d?.maxSale||0),strong:true}],
+    ['Ticket médio', BRLpdf(avg)],
+    ['Lucro estimado', {html:BRLpdf(prof),tone:'pos',strong:true}],
+    ['Margem', `${margin}%`],
+    ['Taxa de cancelamento', {html:`${cancelRate}%`,tone:cancelRate>10?'neg':undefined,strong:true}],
+  ],'Indicadores chave')
 
-  const prodRows = products.map((p:any,i:number) => {
-    const pct2 = Math.round((Number(p.revenue)/Number(maxRev))*100)
-    const lucro = Number(p.revenue)*margin/100
-    const bg = i%2===0?'#fff':'#F9FBFA'
-    return `<tr style="background:${bg}">
-      <td style="padding:10px 14px;color:#888;font-size:12px;border-bottom:1px solid #E5EDE9;">#${i+1}</td>
-      <td style="padding:10px 14px;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.name}</td>
-      <td style="padding:10px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.quantity}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(p.revenue).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;color:#1F8A47;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(lucro).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div style="flex:1;height:6px;background:#E5EDE9;border-radius:999px;overflow:hidden;">
-            <div style="height:6px;background:#1F8A47;border-radius:999px;width:${pct2}%"></div>
-          </div>
-          <span style="font-size:11px;color:#888;width:32px;">${pct2}%</span>
-        </div>
-      </td>
-    </tr>`
-  }).join('')
+  const prods = table([{label:'#'},{label:'Produto'},{label:'Qtd',align:'right'},{label:'Receita',align:'right'},{label:'Lucro est.',align:'right'},{label:'Participação'}],
+    products.map((p:any,i:number)=>[{html:`#${i+1}`,tone:'muted'},{html:esc(p.name),strong:true},String(p.quantity),{html:BRLpdf(p.revenue),strong:true},{html:BRLpdf(Number(p.revenue)*margin/100),tone:'pos'},{html:bar(Math.round(Number(p.revenue)/maxRev*100))}]),
+    'Produtos mais vendidos')
 
-  const payRows = payMethods.map((p:any) => {
-    const payPct = rev>0?Math.round((Number(p.total)/rev)*100):0
-    return `<tr>
-      <td style="padding:8px 14px;font-size:12px;border-bottom:1px solid #E5EDE9;">${PAY[p.paymentMethod]||p.paymentMethod}</td>
-      <td style="padding:8px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${p.count||0}</td>
-      <td style="padding:8px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(p.total).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-      <td style="padding:8px 14px;text-align:right;font-size:12px;color:#888;border-bottom:1px solid #E5EDE9;">${payPct}%</td>
-    </tr>`
-  }).join('')
+  const pays = table([{label:'Forma'},{label:'Qtd',align:'right'},{label:'Total',align:'right'},{label:'%',align:'right'}],
+    payMethods.map((p:any)=>[PAY[p.paymentMethod]||p.paymentMethod,String(p.count||0),{html:BRLpdf(p.total),strong:true},{html:`${rev>0?Math.round(Number(p.total)/rev*100):0}%`,tone:'muted'}]),
+    'Formas de pagamento')
 
-  const growthPct = pct(rev, prevRev)
-  const growthStr = prevRev>0 ? (growthPct>=0?`+${growthPct}%`:`${growthPct}%`) : 'N/A'
-  const growthColor = growthPct>=0?'#1F8A47':'#ef4444'
+  const sellers = sellerRanking.length ? table([{label:'#'},{label:'Vendedor'},{label:'Vendas',align:'right'},{label:'Receita',align:'right'}],
+    sellerRanking.map((s:any,i:number)=>[{html:`#${i+1}`,tone:'muted'},{html:esc(s.name||s.sellerName||'—'),strong:true},String(s.count||s.salesCount||0),{html:BRLpdf(s.total||s.revenue||0),tone:'pos',strong:true}]),
+    'Vendedores') : ''
 
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Relatorio VendaPro</title>
-  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;color:#1a1a1a;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:13px;}
-  h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;margin:20px 32px 10px;padding-bottom:8px;border-bottom:2px solid #E5EDE9;}
-  table{width:100%;border-collapse:collapse;}th{background:#1F8A47;color:white;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;}
-  </style></head><body>
-
-  <div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:40px;height:40px;background:#1F8A47;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>
-      </div>
-      <div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">${storeName}</div></div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:18px;font-weight:700;color:white;">Relatório de Desempenho</div>
-      <div style="font-size:12px;color:#8DA39A;margin-top:3px;">Período: ${from} a ${to}</div>
-      <div style="font-size:11px;color:#6B8C82;margin-top:2px;">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;">
-    ${kpiCard('Faturamento',`${Number(rev).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`vs anterior: ${growthStr}`,growthPct>=0?'#1F8A47':'#ef4444')}
-    ${kpiCard('Lucro estimado',`${Number(prof).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`${margin}% margem`,'#1F8A47')}
-    ${kpiCard('Ticket médio',`${Number(avg).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`,`${tot} vendas`,'#1a1a1a')}
-    ${kpiCard('Total vendas',String(tot),`${rev>0?Math.round(rev/tot):0} R$/venda`,'#1a1a1a')}
-    ${kpiCard('Crescimento',growthStr,'vs período anterior',growthColor)}
-  </div>
-
-
-  <h3>Indicadores Chave</h3>
-  <div style="padding:0 32px 16px;">
-    <table style="border-collapse:collapse;width:100%;">
-      <tbody>
-        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Dias com venda</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${activeDays} dias</td></tr>
-        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Média por dia ativo</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1F8A47;border-bottom:1px solid #E5EDE9;">${activeDays>0?Number(rev/activeDays).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—'}</td></tr>
-        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Maior venda</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1F8A47;border-bottom:1px solid #E5EDE9;">${Number(maxSale||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
-        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Ticket médio</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${Number(avg).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
-        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Lucro estimado</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1F8A47;border-bottom:1px solid #E5EDE9;">${Number(prof).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>
-        <tr><td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #E5EDE9;">Margem</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${margin}%</td></tr>
-        <tr style="background:#F8FAF9"><td style="padding:9px 14px;font-size:12px;color:#555;">Taxa cancelamento</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:${cancelRate>10?'#ef4444':'#1a1a1a'}">${cancelRate}%</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Top Produtos</h3>
-  <div style="padding:0 32px 20px;">
-    <table><thead><tr><th>Rank</th><th>Produto</th><th style="text-align:center;">Qtd</th><th style="text-align:right;">Receita</th><th style="text-align:right;">Lucro Est.</th><th>Participação</th></tr></thead>
-    <tbody>${prodRows}</tbody></table>
-  </div>
-
-  <h3>Formas de Pagamento</h3>
-  <div style="padding:0 32px 20px;">
-    <table><thead><tr><th>Forma</th><th style="text-align:center;">Qtd</th><th style="text-align:right;">Total</th><th style="text-align:right;">%</th></tr></thead>
-    <tbody>${payRows}</tbody></table>
-  </div>
-
-  <div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;margin-top:20px;">
-    <div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br | Gerado automaticamente</div>
-    <div style="font-size:11px;color:#1F8A47;font-weight:700;">${storeName}</div>
-  </div>
-
-  </body></html>`
-
-  // Inserir tabela de vendedores antes do fechamento
-  const sellerRows = sellerRanking.map((s:any, i:number) => {
-    const bg = i%2===0?'#fff':'#F9FBFA'
-    return `<tr style="background:${bg}"><td style="padding:9px 14px;color:#888;font-size:12px;border-bottom:1px solid #E5EDE9;">#${i+1}</td><td style="padding:9px 14px;font-weight:600;font-size:12px;border-bottom:1px solid #E5EDE9;">${s.name||s.sellerName||'—'}</td><td style="padding:9px 14px;text-align:center;font-size:12px;border-bottom:1px solid #E5EDE9;">${s.count||s.salesCount||0}</td><td style="padding:9px 14px;text-align:right;font-weight:600;font-size:12px;color:#1F8A47;border-bottom:1px solid #E5EDE9;">${Number(s.total||s.revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td></tr>`
-  }).join('')
-
-  const sellersSection = sellerRanking.length > 0 ? `<h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;margin:20px 32px 10px;padding-bottom:8px;border-bottom:2px solid #E5EDE9;">Vendedores</h3><div style="padding:0 32px 20px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1F8A47;"><th style="color:white;padding:9px 14px;text-align:left;font-size:11px;">Rank</th><th style="color:white;padding:9px 14px;text-align:left;font-size:11px;">Vendedor</th><th style="color:white;padding:9px 14px;text-align:center;font-size:11px;">Vendas</th><th style="color:white;padding:9px 14px;text-align:right;font-size:11px;">Receita</th></tr></thead><tbody>${sellerRows}</tbody></table></div>` : ''
-
-  const finalHtml = html.replace('</body></html>', sellersSection + '</body></html>')
-  const w = window.open('','_blank')
-  if(w){w.document.write(finalHtml);w.document.close();w.focus();setTimeout(()=>w.print(),600)}
+  exportReport({
+    title:'Relatório de Desempenho', subtitle:`${fmtD(from)} a ${fmtD(to)}`, storeName,
+    kpis:[
+      {label:'Faturamento',value:BRLpdf(rev),sub:`vs anterior: ${growth}`,tone:'pos'},
+      {label:'Lucro estimado',value:BRLpdf(prof),sub:`${margin}% de margem`,tone:'pos'},
+      {label:'Ticket médio',value:BRLpdf(avg),sub:`${tot} vendas`},
+      {label:'Crescimento',value:growth,sub:'vs período anterior',tone:prevRev>0?(g>=0?'pos':'neg'):'muted'},
+    ],
+    body: indicators+prods+pays+sellers,
+  })
 }
+
 
 
 // Estilos de página no padrão aprovado (cartões 16px, rótulos uppercase, valores mono). Só tokens de globals.css.

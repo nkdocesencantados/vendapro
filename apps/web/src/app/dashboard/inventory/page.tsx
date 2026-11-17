@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import { BRLpdf, exportReport, table } from "@/lib/pdf"
 import { AlertTriangle, Download, FileText, Package, Pencil, Plus, Trash2, X } from "lucide-react"
 
 
@@ -27,26 +28,7 @@ function vpCSV(headers: string[], rows: any[][], filename: string) {
 
 }
 
-// Nome da loja salvo pelas Configurações (storeConfig.name).
-function storeNameLS(){ try{ return JSON.parse(localStorage.getItem("storeConfig")||"{}").name||"Minha Loja" }catch{ return "Minha Loja" } }
 
-function vpPDF(html: string) {
-
-  const w = window.open('', '_blank');
-
-  if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => w.print(), 600); }
-
-}
-
-function vpTable(title: string, headers: string[], rows: string[][]) {
-
-  const th = headers.map((h:string) => '<th>' + h + '</th>').join('');
-
-  const tr = rows.map((r:string[]) => '<tr>' + r.map((c:string) => '<td>' + c + '</td>').join('') + '</tr>').join('');
-
-  return '<html><head><title>'+title+'</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th{background:#1F8A47;color:white;padding:8px;font-size:11px}td{padding:7px;border-bottom:1px solid #eee;font-size:11px}</style></head><body><h2>'+title+'</h2><table><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table></body></html>';
-
-}
 
 
 
@@ -67,17 +49,18 @@ function exportInvCSV(products: any[], threshold: number) {
 }
 
 function exportInvPDF(products: any[], threshold: number) {
-  const rows=products.map((p:any,i:number)=>{const bg=i%2===0?'#fff':'#F8FAF9';const st=p.stock===0?'Esgotado':p.stock<=(p.minStock||threshold||5)?'Baixo':'OK';const col=p.stock===0?'#ef4444':p.stock<=(p.minStock||threshold||5)?'#f59e0b':'#1F8A47';return '<tr style="background:'+bg+';"><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+p.name+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">R$ '+Number(p.price).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+p.stock+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;">'+( p.minStock||threshold||5)+'</td><td style="padding:10px 14px;border-bottom:1px solid #E5EDE9;font-size:12px;font-weight:600;color:'+col+';">'+st+'</td></tr>';}).join('');
-  const logo='<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4" r="2.5" fill="white"/><circle cx="4" cy="18" r="2.5" fill="white"/><circle cx="20" cy="18" r="2.5" fill="white"/><line x1="12" y1="4" x2="4" y2="18" stroke="white" stroke-width="1.5"/><line x1="12" y1="4" x2="20" y2="18" stroke="white" stroke-width="1.5"/><line x1="4" y1="18" x2="20" y2="18" stroke="white" stroke-width="1.5"/></svg>';
-  const low=products.filter((p:any)=>p.stock>0&&p.stock<=(p.minStock||threshold||5)).length;
+  const min=(p:any)=>p.minStock||threshold||5;
+  const low=products.filter((p:any)=>p.stock>0&&p.stock<=min(p)).length;
   const out=products.filter((p:any)=>p.stock===0).length;
-  const header='<div style="background:#04130F;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:#1F8A47;border-radius:10px;display:flex;align-items:center;justify-content:center;">'+logo+'</div><div><div style="font-size:16px;font-weight:700;color:white;">VendaPro</div><div style="font-size:11px;color:#6B8C82;">'+storeNameLS()+'</div></div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:white;">Relatorio de Estoque</div><div style="font-size:12px;color:#8DA39A;">Gerado em '+new Date().toLocaleString('pt-BR')+'</div></div></div>';
-  const kpis='<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F8FAF9;border-bottom:2px solid #E5EDE9;"><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Total produtos</div><div style="font-size:22px;font-weight:700;color:#1F8A47;">'+products.length+'</div></div><div style="padding:16px 20px;border-right:1px solid #E5EDE9;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Estoque baixo</div><div style="font-size:22px;font-weight:700;color:#f59e0b;">'+low+'</div></div><div style="padding:16px 20px;"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px;">Esgotados</div><div style="font-size:22px;font-weight:700;color:#ef4444;">'+out+'</div></div></div>';
-  const table='<div style="padding:20px 32px;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1F8A47;"><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Produto</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Preco</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Estoque</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Minimo</th><th style="color:white;padding:10px 14px;text-align:left;font-size:11px;">Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  const footer='<div style="padding:14px 32px;background:#F8FAF9;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #E5EDE9;"><div style="font-size:11px;color:#888;">VendaPro - vendapro.com.br</div><div style="font-size:11px;color:#1F8A47;font-weight:700;">'+storeNameLS()+'</div></div>';
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style></head><body>'+header+kpis+table+footer+'</body></html>';
-  vpPDF(html);
+  const value=products.reduce((a:number,p:any)=>a+Number(p.price||0)*Math.max(0,Number(p.stock||0)),0);
+  const rows=products.map((p:any)=>{const st=p.stock===0?['Esgotado','neg']:p.stock<=min(p)?['Baixo','warn']:['OK','pos'];return [p.name,BRLpdf(p.price),String(p.stock),String(min(p)),{html:st[0],tone:st[1] as any,strong:true}];});
+  exportReport({
+    title:'Relatório de Estoque',
+    kpis:[{label:'Produtos',value:String(products.length)},{label:'Valor em estoque',value:BRLpdf(value),tone:'pos'},{label:'Estoque baixo',value:String(low),tone:low?'warn':undefined},{label:'Esgotados',value:String(out),tone:out?'neg':undefined}],
+    body:table([{label:'Produto'},{label:'Preço',align:'right'},{label:'Estoque',align:'right'},{label:'Mínimo',align:'right'},{label:'Status',align:'center'}],rows,'Produtos'),
+  });
 }
+
 
 
 

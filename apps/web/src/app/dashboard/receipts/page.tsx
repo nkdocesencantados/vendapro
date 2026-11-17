@@ -4,6 +4,7 @@ import QRCode from "qrcode"
 import toast, { Toaster } from "react-hot-toast"
 import { Copy, FileDown, MessageCircle, X } from "lucide-react"
 import { api } from "@/lib/api"
+import { printDoc } from "@/lib/pdf"
 import { storePix, waLink } from "@/lib/pix"
 
 const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Crédito",debit_card:"Débito",fiado:"Fiado"}
@@ -68,16 +69,7 @@ export default function ReceiptsPage() {
   function openPDF() {
     const el = document.getElementById("receipt-print")
     if (!el) return
-    const css = `
-      *{box-sizing:border-box;margin:0;padding:0;}
-      body{font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;max-width:420px;margin:0 auto;background:white;}
-    `
-    const w = window.open("","_blank")
-    if (!w) return
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${el.innerHTML}</body></html>`)
-    w.document.close()
-    w.focus()
-    setTimeout(()=>w.print(),600)
+    printDoc(`Recibo #${receiptNum} - ${storeName}`, el.innerHTML, "@page{size:auto;margin:10mm}body{max-width:420px;margin:0 auto}")
   }
 
   const row = {display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`0.5px solid ${P.border}`,fontSize:12} as const
@@ -232,7 +224,7 @@ export default function ReceiptsPage() {
                   )}
                   <div style={{background:P.dark,padding:"13px 18px",textAlign:"center",borderTop:`1px solid ${P.border}`}}>
                     <div style={{fontSize:12,color:P.light,marginBottom:3}}>Obrigado pela preferência!</div>
-                    <div style={{fontSize:10,color:P.mid}}>VendaPro · vendapro.com.br</div>
+                    <div style={{fontSize:10,color:P.mid,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><img src="/brand/haux-emblem.png" width={14} height={14} alt="" style={{borderRadius:"50%"}}/>VendaPro by House Web · vendapro.com.br</div>
                   </div>
                 </div>
               </div>
