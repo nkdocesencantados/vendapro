@@ -7,7 +7,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 /* ═══════════════════════════════════════════════════════════
-   VENDAPRO — DESIGN SYSTEM v4 · Verde Haux Web
+   VENDAPRO — DESIGN SYSTEM v4 · Verde Txai Tech
    Fonte única de verdade: estes tokens. tailwind.config.js
    lê as mesmas variáveis. Escuro é o padrão.
 ═══════════════════════════════════════════════════════════ */
@@ -77,7 +77,7 @@
 
 /* ═══════════════════════════════════════
    PALETAS DA LOJA — data-palette no <html>
-   Padrão (sem atributo ou "emerald") = verde Haux Web acima.
+   Padrão (sem atributo ou "emerald") = verde Txai Tech acima.
    Login e telas públicas usam sempre o padrão.
    Cada paleta define só a cor; superfícies e texto derivam
    dela com o mesmo contraste do tema verde (≥4.5:1).

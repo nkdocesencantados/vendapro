@@ -11,7 +11,7 @@ const PAY: Record<string,string> = {cash:"Dinheiro",pix:"PIX",credit_card:"Créd
 function BRL(v:number){ return (Number(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) }
 const itemName = (it:any) => it.productName||it.name||it.manualDescription||"Produto"
 
-// Cores do PDF impresso (papel branco), identidade Haux Web.
+// Cores do PDF impresso (papel branco), identidade Txai Tech.
 const P = {brand:"#2DBE60",dark:"#060A08",mid:"#8FA89B",light:"#7EE8A8",tint:"#E8F7EE",border:"rgba(45,190,96,0.25)",dashed:"rgba(45,190,96,0.3)",text:"#0B3A1F"}
 
 export default function ReceiptsPage() {
@@ -224,7 +224,7 @@ export default function ReceiptsPage() {
                   )}
                   <div style={{background:P.dark,padding:"13px 18px",textAlign:"center",borderTop:`1px solid ${P.border}`}}>
                     <div style={{fontSize:12,color:P.light,marginBottom:3}}>Obrigado pela preferência!</div>
-                    <div style={{fontSize:10,color:P.mid,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><img src="/brand/haux-emblem.png" width={14} height={14} alt="" style={{borderRadius:"50%"}}/>VendaPro by House Web · vendapro.com.br</div>
+                    <div style={{fontSize:10,color:P.mid,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><img src="/brand/haux-emblem.png" width={14} height={14} alt="" style={{borderRadius:"50%"}}/>VendaPro by Txai Tech · vendapro.com.br</div>
                   </div>
                 </div>
               </div>

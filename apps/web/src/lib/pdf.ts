@@ -1,4 +1,4 @@
-// Exportação de PDF (via impressão do navegador) com a identidade House Web / VendaPro.
+// Exportação de PDF (via impressão do navegador) com a identidade Txai Tech / VendaPro.
 // Todas as telas usam este módulo: cabeçalho com emblema, KPIs, tabelas e rodapé padronizados.
 
 export const BRLpdf = (v: number) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
@@ -108,7 +108,7 @@ export function exportReport(opts: { title: string; subtitle?: string; kpis?: Kp
   const html = `
 <div class="page">
   <div class="hd">
-    <div class="brand"><img src="${logo}" alt=""><div><div class="bw">Venda<b>Pro</b></div><div class="by">by House Web</div></div></div>
+    <div class="brand"><img src="${logo}" alt=""><div><div class="bw">Venda<b>Pro</b></div><div class="by">by Txai Tech</div></div></div>
     <div class="meta"><div class="tt">${esc(opts.title)}</div><div class="st">${opts.subtitle ? esc(opts.subtitle) + " · " : ""}Gerado em ${esc(now)}</div></div>
   </div>
   <div class="sc"><div class="av">${esc(initials)}</div><div><div class="sn">${esc(store)}</div>${contact ? `<div class="sd">${esc(contact)}</div>` : ""}</div></div>
@@ -116,6 +116,6 @@ export function exportReport(opts: { title: string; subtitle?: string; kpis?: Kp
   ${opts.kpis?.length ? "" : '<div style="height:18px"></div>'}
   ${opts.body}
 </div>
-<div class="ft"><span><img src="${logo}" alt=""><b>VendaPro</b> by House Web · vendapro.com.br</span><span>${esc(store)} · ${esc(now)}</span></div>`
+<div class="ft"><span><img src="${logo}" alt=""><b>VendaPro</b> by Txai Tech · vendapro.com.br</span><span>${esc(store)} · ${esc(now)}</span></div>`
   printDoc(opts.fileName || `${opts.title} - ${store}`, html)
 }

@@ -65,7 +65,7 @@ export default function LoginPage() {
   }
 
   return (
-    // data-theme="dark" fixa o verde Haux Web aqui, independente do tema/paleta da loja
+    // data-theme="dark" fixa o verde Txai Tech aqui, independente do tema/paleta da loja
     <div className="lg-root" data-theme="dark">
       <style dangerouslySetInnerHTML={{ __html: `
         .lg-root{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--bg);color:var(--text);font-family:var(--font);}
@@ -160,7 +160,7 @@ export default function LoginPage() {
           </button>
 
           <div className="lg-seal">
-            <Lock size={14} aria-hidden/> Conexão criptografada · Um produto Haux Web
+            <Lock size={14} aria-hidden/> Conexão criptografada · Um produto Txai Tech
           </div>
         </form>
       </section>

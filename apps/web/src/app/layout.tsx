@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "VendaPro · Gestão de vendas",
-  description: "Vendas, estoque, caixa e fiado em um só lugar. Um produto Haux Web.",
+  description: "Vendas, estoque, caixa e fiado em um só lugar. Um produto Txai Tech.",
   icons: { icon: "/brand/haux-emblem.png", apple: "/brand/haux-emblem.png" },
 };
 

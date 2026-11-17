@@ -19,7 +19,7 @@ const MODULES = [
 ]
 
 const PALETTES = [
-  { id:"emerald",  name:"Verde Haux (padrão)", color:"#2DBE60", desc:"Identidade padrão" },
+  { id:"emerald",  name:"Verde Txai Tech (padrão)", color:"#2DBE60", desc:"Identidade padrão" },
   { id:"indigo",   name:"Índigo",    color:"#6366F1", desc:"Sério, tecnológico" },
   { id:"amber",    name:"Âmbar",     color:"#F59E0B", desc:"Confeitaria, padaria, café" },
   { id:"crimson",  name:"Carmim",    color:"#E11D48", desc:"Açougue, lanchonete, brechó" },

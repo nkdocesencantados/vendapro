@@ -1,5 +1,5 @@
 ﻿/* eslint-disable @next/next/no-img-element */
-// Emblema Haux Web + wordmark "VendaPro". Estilos em globals.css (.vp-logo*).
+// Emblema Txai Tech + wordmark "VendaPro". Estilos em globals.css (.vp-logo*).
 export function VendaProLogo({ size = 36, showText = true, showBy = true }: { size?: number; showText?: boolean; showBy?: boolean }) {
   return (
     <span className="vp-logo">
@@ -7,7 +7,7 @@ export function VendaProLogo({ size = 36, showText = true, showBy = true }: { si
       {showText && (
         <span className="vp-logo-text">
           <span className="vp-logo-word" style={{ fontSize: Math.round(size * 0.47) }}>Venda<b>Pro</b></span>
-          {showBy && <span className="vp-logo-by">by Haux Web</span>}
+          {showBy && <span className="vp-logo-by">by Txai Tech</span>}
         </span>
       )}
     </span>
