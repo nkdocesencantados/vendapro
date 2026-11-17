@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [trialExpired,  setTrialExpired]  = useState(false)
 
   const PALETTES: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
-    emerald:  { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
+    emerald:  { brand:"#2DBE60", brandDeep:"#0B3A1F", brandGlow:"#7EE8A8" },
     amber:    { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
     crimson:  { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
     violet:   { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },

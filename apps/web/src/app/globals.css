@@ -14,12 +14,12 @@
 
 /* PALETA PADRÃO: ESMERALDA */
 :root {
-  --brand:       #1D9E75;
-  --brand-deep:  #04342C;
-  --brand-mid:   #0A5C42;
-  --brand-soft:  #34D399;
-  --brand-tint:  #E7F5EF;
-  --brand-glow:  #34D399;
+  --brand:       #2DBE60;
+  --brand-deep:  #0B3A1F;
+  --brand-mid:   #1F8A47;
+  --brand-soft:  #7EE8A8;
+  --brand-tint:  #E7F7EC;
+  --brand-glow:  #7EE8A8;
 
   --bg:          color-mix(in oklab, #06080A 86%, var(--brand-deep) 14%);
   --bg-elevated: color-mix(in oklab, #0B0D0F 84%, var(--brand-deep) 16%);
@@ -1222,3 +1222,85 @@ body {
 .vp-card:hover { box-shadow: var(--shadow-md); }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.8s linear infinite; }
+
+/* ═══════════════════════════════════════════════════════════
+   VENDAPRO — TEMA NEUTRO FUTURISTA (v3)
+   Base grafite neutra; a cor da marca (palette) só aparece em
+   destaques: botões, gráficos, bordas e brilhos.
+   Vale para o modo escuro. O modo claro segue as regras acima.
+═══════════════════════════════════════════════════════════ */
+:root:not([data-theme="light"]) {
+  --bg:            color-mix(in oklab, #08090B 96%, var(--brand-deep) 4%);
+  --bg-elevated:   color-mix(in oklab, #0B0C0F 96%, var(--brand-deep) 4%);
+  --surface:       color-mix(in oklab, #101216 96%, var(--brand-deep) 4%);
+  --surface-2:     color-mix(in oklab, #14171C 95%, var(--brand-deep) 5%);
+  --surface-3:     color-mix(in oklab, #1C2027 95%, var(--brand-deep) 5%);
+  --border:        #1F232B;
+  --border-strong: #2B313B;
+  --text:          #EDEFF2;
+  --text-muted:    #9AA1AD;
+  --text-subtle:   #6F7782;
+  --shadow-glow:   0 0 22px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+:root:not([data-theme="light"]) body {
+  background:
+    radial-gradient(ellipse 80% 480px at 85% -180px,
+      color-mix(in oklab, var(--brand) 10%, transparent), transparent 70%),
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px) 0 0 / 56px 56px,
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Cards em vidro, com linha de luz no topo */
+:root:not([data-theme="light"]) .vp-card,
+:root:not([data-theme="light"]) .vp-kpi {
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)), var(--surface);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  position: relative;
+}
+:root:not([data-theme="light"]) .vp-kpi::before {
+  content: "";
+  position: absolute; left: 20px; top: 0;
+  width: 34px; height: 2px;
+  background: var(--brand);
+  box-shadow: 0 0 12px var(--brand);
+  border-radius: 0 0 2px 2px;
+}
+:root:not([data-theme="light"]) .vp-card:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 28px rgba(0,0,0,.45); }
+
+/* Rótulos técnicos */
+.vp-kpi-label, .kpi-lbl {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+/* Menu lateral: barra de destaque no item ativo */
+:root:not([data-theme="light"]) .vp-nav-item.active {
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
+/* Botão principal com brilho */
+.vp-btn-primary { box-shadow: 0 0 22px color-mix(in srgb, var(--brand) 38%, transparent); color: #05070A; }
+.vp-btn-primary:hover { filter: brightness(1.1); }
+
+/* Logo da marca no menu lateral */
+.vp-sidebar-logo.has-img { background: transparent; padding: 0; overflow: hidden; box-shadow: 0 0 18px color-mix(in srgb, var(--brand) 30%, transparent); }
+.vp-sidebar-logo.has-img img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+
+/* Selo de status */
+.vp-online {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+  color: var(--text-muted);
+}
+.vp-online::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--brand); box-shadow: 0 0 10px var(--brand);
+  animation: vpPulse 2s ease-in-out infinite;
+}
+@keyframes vpPulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+@media (prefers-reduced-motion: reduce) { .vp-online::before { animation: none; } }

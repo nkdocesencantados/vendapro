@@ -4,7 +4,7 @@ import { api } from "@/lib/api"
 import { useAuthStore } from "@/contexts/auth.store"
 
 const PALETTES = [
-  { id:"emerald",  name:"Esmeralda", color:"#1D9E75", desc:"Confiável, equilibrado" },
+  { id:"emerald",  name:"Verde Haux", color:"#2DBE60", desc:"Identidade padrão" },
   { id:"indigo",   name:"Índigo",    color:"#6366F1", desc:"Sério, tecnológico" },
   { id:"amber",    name:"Âmbar",     color:"#F59E0B", desc:"Confeitaria, padaria, café" },
   { id:"crimson",  name:"Carmim",    color:"#E11D48", desc:"Açougue, lanchonete, brechó" },
@@ -66,7 +66,7 @@ export default function SettingsPage() {
     r.setAttribute("data-palette", id)
     // Aplicar variáveis CSS imediatamente sem precisar recarregar
     const themes: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
-      emerald: { brand:"#1D9E75", brandDeep:"#04342C", brandGlow:"#34D399" },
+      emerald: { brand:"#2DBE60", brandDeep:"#0B3A1F", brandGlow:"#7EE8A8" },
       amber:   { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
       crimson: { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
       violet:  { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },
