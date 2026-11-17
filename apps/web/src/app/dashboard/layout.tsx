@@ -18,9 +18,9 @@ type NavItem = { id: string; href: string; label: string; icon: LucideIcon; badg
 const NAV_ALL: NavItem[] = [
   { id:"dashboard",  href:"/dashboard",             label:"Dashboard",     icon:LayoutDashboard },
   { id:"vendas",     href:"/dashboard/sales",       label:"Vendas",        icon:ShoppingCart },
-  { id:"clientes",   href:"/dashboard/customers",   label:"Clientes",      icon:Users,     badge:"NOVO" },
-  { id:"fiado",      href:"/dashboard/receivables", label:"Fiado",         icon:HandCoins, badge:"NOVO" },
-  { id:"pix",        href:"/dashboard/pix",         label:"Cobrar PIX",    icon:QrCode,    badge:"NOVO" },
+  { id:"clientes",   href:"/dashboard/customers",   label:"Clientes",      icon:Users },
+  { id:"fiado",      href:"/dashboard/receivables", label:"Fiado",         icon:HandCoins },
+  { id:"pix",        href:"/dashboard/pix",         label:"Cobrar PIX",    icon:QrCode },
   { id:"estoque",    href:"/dashboard/inventory",   label:"Estoque",       icon:Package },
   { id:"caixa",      href:"/dashboard/cash",        label:"Caixa",         icon:Wallet },
   { id:"recibos",    href:"/dashboard/receipts",    label:"Recibos",       icon:Receipt },
@@ -191,6 +191,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             )
           })}
+          {role !== "seller" && (
+            <Link href="/dashboard/settings#abas" onClick={() => setMobileOpen(false)} style={{fontSize:12,color:"var(--text-subtle)",padding:"8px 12px",textDecoration:"none"}}>
+              Mostrar ou ocultar abas
+            </Link>
+          )}
         </nav>
 
         {trialDaysLeft !== null && trialDaysLeft > 0 && (
