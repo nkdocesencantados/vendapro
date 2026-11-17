@@ -25,7 +25,7 @@ export class ReceivablesService {
       `SELECT s.id AS "saleId", s."customerId", COALESCE(c.name, s."customerName") AS "customerName", c.phone AS "customerPhone",
         s.total, COALESCE(s."paidAmount", 0) AS "paidAmount", COALESCE(s."saleDate", s."createdAt") AS "saleDate", s."dueDate"::text AS "dueDate"
        FROM sales s
-       LEFT JOIN customers c ON c.id = s."customerId" AND c."storeId" = s."storeId"
+       LEFT JOIN customers c ON c.id = s."customerId" AND c."storeId"::text = s."storeId"::text
        WHERE s."storeId" = $1 AND s.status = 'completed' AND s."paymentMethod" = 'fiado' ${saleId ? 'AND s.id = $2' : ''}
        ORDER BY s."dueDate" ASC NULLS LAST, s."createdAt" ASC`,
       params,
@@ -60,7 +60,7 @@ export class ReceivablesService {
     const [received] = await this.saleRepo.query(
       `SELECT COALESCE(SUM(f.amount), 0) AS total
        FROM financial_entries f
-       JOIN sales s ON s.id::text = f."referenceId" AND s."storeId" = f."storeId"
+       JOIN sales s ON s.id::text = f."referenceId" AND s."storeId"::text = f."storeId"::text
        WHERE f."storeId" = $1 AND s."paymentMethod" = 'fiado' AND f.type = 'income' AND f.date >= $2`,
       [storeId, monthStart],
     );
