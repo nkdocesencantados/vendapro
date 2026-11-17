@@ -26,7 +26,7 @@ export class CustomersService {
         MAX(COALESCE(s."saleDate", s."createdAt")) FILTER (WHERE s.status = 'completed') AS "lastPurchase",
         COALESCE(SUM(s.total - COALESCE(s."paidAmount", 0)) FILTER (WHERE s.status = 'completed' AND s."paymentMethod" = 'fiado'), 0) AS balance
        FROM customers c
-       LEFT JOIN sales s ON s."customerId" = c.id AND s."storeId" = c."storeId"
+       LEFT JOIN sales s ON s."customerId" = c.id AND s."storeId"::text = c."storeId"::text
        WHERE ${where}
        GROUP BY c.id
        ORDER BY c.name ASC`,

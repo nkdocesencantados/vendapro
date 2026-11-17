@@ -10,3 +10,4 @@ apps/api/dist/
 # Remotion (login animation) build output
 brand-video/out/
 apps/web/tsconfig.tsbuildinfo
+.playwright-mcp/
