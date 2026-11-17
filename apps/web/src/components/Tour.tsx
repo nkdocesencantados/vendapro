@@ -36,18 +36,23 @@ export default function Tour() {
     return () => window.removeEventListener("vp-tour-open", onOpen)
   }, [])
 
-  const measure = useCallback(() => {
-    const el = step?.href ? document.querySelector(`a.vp-nav-item[href="${step.href}"]`) : null
-    const r = el?.getBoundingClientRect()
-    setRect(r && r.width > 0 && r.right > 0 ? r : null) // menu escondido (celular): mostra o cartão no centro
-  }, [step?.href])
-
+  // o menu muda de posição depois que os dados da loja chegam (plano, logo, abas escondidas),
+  // então acompanha o item a cada quadro em vez de medir uma vez só
   useEffect(() => {
     if (!open) return
-    measure()
-    window.addEventListener("resize", measure)
-    return () => window.removeEventListener("resize", measure)
-  }, [open, measure])
+    const find = () => step?.href ? document.querySelector(`a.vp-nav-item[href="${step.href}"]`) : null
+    find()?.scrollIntoView({ block: "nearest" })
+    let raf = 0, last = ""
+    const tick = () => {
+      const r = find()?.getBoundingClientRect()
+      const ok = r && r.width > 0 && r.right > 0 && r.bottom > 0 && r.top < window.innerHeight
+      const key = ok ? `${r!.top}|${r!.left}|${r!.width}|${r!.height}` : "none"
+      if (key !== last) { last = key; setRect(ok ? r : null) } // menu escondido (celular): cartão no centro
+      raf = requestAnimationFrame(tick)
+    }
+    tick()
+    return () => cancelAnimationFrame(raf)
+  }, [open, step?.href])
 
   const close = useCallback(() => { setOpen(false); try { localStorage.setItem(KEY, "1") } catch {} }, [])
 
