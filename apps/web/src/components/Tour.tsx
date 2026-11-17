@@ -1,13 +1,14 @@
 "use client"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { createPortal } from "react-dom"
 
 // Tour de boas-vindas: aparece no primeiro acesso (vp-tour-done) e reabre pelo evento "vp-tour-open".
 const STEPS: { href?: string; title: string; text: string }[] = [
   { title: "Bem-vindo ao VendaPro", text: "Em 1 minuto mostramos onde fica cada coisa. Você pode pular e rever o tour quando quiser pelo botão de ajuda (?) no topo." },
   { href: "/dashboard", title: "Dashboard", text: "O resumo do dia: quanto vendeu, quantas vendas e como está a meta do mês." },
-  { href: "/dashboard/inventory", title: "1º passo: cadastre seus produtos", text: "Em Estoque, clique em Novo produto e informe nome, preço de venda e quantidade que você tem na loja. O estoque baixa sozinho a cada venda." },
-  { href: "/dashboard/sales", title: "2º passo: registre uma venda", text: "Clique em Nova venda, escolha o cliente e a forma de pagamento. Em cada item: escolha o produto, a QUANTIDADE (quantas unidades) e confira o PREÇO UNITÁRIO (valor de uma unidade). O total é calculado na hora." },
+  { href: "/dashboard/inventory", title: "Comece cadastrando seus produtos", text: "Em Estoque, clique em Novo produto e informe nome, preço de venda e quantidade que você tem na loja. O estoque baixa sozinho a cada venda." },
+  { href: "/dashboard/sales", title: "Depois, registre uma venda", text: "Clique em Nova venda, escolha o cliente e a forma de pagamento. Em cada item: escolha o produto, a QUANTIDADE (quantas unidades) e confira o PREÇO UNITÁRIO (valor de uma unidade). O total é calculado na hora." },
   { href: "/dashboard/customers", title: "Clientes", text: "Guarde nome e telefone de quem compra para vender no fiado e cobrar pelo WhatsApp." },
   { href: "/dashboard/receivables", title: "Fiado", text: "Veja quem está devendo, quando vence e registre os pagamentos recebidos." },
   { href: "/dashboard/pix", title: "Cobrar com PIX", text: "Gere um QR Code ou PIX copia e cola com o valor certo e envie ao cliente." },
@@ -70,7 +71,8 @@ export default function Tour() {
     ? { top: Math.max(16, Math.min(rect.top - 8, window.innerHeight - 260)), left: rect.right + 18 }
     : { top: "50%", left: "50%", transform: "translate(-50%,-50%)" }
 
-  return (
+  // portal no body: o topo tem backdrop-filter, que faria o position:fixed medir a partir dele
+  return createPortal(
     <div role="dialog" aria-modal="true" aria-labelledby="vp-tour-title" style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
       {rect
         ? <div style={{ position: "fixed", top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, borderRadius: 12, border: "2px solid var(--brand)", boxShadow: "0 0 0 9999px rgba(0,0,0,.65)", transition: "all .25s ease", pointerEvents: "none" }} />
@@ -88,6 +90,7 @@ export default function Tour() {
           <button type="button" className="vp-btn vp-btn-primary vp-btn-sm" autoFocus onClick={() => last ? close() : setI(i + 1)}>{last ? "Começar" : "Próximo"}</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
