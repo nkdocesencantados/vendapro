@@ -257,8 +257,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Tour/>
 
           <div className="vp-topbar-actions">
-            <button className="vp-icon-btn" onClick={()=>window.dispatchEvent(new Event("vp-tour-open"))} title="Como usar o VendaPro" aria-label="Abrir tour de ajuda">
-              <HelpCircle size={18} aria-hidden/>
+            <button className="vp-btn vp-btn-secondary vp-btn-sm vp-tour-btn" onClick={()=>window.dispatchEvent(new CustomEvent("vp-tour-open",{detail:{scope:"page"}}))} title="Veja como funciona esta tela" aria-label="Tour da loja: veja como funciona esta tela">
+              <HelpCircle size={16} aria-hidden/> <span>Tour da loja</span>
             </button>
             <button className="vp-icon-btn" onClick={toggleDark} title={dark ? "Modo claro" : "Modo escuro"} aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}>
               {dark ? <Sun size={16} aria-hidden/> : <Moon size={16} aria-hidden/>}

@@ -7,7 +7,8 @@ import { api } from "@/lib/api"
 import { storePix, waLink } from "@/lib/pix"
 
 const BRL = (v: number) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-const DATE = (d?: string) => (d ? new Date(d.length === 10 ? d + "T12:00:00" : d).toLocaleDateString("pt-BR") : "—")
+// a data da venda é um dia do calendário (gravado à meia-noite UTC): usar só AAAA-MM-DD evita mostrar o dia anterior no Brasil
+const DATE = (d?: string) => (d ? new Date(d.slice(0, 10) + "T12:00:00").toLocaleDateString("pt-BR") : "—")
 const TABS = [["open", "Em aberto"], ["overdue", "Atrasados"], ["paid", "Pagos"], ["all", "Todos"]] as const
 const STATUS: Record<string, [string, string]> = { open: ["Em aberto", "vp-pill-warn"], overdue: ["Atrasado", "vp-pill-bad"], paid: ["Pago", "vp-pill-ok"] }
 
@@ -69,7 +70,7 @@ export default function ReceivablesPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .rv-tabs{display:flex;gap:4px;padding:4px;border-radius:12px;border:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
         .rv-tab{min-height:36px;padding:0 14px;border-radius:9px;border:0;background:transparent;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer}
-        .rv-tab.on{background:var(--brand-tint);color:var(--text);font-weight:600;box-shadow:inset 0 0 0 1px var(--brand-soft)}
+        .rv-tab.on{background:var(--brand);color:var(--on-brand);font-weight:600}
         .rv-num{font-family:var(--font-mono);letter-spacing:-.02em}
         .rv-pm{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
       ` }} />

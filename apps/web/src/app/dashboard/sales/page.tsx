@@ -91,7 +91,8 @@ function exportSalesPDF(sales: any[]) {
 }
 
 
-const emptyItem = () => ({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
+const PAY_OPTIONS: [string,string][] = [["pix","PIX"],["cash","Dinheiro"],["credit_card","Crédito"],["debit_card","Débito"],["fiado","Fiado"]]
+const emptyItem = () =>({ productId:"", name:"", quantity:"1", unitPrice:"", isManual:false })
 
 const in30 = () => { const d=new Date(); d.setDate(d.getDate()+30); return d.toISOString().split("T")[0] }
 
@@ -274,6 +275,7 @@ export default function SalesPage() {
         .kpi-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:var(--brand-glow);filter:blur(20px);pointer-events:none;}
         @media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
         @media(max-width:640px){.kpi-grid{grid-template-columns:1fr 1fr!important;}}
+        @media(max-width:520px){.si-grid{grid-template-columns:1fr 1fr 30px!important;}.si-grid>:first-child{grid-column:1/-1;}}
 
         .kpi .dlt{margin-top:4px;font-size:11px;color:var(--success,#1D9E75);}
 
@@ -503,30 +505,27 @@ export default function SalesPage() {
 
                 <div className="vp-field">
 
-                  <label>Pagamento</label>
-
-                  <select className="vp-select" value={form.paymentMethod} onChange={e=>setForm({...form,paymentMethod:e.target.value})}>
-
-                    <option value="pix">PIX</option>
-
-                    <option value="cash">Dinheiro</option>
-
-                    <option value="credit_card">Cartão Crédito</option>
-
-                    <option value="debit_card">Cartão Débito</option>
-
-                    <option value="fiado">Fiado (pagar depois)</option>
-
-                  </select>
-
-                </div>
-
-                <div className="vp-field">
-
                   <label>Data</label>
 
                   <input className="vp-input" type="date" value={form.saleDate} onChange={e=>setForm({...form,saleDate:e.target.value})} />
 
+                </div>
+
+                <div className="vp-field" style={{gridColumn:"1 / -1"}} data-tour="sale-payment">
+                  <label id="sale-pay-label">Forma de pagamento</label>
+                  <div role="radiogroup" aria-labelledby="sale-pay-label" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(92px,1fr))",gap:6}}>
+                    {PAY_OPTIONS.map(([v,l])=>{
+                      const on = form.paymentMethod===v
+                      return (
+                        <button key={v} type="button" role="radio" aria-checked={on} onClick={()=>setForm({...form,paymentMethod:v})}
+                          style={{minHeight:40,padding:"0 10px",borderRadius:10,cursor:"pointer",font:"inherit",fontSize:13,fontWeight:on?700:500,
+                            border:`1.5px solid ${on?"var(--brand)":"var(--border)"}`,background:on?"var(--brand)":"var(--surface-2)",color:on?"var(--on-brand)":"var(--text-muted)"}}>
+                          {l}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {form.paymentMethod==="fiado" && <span style={{fontSize:12,color:"var(--text-subtle)",marginTop:4}}>Fiado: escolha o cliente e o vencimento. A venda fica na aba Fiado até ele pagar.</span>}
                 </div>
 
                 {form.paymentMethod==="fiado" && (
@@ -548,13 +547,13 @@ export default function SalesPage() {
 
               <div style={{background:"var(--surface-2)",borderRadius:10,padding:10}} data-tour="sale-items">
 
-                <div aria-hidden style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:4,fontSize:11,fontWeight:600,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".04em"}}>
+                <div aria-hidden className="si-grid" style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:4,fontSize:11,fontWeight:600,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".04em"}}>
                   <span>Produto</span><span style={{textAlign:"center"}}>Quantidade</span><span>Preço unit. (R$)</span><span/>
                 </div>
 
                 {form.items.map((item:any,i:number)=>(
 
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:6}}>
+                  <div key={i} className="si-grid" style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:6}}>
 
                     {item.isManual ? (
 

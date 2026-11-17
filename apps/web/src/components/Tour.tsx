@@ -11,14 +11,16 @@ type Step = { page?: string; sel?: string; nth?: number; click?: string; title: 
 const C = ".vp-content "
 const BTN = C + ".vp-btn-primary"
 const STEPS: Step[] = [
-  { title: "Bem-vindo ao VendaPro", text: "Vamos passar por cada aba e abrir as telas para você ver como tudo funciona. Leva 2 minutos. Pode pular e rever quando quiser pelo botão (?) no topo." },
+  { title: "Bem-vindo ao VendaPro", text: "Vamos passar por cada aba e abrir as telas para você ver como tudo funciona. Leva 2 minutos. Pode pular: o botão Tour da loja, no topo, explica a tela em que você estiver." },
   { page: "/dashboard", sel: C + ".d-kpis", title: "Seu resumo do dia", text: "Aqui você vê quanto vendeu hoje, o faturamento do mês, o ticket médio, o fiado a receber e os produtos acabando." },
+  { page: "/dashboard", sel: C + ".vp-btn-primary", title: "Atalho para vender", text: "De qualquer lugar do resumo, Nova venda leva direto para registrar uma venda." },
   { page: "/dashboard/inventory", sel: BTN, title: "Comece cadastrando seus produtos", text: "Em Estoque, o botão Novo produto abre o cadastro. Vamos abrir para você ver." },
   { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-name)", title: "Nome do produto", text: "Escreva como você chama o produto na loja, ex.: \"Bolo de pote 250 ml\"." },
   { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-price)", title: "Preço de venda", text: "Quanto o cliente paga por UMA unidade. Esse valor já entra sozinho quando você escolhe o produto na venda." },
   { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-stock)", title: "Quantidade em estoque", text: "Quantas unidades você tem hoje. A cada venda o estoque diminui sozinho, e o painel avisa quando está acabando." },
   { page: "/dashboard/sales", sel: BTN, title: "Registre uma venda", text: "Toda venda começa no botão Nova venda. Vamos abrir para você ver cada campo." },
-  { page: "/dashboard/sales", click: BTN, sel: ".vp-modal-body > div:first-child", title: "Cliente e pagamento", text: "Digite o nome do cliente (ou escolha um cadastrado) e a forma de pagamento: PIX, dinheiro, cartão ou Fiado." },
+  { page: "/dashboard/sales", click: BTN, sel: ".vp-modal-body > div:first-child > .vp-field:first-child", title: "Cliente", text: "Digite o nome do cliente ou escolha um já cadastrado. Para vender fiado, o cliente é obrigatório." },
+  { page: "/dashboard/sales", click: BTN, sel: '[data-tour="sale-payment"]', title: "Forma de pagamento", text: "Toque em como o cliente está pagando: PIX, Dinheiro, Crédito, Débito ou Fiado. No Fiado, escolha o vencimento: a venda vai para a aba Fiado até ser paga." },
   { page: "/dashboard/sales", click: BTN, sel: '[data-tour="sale-items"]', title: "Produto, quantidade e preço", text: "Em cada linha: escolha o PRODUTO, depois a QUANTIDADE (quantas unidades) e confira o PREÇO UNITÁRIO (valor de uma unidade). Use + Item para vender mais de um produto." },
   { page: "/dashboard/sales", click: BTN, sel: ".vp-modal-foot", title: "Total e finalizar", text: "O total é calculado na hora. Clique em Finalizar venda: ela entra no caixa, baixa o estoque e gera o recibo." },
   { page: "/dashboard/customers", sel: BTN, title: "Cadastre seus clientes", text: "Com o cliente salvo você vende no fiado e cobra pelo WhatsApp com um toque." },
@@ -45,13 +47,20 @@ export default function Tour() {
   const [i, setI] = useState(0)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [inMenu, setInMenu] = useState(false)
+  // pelo botão "Tour da loja": só os passos da tela aberta; no primeiro acesso: tour completo
+  const [onlyPage, setOnlyPage] = useState<string | null>(null)
 
-  const steps = open ? STEPS.filter(s => !s.page || s.page === "/dashboard" || navLink(s.page)) : STEPS
+  const all = open ? STEPS.filter(s => !s.page || s.page === "/dashboard" || navLink(s.page)) : STEPS
+  const pageSteps = onlyPage ? all.filter(s => s.page === onlyPage) : []
+  const steps = pageSteps.length ? pageSteps : all
   const step = steps[Math.min(i, steps.length - 1)]
 
   useEffect(() => {
     try { if (!localStorage.getItem(KEY)) setOpen(true) } catch {}
-    const onOpen = () => { setI(0); setOpen(true) }
+    const onOpen = (e: Event) => {
+      setOnlyPage((e as CustomEvent).detail?.scope === "page" ? window.location.pathname : null)
+      setI(0); setOpen(true)
+    }
     window.addEventListener("vp-tour-open", onOpen)
     return () => window.removeEventListener("vp-tour-open", onOpen)
   }, [])
@@ -90,7 +99,11 @@ export default function Tour() {
     return () => cancelAnimationFrame(raf)
   }, [open, step?.page, step?.sel, step?.nth, pathname])
 
-  const close = useCallback(() => { setOpen(false); try { localStorage.setItem(KEY, "1") } catch {} }, [])
+  // fecha também a janela que o tour abriu (o botão do tour fica atrás de qualquer janela, então ela é do tour)
+  const close = useCallback(() => {
+    setOpen(false); document.querySelector<HTMLElement>(".vp-modal-bg")?.click()
+    try { localStorage.setItem(KEY, "1") } catch {}
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -119,14 +132,19 @@ export default function Tour() {
         ? <div style={{ position: "fixed", top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, borderRadius: 12, border: "2px solid var(--brand)", boxShadow: "0 0 0 9999px rgba(0,0,0,.65)", transition: "all .25s ease", pointerEvents: "none" }} />
         : <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.65)" }} />}
       <div style={{ position: "fixed", ...card, width: W, background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)", borderRadius: 14, padding: 18, boxShadow: "0 20px 50px rgba(0,0,0,.45)", transition: "top .25s ease, left .25s ease" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--brand-neon)", letterSpacing: ".06em", textTransform: "uppercase" }}>Passo {i + 1} de {steps.length}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "var(--brand-neon)", letterSpacing: ".06em", textTransform: "uppercase" }}>{pageSteps.length ? "Esta tela · " : ""}Passo {i + 1} de {steps.length}</div>
         <h2 id="vp-tour-title" style={{ fontSize: 16, fontWeight: 700, margin: "6px 0 8px" }}>{step.title}</h2>
         <p style={{ fontSize: 13.5, lineHeight: 1.55, color: "var(--text-muted)" }}>{step.text}</p>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
           <button type="button" className="vp-btn vp-btn-ghost vp-btn-sm" onClick={close} style={{ marginRight: "auto" }}>Pular tour</button>
           {i > 0 && <button type="button" className="vp-btn vp-btn-secondary vp-btn-sm" onClick={() => setI(i - 1)}>Voltar</button>}
-          <button type="button" className="vp-btn vp-btn-primary vp-btn-sm" autoFocus onClick={() => last ? close() : setI(i + 1)}>{last ? "Começar a usar" : "Próximo"}</button>
+          <button type="button" className="vp-btn vp-btn-primary vp-btn-sm" autoFocus onClick={() => last ? close() : setI(i + 1)}>{last ? (pageSteps.length ? "Entendi" : "Começar a usar") : "Próximo"}</button>
         </div>
+        {pageSteps.length > 0 && last && (
+          <button type="button" onClick={() => { setOnlyPage(null); setI(0) }} style={{ marginTop: 12, background: "none", border: 0, padding: 0, color: "var(--brand-neon)", font: "inherit", fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>
+            Ver o tour completo da loja
+          </button>
+        )}
       </div>
     </div>,
     document.body,
