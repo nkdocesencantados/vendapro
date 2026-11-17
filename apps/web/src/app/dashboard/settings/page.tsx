@@ -64,7 +64,7 @@ export default function SettingsPage() {
   const [logo,     setLogo]     = useState("")
   const [logoMsg,  setLogoMsg]  = useState("")
   const [hidden,   setHidden]   = useState<string[]>([])
-  const [plan,     setPlan]     = useState("")
+  const [plan,     setPlan]     = useState("business")
   const [modMsg,   setModMsg]   = useState("")
 
   async function toggleModule(id: string){
@@ -107,7 +107,7 @@ export default function SettingsPage() {
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
-        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); setLogo(s.logoUrl||""); setHidden(s.settings?.hiddenModules||[]); setPlan(s.plan||"")
+        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); setLogo(s.logoUrl||""); setHidden(s.settings?.hiddenModules||[]); setPlan(s.plan||"business")
         setPixKeyType(s.pixKeyType||"cpf"); setPixKey(s.pixKey||""); setPixName(s.pixMerchantName||""); setPixCity(s.pixCity||"")
         localStorage.setItem("storeConfig", JSON.stringify(s))
       }
@@ -252,7 +252,7 @@ export default function SettingsPage() {
           </div>
 
           {/* LOGO */}
-          <div className="st-section">
+          <div className="st-section" data-tour="logo">
             <div className="st-section-title">Logo da loja</div>
             <div className="st-section-sub">Aparece no menu lateral e nos recibos. PNG, JPG ou WEBP; reduzimos o tamanho automaticamente.</div>
             <div style={{display:"flex",alignItems:"center",gap:14,marginTop:12,flexWrap:"wrap"}}>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ABAS DO MENU */}
-          <div className="st-section">
+          <div className="st-section" data-tour="abas" id="abas">
             <div className="st-section-title">Abas do menu</div>
             <div className="st-section-sub">Desligue o que sua loja não usa. Nada é apagado: ligue de novo quando quiser e a aba volta com todos os dados.</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:8,marginTop:12}}>
