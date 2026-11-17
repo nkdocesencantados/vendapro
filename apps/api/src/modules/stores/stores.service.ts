@@ -13,7 +13,7 @@ export class StoresService {
 
   async findOne(id: string) {
     const r = await this.repo.query(
-      `SELECT id, name, "primaryColor", phone, "monthlyGoal", address, COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette, "pixKey", "pixKeyType", "pixMerchantName", "pixCity", "logoUrl" FROM stores WHERE id = $1`, [id]
+      `SELECT id, name, "primaryColor", phone, "monthlyGoal", address, COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette, "pixKey", "pixKeyType", "pixMerchantName", "pixCity", "logoUrl", settings FROM stores WHERE id = $1`, [id]
     );
     if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
     const store = r[0];
@@ -46,6 +46,15 @@ export class StoresService {
     );
     if ('margin' in data || 'profitMargin' in data) try { await this.repo.query(`UPDATE stores SET "profitMargin" = $1, margin = $2 WHERE id = $3`, [data.profitMargin || data.margin || 26.30, data.margin || data.profitMargin || 26.30, id]); } catch(e) {}
     if ('phone' in data || 'cnpj' in data) try { await this.repo.query(`UPDATE stores SET phone = $1, cnpj = $2 WHERE id = $3`, [data.phone || null, data.cnpj || null, id]); } catch(e) {}
+    if ('hiddenModules' in data) {
+      // abas que o lojista escolheu esconder do menu; dashboard e config nunca somem (senão não dá para reativar)
+      const allowed = ['vendas', 'clientes', 'fiado', 'pix', 'estoque', 'caixa', 'recibos', 'relatórios', 'comissoes', 'equipe'];
+      if (!Array.isArray(data.hiddenModules) || data.hiddenModules.some((m: any) => !allowed.includes(m))) throw new BadRequestException('hiddenModules invalido');
+      await this.repo.query(
+        `UPDATE stores SET settings = COALESCE(settings, '{}'::jsonb) || jsonb_build_object('hiddenModules', $1::jsonb) WHERE id = $2`,
+        [JSON.stringify([...new Set(data.hiddenModules)]), id],
+      );
+    }
     if ('logoUrl' in data) {
       const logo = data.logoUrl ? String(data.logoUrl) : null;
       // só aceita imagem embutida (data URL) já reduzida no navegador; cabe no limite padrão de 100kb do body

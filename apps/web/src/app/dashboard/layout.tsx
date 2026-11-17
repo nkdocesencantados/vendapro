@@ -141,7 +141,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pageName  = PAGE_NAMES[pathname] || NAV_ALL.find(n => n.href !== "/dashboard" && pathname.startsWith(n.href))?.label || "VendaPro"
 
   const allowed  = role === "seller" ? SELLER_MENU : (PLAN_MENU[plan] || PLAN_MENU.basic)
-  const navItems = NAV_ALL.filter(n => allowed.includes(n.id))
+  const hidden: string[] = store?.settings?.hiddenModules || []
+  const navItems = NAV_ALL.filter(n => allowed.includes(n.id) && !hidden.includes(n.id))
 
   // Tela de bloqueio de trial
   if (trialExpired) return (
