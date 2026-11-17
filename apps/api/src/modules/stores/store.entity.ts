@@ -53,6 +53,18 @@ export class Store {
   @Column({ type: 'jsonb', nullable: true })
   settings: Record<string, any>;
 
+  @Column({ nullable: true, length: 140 })
+  pixKey: string;
+
+  @Column({ nullable: true, length: 10 })
+  pixKeyType: string; // cpf | cnpj | email | phone | random
+
+  @Column({ nullable: true, length: 25 })
+  pixMerchantName: string;
+
+  @Column({ nullable: true, length: 15 })
+  pixCity: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

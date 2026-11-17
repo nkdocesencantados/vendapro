@@ -1,15 +1,46 @@
 "use client"
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff, Lock, AlertCircle } from "lucide-react"
 import { useAuthStore } from "@/contexts/auth.store"
+import { VendaProLogo } from "@/components/logo"
 
-const PALETTES = [
-  { id:"emerald", color:"#2DBE60", name:"Verde Haux" },
-  { id:"ocean",   color:"#0EA5E9", name:"Azul" },
-  { id:"violet",  color:"#8B5CF6", name:"Violeta" },
-  { id:"amber",   color:"#F59E0B", name:"Âmbar" },
-  { id:"indigo",  color:"#6366F1", name:"Índigo" },
-]
+const POSTER = "/brand/login-hero-poster.jpg"
+
+/* Painel da marca: vídeo em loop → poster → emblema estático, sem mudar o layout. */
+function BrandMedia() {
+  const [reduce, setReduce] = useState(true)          // começa estático; só anima depois de checar a preferência
+  const [videoFailed, setVideoFailed] = useState(false)
+  const [posterFailed, setPosterFailed] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    setReduce(mq.matches)
+    const onChange = (e: MediaQueryListEvent) => setReduce(e.matches)
+    mq.addEventListener?.("change", onChange)
+    const img = new Image()
+    img.onerror = () => setPosterFailed(true)
+    img.src = POSTER
+    return () => mq.removeEventListener?.("change", onChange)
+  }, [])
+
+  return (
+    <div className="lg-media" aria-hidden="true">
+      <img className="lg-emblem" src="/brand/haux-emblem.png" alt="" />
+      {!reduce && !videoFailed ? (
+        <video className="lg-video" autoPlay muted loop playsInline poster={posterFailed ? undefined : POSTER} onError={() => setVideoFailed(true)}>
+          <source src="/brand/login-hero.webm" type="video/webm" />
+          <source src="/brand/login-hero.mp4" type="video/mp4" onError={() => setVideoFailed(true)} />
+        </video>
+      ) : !posterFailed ? (
+        <img className="lg-video" src={POSTER} alt="" onError={() => setPosterFailed(true)} />
+      ) : null}
+      <div className="lg-shade" />
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -19,22 +50,7 @@ export default function LoginPage() {
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [remember, setRemember] = useState(false)
-  const [activePal, setActivePal] = useState("emerald")
-
-  useEffect(() => {
-    try {
-      const s = localStorage.getItem("vp-palette")
-      if (s && PALETTES.some(p => p.id === s)) setActivePal(s)
-    } catch(e) {}
-  }, [])
-
-  function pick(id: string) {
-    setActivePal(id)
-    try { localStorage.setItem("vp-palette", id) } catch(e) {}
-  }
-
-  const pal = PALETTES.find(p => p.id === activePal) || PALETTES[0]
+  const [remember, setRemember] = useState(true)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -44,130 +60,110 @@ export default function LoginPage() {
       const authU = useAuthStore.getState().user
       if (authU?.role === "super_admin") router.push("/superadmin"); else router.push("/dashboard")
     } catch(err: any) {
-      setError(err?.response?.data?.message || "Credenciais inválidas")
+      setError(err?.response?.data?.message || "E-mail ou senha incorretos. Confira e tente de novo.")
     } finally { setLoading(false) }
   }
 
   return (
-    <div className="lg-root" style={{ ["--c" as any]: pal.color }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-        *,*::before,*::after{box-sizing:border-box}
-        html,body{margin:0;background:#08090B}
-        .lg-root{min-height:100vh;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);background:#08090B;color:#EDEFF2;font-family:Inter,system-ui,sans-serif;}
-        .lg-left{display:flex;align-items:center;justify-content:center;padding:40px 36px;position:relative;}
-        .lg-form{width:100%;max-width:380px;}
-        .lg-brand{display:flex;align-items:center;gap:12px;margin-bottom:44px;}
-        .lg-brand img{width:44px;height:44px;border-radius:50%;box-shadow:0 0 24px color-mix(in srgb,var(--c) 40%,transparent);}
-        .lg-brand b{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.03em;}
-        .lg-online{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:#9AA1AD;margin-bottom:14px;}
-        .lg-online i{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);animation:lgPulse 2s infinite;}
-        @keyframes lgPulse{50%{opacity:.35}}
-        h1.lg-h{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:32px;letter-spacing:-.035em;margin:0 0 8px;}
-        .lg-sub{color:#9AA1AD;font-size:14px;margin:0 0 26px;}
-        .lg-label{display:block;font-size:12px;font-weight:500;color:#9AA1AD;margin-bottom:6px;}
-        .lg-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 14px;font-size:14px;color:#EDEFF2;font-family:inherit;outline:none;transition:.15s;}
-        .lg-input:focus{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent);}
-        .lg-input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #14171C inset!important;-webkit-text-fill-color:#EDEFF2!important;}
-        .lg-btn{width:100%;padding:14px;border:0;border-radius:10px;background:var(--c);color:#05070A;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer;box-shadow:0 0 28px color-mix(in srgb,var(--c) 38%,transparent);transition:.15s;}
-        .lg-btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
-        .lg-btn:disabled{opacity:.6;cursor:default;transform:none;}
-        .lg-theme{margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,.07);}
-        .lg-theme small{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:#6F7782;text-transform:uppercase;display:block;margin-bottom:12px;}
-        .lg-sw{display:flex;gap:10px;align-items:center;}
-        .lg-sw button{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:.15s;}
-        .lg-sw button.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.12),0 0 16px currentColor;transform:scale(1.12);}
-        .lg-sw span{font-size:12px;color:#9AA1AD;margin-left:6px;}
-        .lg-err{margin-bottom:14px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:13px;color:#f87171;}
-        .lg-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#9AA1AD;}
-        .lg-row a{color:var(--c);text-decoration:none;font-weight:500;}
-        /* cena 3D */
-        .lg-right{position:relative;overflow:hidden;border-left:1px solid rgba(255,255,255,.06);background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--c) 18%,#08090B) 0%,#08090B 62%);display:flex;align-items:center;justify-content:center;perspective:1100px;}
-        .lg-right::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);}
-        .lg-scene{position:relative;width:min(520px,80%);aspect-ratio:1;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-20deg);}
-        .lg-ring{position:absolute;inset:0;border-radius:50%;border:1px solid color-mix(in srgb,var(--c) 55%,transparent);transform-style:preserve-3d;}
-        .lg-ring.r1{animation:lgSpin 26s linear infinite;}
-        .lg-ring.r2{inset:12%;animation:lgSpin 18s linear infinite reverse;border-style:dashed;opacity:.8;}
-        .lg-ring.r3{inset:26%;animation:lgSpin 12s linear infinite;border-color:color-mix(in srgb,var(--c) 80%,#fff);}
-        .lg-ring::after{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 14px 3px var(--c);}
-        @keyframes lgSpin{to{transform:rotateZ(360deg)}}
-        .lg-core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;}
-        .lg-core img{width:min(150px,28%);border-radius:50%;box-shadow:0 0 70px color-mix(in srgb,var(--c) 55%,transparent);animation:lgFloat 5s ease-in-out infinite;}
-        @keyframes lgFloat{50%{transform:translateY(-10px)}}
-        .lg-glass{position:absolute;z-index:3;padding:12px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 40px rgba(0,0,0,.45);font-family:'JetBrains Mono',monospace;animation:lgBob 6s ease-in-out infinite;}
-        .lg-glass small{display:block;font-size:10px;letter-spacing:.1em;color:#9AA1AD;text-transform:uppercase;margin-bottom:4px;}
-        .lg-glass b{font-size:18px;font-weight:500;}
-        .lg-glass em{font-style:normal;color:var(--c);}
-        .g1{top:16%;left:9%;}
-        .g2{bottom:20%;right:8%;animation-delay:-2s;}
-        .g3{bottom:11%;left:15%;animation-delay:-4s;}
-        @keyframes lgBob{50%{transform:translateY(-12px)}}
-        .lg-scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:.35;animation:lgScan 7s linear infinite;}
-        @keyframes lgScan{from{top:-2%}to{top:102%}}
+    // data-theme="dark" fixa o verde Haux Web aqui, independente do tema/paleta da loja
+    <div className="lg-root" data-theme="dark">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .lg-root{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--bg);color:var(--text);font-family:var(--font);}
+        .lg-brand{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:28px;padding:48px;border-right:1px solid var(--border);
+          background:radial-gradient(700px 500px at 30% 40%,rgba(45,190,96,.22),transparent 65%),linear-gradient(160deg,#0B3A1F 0%,#06120B 60%,#060A08 100%);}
+        .lg-brand::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(126,232,168,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(126,232,168,.05) 1px,transparent 1px);background-size:40px 40px;}
+        .lg-media{position:absolute;inset:0;display:grid;place-items:center;}
+        .lg-emblem{width:min(220px,34%);aspect-ratio:1;border-radius:50%;opacity:.9;box-shadow:0 0 80px rgba(45,190,96,.35);}
+        .lg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:transparent;}
+        .lg-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,8,.55) 0%,rgba(6,10,8,0) 30%,rgba(6,10,8,.2) 55%,rgba(6,10,8,.92) 100%);}
+        .lg-brand > *:not(.lg-media){position:relative;}
+        .lg-copy{margin-top:auto;display:flex;flex-direction:column;gap:16px;max-width:480px;}
+        .lg-h{font-size:clamp(32px,4vw,44px);line-height:1.05;font-weight:600;letter-spacing:-.03em;text-wrap:balance;}
+        .lg-h span{color:var(--brand-neon);}
+        .lg-lead{font-size:16px;line-height:1.6;color:#B7CCBF;max-width:44ch;}
+        .lg-chips{list-style:none;display:flex;flex-wrap:wrap;gap:10px;}
+        .lg-chips li{font-size:13px;padding:8px 12px;border-radius:999px;border:1px solid rgba(126,232,168,.25);background:rgba(6,10,8,.55);backdrop-filter:blur(6px);}
+        .lg-formwrap{display:flex;align-items:center;justify-content:center;padding:48px;}
+        .lg-form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:18px;}
+        .lg-title{font-size:26px;font-weight:600;letter-spacing:-.02em;}
+        .lg-sub{font-size:14px;color:var(--text-muted);margin-top:6px;}
+        .lg-label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-soft);}
+        .lg-input{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--border-strong);background:#0B120F;color:var(--text);font:15px var(--font);outline:none;transition:border-color .18s,box-shadow .18s;}
+        .lg-input::placeholder{color:var(--text-subtle);}
+        .lg-input:focus{border-color:var(--brand);box-shadow:var(--focus-ring);}
+        .lg-input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #0B120F inset!important;-webkit-text-fill-color:var(--text)!important;}
+        .lg-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--text-muted);cursor:pointer;}
+        .lg-eye:hover{color:var(--text);background:var(--surface-2);}
+        .lg-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;}
+        .lg-row label{display:flex;align-items:center;gap:8px;color:var(--text-soft);cursor:pointer;}
+        .lg-row a,.lg-foot a{color:var(--brand-neon);text-decoration:none;font-weight:500;}
+        .lg-row a:hover,.lg-foot a:hover{color:#B6F5CF;text-decoration:underline;}
+        .lg-err{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--danger-bg);border:1px solid rgba(255,138,138,.3);font-size:13px;line-height:1.45;color:var(--danger);}
+        .lg-submit{min-height:48px;font-size:15px;width:100%;}
+        .lg-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(4,20,10,.3);border-top-color:#04140A;animation:spin .7s linear infinite;}
+        .lg-seal{display:flex;align-items:center;justify-content:center;gap:8px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-subtle);}
         @media(max-width:900px){
-          .lg-root{grid-template-columns:1fr;}
-          .lg-right{order:-1;min-height:260px;border-left:0;border-bottom:1px solid rgba(255,255,255,.06);}
-          .lg-scene{width:240px;}
-          .lg-glass{display:none;}
-          .lg-left{padding:28px 20px 40px;}
-          .lg-brand{margin-bottom:28px;}
+          .lg-root{grid-template-columns:minmax(0,1fr);}
+          .lg-brand{min-height:220px;padding:20px;gap:14px;border-right:0;border-bottom:1px solid var(--border);}
+          .lg-emblem{width:120px;}
+          .lg-h{font-size:28px;}
+          .lg-lead,.lg-chips{display:none;}
+          .lg-formwrap{padding:28px 20px 40px;align-items:flex-start;}
         }
-        @media(prefers-reduced-motion:reduce){.lg-ring,.lg-glass,.lg-core img,.lg-scan{animation:none!important}}
-      `}</style>
+      ` }} />
 
-      <div className="lg-left">
-        <div className="lg-form">
-          <div className="lg-brand">
-            <img src="/brand/haux-emblem.png" alt="" />
-            <b>VendaPro</b>
-          </div>
-          <div className="lg-online"><i/> SISTEMA ONLINE</div>
-          <h1 className="lg-h">Entrar</h1>
-          <p className="lg-sub">Acesse sua conta e gerencie sua loja.</p>
-          {error && <div className="lg-err">{error}</div>}
-          <form onSubmit={onSubmit} style={{display:"flex",flexDirection:"column",gap:14}}>
-            <div>
-              <label className="lg-label" htmlFor="lg-email">E-mail</label>
-              <input id="lg-email" className="lg-input" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="seu@email.com" required/>
-            </div>
-            <div>
-              <label className="lg-label" htmlFor="lg-pass">Senha</label>
-              <div style={{position:"relative"}}>
-                <input id="lg-pass" className="lg-input" type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required style={{paddingRight:60}}/>
-                <button type="button" onClick={()=>setShow(!show)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:0,cursor:"pointer",color:"#9AA1AD",fontSize:12}}>{show?"Ocultar":"Ver"}</button>
-              </div>
-            </div>
-            <div className="lg-row">
-              <label style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
-                <input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} style={{accentColor:pal.color}}/> Lembrar-me
-              </label>
-              <a href="https://wa.me/5511958924764" target="_blank" rel="noopener noreferrer">Esqueci a senha</a>
-            </div>
-            <button type="submit" disabled={loading} className="lg-btn">{loading?"Entrando...":"Entrar"}</button>
-          </form>
-
-          <div className="lg-theme">
-            <small>Cor do tema</small>
-            <div className="lg-sw">
-              {PALETTES.map(p => (
-                <button key={p.id} type="button" aria-label={p.name} title={p.name} className={activePal===p.id?"on":""} style={{background:p.color,color:p.color}} onClick={()=>pick(p.id)}/>
-              ))}
-              <span>{pal.name}</span>
-            </div>
-          </div>
+      <section className="lg-brand">
+        <BrandMedia />
+        <VendaProLogo size={44} />
+        <div className="lg-copy">
+          <h1 className="lg-h">Seu negócio,<br/><span>no controle.</span></h1>
+          <p className="lg-lead">Vendas, estoque, caixa e fiado em um só lugar, feito para quem vende todo dia.</p>
         </div>
-      </div>
+        <ul className="lg-chips">
+          <li>PIX integrado</li>
+          <li>Cobrança pelo WhatsApp</li>
+          <li>Funciona no celular</li>
+        </ul>
+      </section>
 
-      <div className="lg-right" aria-hidden="true">
-        <div className="lg-scan"/>
-        <div className="lg-scene">
-          <div className="lg-ring r1"/><div className="lg-ring r2"/><div className="lg-ring r3"/>
-          <div className="lg-core"><img src="/brand/haux-emblem.png" alt=""/></div>
-        </div>
-        <div className="lg-glass g1"><small>Venda #1043</small><b>R$ 342,00</b></div>
-        <div className="lg-glass g2"><small>Faturamento hoje</small><b><em>▲</em> R$ 4.872</b></div>
-        <div className="lg-glass g3"><small>Caixa</small><b>Conciliado <em>●</em></b></div>
-      </div>
+      <section className="lg-formwrap">
+        <form className="lg-form" onSubmit={onSubmit}>
+          <div>
+            <h2 className="lg-title">Entrar</h2>
+            <p className="lg-sub">Acesse o painel da sua loja.</p>
+          </div>
+
+          {error && <div className="lg-err" role="alert"><AlertCircle size={16} style={{flexShrink:0,marginTop:1}} aria-hidden/>{error}</div>}
+
+          <label className="lg-label" htmlFor="lg-email">E-mail
+            <input id="lg-email" className="lg-input" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="voce@sualoja.com.br" required/>
+          </label>
+
+          <label className="lg-label" htmlFor="lg-pass">Senha
+            <span style={{position:"relative",display:"block"}}>
+              <input id="lg-pass" className="lg-input" type={show?"text":"password"} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Sua senha" required style={{paddingRight:48}}/>
+              <button type="button" className="lg-eye" onClick={()=>setShow(!show)} aria-label={show?"Ocultar senha":"Mostrar senha"} aria-pressed={show}>
+                {show ? <EyeOff size={17} aria-hidden/> : <Eye size={17} aria-hidden/>}
+              </button>
+            </span>
+          </label>
+
+          <div className="lg-row">
+            <label>
+              <input type="checkbox" checked={remember} onChange={e=>setRemember(e.target.checked)} style={{accentColor:"var(--brand)",width:16,height:16}}/> Manter conectado
+            </label>
+            <Link href="/forgot-password">Esqueci a senha</Link>
+          </div>
+
+          <button type="submit" disabled={loading} className="vp-btn vp-btn-primary lg-submit">
+            {loading ? <><span className="lg-spin" aria-hidden/> Entrando…</> : "Entrar"}
+          </button>
+
+          <div className="lg-seal">
+            <Lock size={14} aria-hidden/> Conexão criptografada · Um produto Haux Web
+          </div>
+        </form>
+      </section>
     </div>
   )
 }

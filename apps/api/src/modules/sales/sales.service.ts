@@ -2,7 +2,9 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
-import { Sale, SaleStatus } from "./sale.entity";
+import { isUUID, isISO8601 } from "class-validator";
+import { Sale, SaleStatus, PaymentMethod } from "./sale.entity";
+import { Customer } from "../customers/customer.entity";
 import { StockMovement, MovementType } from "../stock/stock-movement.entity";
 import { SaleItem } from "./sale-item.entity";
 import { Product } from "../products/product.entity";
@@ -18,6 +20,7 @@ export class SalesService {
     @InjectRepository(StockMovement) private movRepo: Repository<StockMovement>,
     @InjectRepository(FinancialEntry) private financialRepo: Repository<FinancialEntry>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Customer) private customerRepo: Repository<Customer>,
   ) {}
 
   async findAll(storeId: string, from?: string, to?: string, sellerId?: string) {
@@ -39,8 +42,8 @@ export class SalesService {
     return salesWithItems;
   }
 
-  async findOne(id: string) {
-    const sale = await this.saleRepo.findOne({ where: { id } });
+  async findOne(id: string, storeId: string) {
+    const sale = await this.saleRepo.findOne({ where: { id, storeId } });
     if (!sale) throw new NotFoundException("Venda nao encontrada");
     const items = await this.itemRepo.find({ where: { saleId: id } });
     return { ...sale, items };
@@ -73,11 +76,28 @@ export class SalesService {
     const total = Math.max(subtotal - discount, 0); // total nunca negativo
     const commission = total * ((Number(saleData.commissionRate) || 15) / 100);
     const saleDate = saleData.saleDate ? new Date(saleData.saleDate) : new Date();
-    const { saleDate: _sd, createdAt: _ca, ...cleanSaleData } = saleData;
+    const { saleDate: _sd, createdAt: _ca, id: _id, paidAt: _pa, paidAmount: _pam, customerId, dueDate, ...cleanSaleData } = saleData;
+
+    const isFiado = saleData.paymentMethod === PaymentMethod.FIADO;
+    if (isFiado && !customerId) throw new BadRequestException("Venda fiado exige um cliente (customerId)");
+    if (customerId) {
+      if (!isUUID(String(customerId))) throw new BadRequestException("customerId invalido");
+      const customer = await this.customerRepo.findOne({ where: { id: customerId, storeId } });
+      if (!customer) throw new BadRequestException("Cliente nao encontrado");
+      cleanSaleData.customerName = customer.name;
+    }
+    if (dueDate && !isISO8601(String(dueDate))) throw new BadRequestException("dueDate invalido (use YYYY-MM-DD)");
+    let fiadoDueDate: string = null;
+    if (isFiado) {
+      const d = new Date(); d.setDate(d.getDate() + 30);
+      fiadoDueDate = dueDate ? String(dueDate).slice(0, 10) : d.toLocaleDateString("sv-SE");
+    }
 
     const saleEntity = this.saleRepo.create({
       ...cleanSaleData, storeId, sellerId, subtotal, total, commission,
       status: SaleStatus.COMPLETED, saleDate,
+      customerId: customerId || null, dueDate: fiadoDueDate,
+      paidAmount: isFiado ? 0 : total,
     });
     const savedSale: any = await this.saleRepo.save(saleEntity);
     const saleId: string = savedSale.id;
@@ -103,7 +123,8 @@ export class SalesService {
       }
     }
 
-    await this.financialRepo.save(this.financialRepo.create({
+    // fiado: a entrada financeira é lançada a cada recebimento (POST /receivables/:saleId/payments)
+    if (!isFiado) await this.financialRepo.save(this.financialRepo.create({
       type: EntryType.INCOME, category: EntryCategory.SALE,
       description: `Venda #${saleId.slice(0, 8)}`, amount: total,
       date: saleDate, isPaid: true, referenceId: saleId, storeId, createdById: sellerId,
@@ -112,8 +133,8 @@ export class SalesService {
     return { id: saleId, message: "Venda criada com sucesso" };
   }
 
-  async cancel(id: string) {
-    const sale = await this.saleRepo.findOne({ where: { id } });
+  async cancel(id: string, storeId: string) {
+    const sale = await this.saleRepo.findOne({ where: { id, storeId } });
     if (!sale) throw new NotFoundException("Venda nao encontrada");
     if (sale.status === SaleStatus.CANCELLED) throw new BadRequestException("Venda ja cancelada");
     await this.saleRepo.update(id, { status: SaleStatus.CANCELLED });

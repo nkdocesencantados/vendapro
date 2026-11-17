@@ -1,10 +1,11 @@
 ﻿"use client"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
+import { PIX_TYPES, pixKeyError } from "@/lib/pix"
 import { useAuthStore } from "@/contexts/auth.store"
 
 const PALETTES = [
-  { id:"emerald",  name:"Verde Haux", color:"#2DBE60", desc:"Identidade padrão" },
+  { id:"emerald",  name:"Verde Haux (padrão)", color:"#2DBE60", desc:"Identidade padrão" },
   { id:"indigo",   name:"Índigo",    color:"#6366F1", desc:"Sério, tecnológico" },
   { id:"amber",    name:"Âmbar",     color:"#F59E0B", desc:"Confeitaria, padaria, café" },
   { id:"crimson",  name:"Carmim",    color:"#E11D48", desc:"Açougue, lanchonete, brechó" },
@@ -13,17 +14,19 @@ const PALETTES = [
   { id:"rose",     name:"Rosé",      color:"#EC4899", desc:"Floricultura, pet shop, doceria" },
   { id:"graphite", name:"Grafite",   color:"#94A3B8", desc:"Minimal, foco em dados" },
 ]
-
-function PaletteBar({ color }: { color: string }) {
-  const shades = [color+"CC","#888","#555","#333","#222"]
-  return (
-    <div style={{display:"flex",gap:2,marginTop:6}}>
-      {shades.map((c,i)=>(
-        <div key={i} style={{flex:1,height:4,borderRadius:2,background:i===0?color:`${color}${["55","33","22","11"][i-1]}`}}/>
-      ))}
-    </div>
-  )
+const THEMES: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
+  emerald: { brand:"#2DBE60", brandDeep:"#0B3A1F", brandGlow:"#7EE8A8" },
+  amber:   { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
+  crimson: { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
+  violet:  { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },
+  ocean:   { brand:"#0EA5E9", brandDeep:"#082F49", brandGlow:"#7DD3FC" },
+  indigo:  { brand:"#6366F1", brandDeep:"#1E1B4B", brandGlow:"#A5B4FC" },
+  rose:    { brand:"#F43F5E", brandDeep:"#4C0519", brandGlow:"#FDA4AF" },
+  graphite:{ brand:"#64748B", brandDeep:"#0F172A", brandGlow:"#CBD5E1" },
 }
+
+const PIX_PLACEHOLDER: Record<string,string> = { cpf:"000.000.000-00", cnpj:"00.000.000/0000-00", email:"voce@email.com", phone:"(11) 9 0000-0000", random:"123e4567-e89b-12d3-a456-426614174000" }
+
 
 export default function SettingsPage() {
   const { user: authUser } = useAuthStore()
@@ -32,6 +35,10 @@ export default function SettingsPage() {
   const [saved,    setSaved]    = useState(false)
   const [name,     setName]     = useState("")
   const [palette,  setPalette]  = useState("emerald")
+  const [pixKeyType, setPixKeyType] = useState("cpf")
+  const [pixKey,     setPixKey]     = useState("")
+  const [pixName,    setPixName]    = useState("")
+  const [pixCity,    setPixCity]    = useState("")
   const [goal,     setGoal]     = useState("")
   const [margin,   setMargin]   = useState("26")
   const [address,  setAddress]  = useState("")
@@ -40,20 +47,41 @@ export default function SettingsPage() {
   const [userEmail,setUserEmail]= useState("")
   const [newPwd,   setNewPwd]   = useState("")
   const [storeId,  setStoreId]  = useState("")
+  const [logo,     setLogo]     = useState("")
+  const [logoMsg,  setLogoMsg]  = useState("")
 
-  const activePalette = PALETTES.find(p=>p.id===palette) || PALETTES[0]
+  // reduz para 256px no navegador: a logo vira um data URL pequeno salvo junto da loja
+  async function onLogoFile(file?: File){
+    if(!file) return
+    if(!/^image\/(png|jpeg|webp)$/.test(file.type)){ setLogoMsg("Use uma imagem PNG, JPG ou WEBP."); return }
+    try{
+      const bmp = await createImageBitmap(file)
+      const k = Math.min(1, 256/Math.max(bmp.width,bmp.height))
+      const c = document.createElement("canvas"); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k)
+      c.getContext("2d")!.drawImage(bmp,0,0,c.width,c.height)
+      const url = c.toDataURL("image/webp",0.85)
+      await saveLogo(url.startsWith("data:image/webp") ? url : c.toDataURL("image/png"))
+    }catch{ setLogoMsg("Não foi possível ler essa imagem.") }
+  }
+  async function saveLogo(url: string){
+    setLogoMsg("Salvando…")
+    try{
+      await api.patch(`/stores/${storeId}`,{ logoUrl: url || null })
+      setLogo(url); setLogoMsg(url ? "Logo salva." : "Logo removida.")
+      window.dispatchEvent(new Event("storeConfigUpdated"))
+    }catch(e:any){ setLogoMsg(e?.response?.data?.message || "Não foi possível salvar a logo.") }
+  }
+
+  const pixErr = pixKeyError(pixKeyType, pixKey)
 
   useEffect(()=>{
-    const saved = localStorage.getItem("vp-palette") || "emerald"
-    setPalette(saved)
-    // Aplicar paleta salva imediatamente sem esperar a API
-    applyPalette(saved)
+    applyPalette(localStorage.getItem("vp-palette") || "emerald")
     api.get("/stores").then(r=>{
       const s = Array.isArray(r.data)?r.data[0]:r.data
       if(s){
-        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone)
-        // Setar estado mas NÃO reaplicar paleta — respeitar o que está ativo visualmente
-         localStorage.setItem("storeConfig", JSON.stringify(s))
+        setName(s.name||""); setGoal(s.monthlyGoal?String(s.monthlyGoal):""); setMargin(String(s.margin||"26")); setAddress(s.address||""); setStoreId(s.id||authUser?.storeId||""); if(s.phone)setPhone(s.phone); setLogo(s.logoUrl||"")
+        setPixKeyType(s.pixKeyType||"cpf"); setPixKey(s.pixKey||""); setPixName(s.pixMerchantName||""); setPixCity(s.pixCity||"")
+        localStorage.setItem("storeConfig", JSON.stringify(s))
       }
     }).catch(()=>{})
     if(authUser){ setUserName(authUser.name||""); setUserEmail(authUser.email||"") }
@@ -65,29 +93,22 @@ export default function SettingsPage() {
     const r = document.documentElement
     r.setAttribute("data-palette", id)
     // Aplicar variáveis CSS imediatamente sem precisar recarregar
-    const themes: Record<string,{brand:string,brandDeep:string,brandGlow:string}> = {
-      emerald: { brand:"#2DBE60", brandDeep:"#0B3A1F", brandGlow:"#7EE8A8" },
-      amber:   { brand:"#F59E0B", brandDeep:"#3F1D04", brandGlow:"#FCD34D" },
-      crimson: { brand:"#E11D48", brandDeep:"#3F0612", brandGlow:"#FB7185" },
-      violet:  { brand:"#8B5CF6", brandDeep:"#2A1065", brandGlow:"#C4B5FD" },
-      ocean:   { brand:"#0EA5E9", brandDeep:"#082F49", brandGlow:"#7DD3FC" },
-      indigo:  { brand:"#6366F1", brandDeep:"#1E1B4B", brandGlow:"#A5B4FC" },
-      rose:    { brand:"#F43F5E", brandDeep:"#4C0519", brandGlow:"#FDA4AF" },
-      graphite:{ brand:"#64748B", brandDeep:"#0F172A", brandGlow:"#CBD5E1" },
-    }
-    const t = themes[id] || themes.emerald
+    const t = THEMES[id] || THEMES.emerald
     r.style.setProperty("--brand",      t.brand)
     r.style.setProperty("--brand-deep", t.brandDeep)
     r.style.setProperty("--brand-glow", t.brandGlow)
   }
 
   async function saveStore(){
+    if(pixErr) return alert(pixErr)
+    if(pixKey.trim() && (!pixName.trim() || !pixCity.trim())) return alert("Informe nome do recebedor e cidade para o PIX")
     setSaving(true)
+    const pix = { pixKeyType, pixKey:pixKey.trim()||null, pixMerchantName:pixName.trim().slice(0,25)||null, pixCity:pixCity.trim().slice(0,15)||null }
     try{
-      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26, profitMargin:+margin||26, phone })
+      await api.patch(`/stores/${storeId}`,{ name, palette, monthlyGoal:+goal||0, address, margin:+margin||26, profitMargin:+margin||26, phone, ...pix })
       const sc = localStorage.getItem("storeConfig")
       const store = sc?JSON.parse(sc):{}
-      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26,profitMargin:+margin||26,phone}))
+      localStorage.setItem("storeConfig", JSON.stringify({...store,name,palette,monthlyGoal:+goal||0,address,margin:+margin||26,profitMargin:+margin||26,phone,...pix}))
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       window.dispatchEvent(new Event("storeConfigUpdated"))
     }catch(e:any){ alert(e?.response?.data?.message||"Erro ao salvar") }
@@ -108,7 +129,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{maxWidth:960,margin:"0 auto"}}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .st-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:24px;}
         .st-tab{padding:10px 16px;font-size:13px;color:var(--text-subtle);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:var(--transition);}
         .st-tab:hover{color:var(--text);}
@@ -122,22 +143,18 @@ export default function SettingsPage() {
         .st-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-glow);}
         .st-input::placeholder{color:var(--text-subtle);}
         .st-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-        .palette-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-        .palette-card{border:2px solid var(--border);border-radius:var(--r-md);padding:14px;cursor:pointer;transition:var(--transition);background:var(--surface-2);}
-        .palette-card:hover{border-color:var(--border-strong);transform:translateY(-1px);}
-        .palette-card.active{border-width:2px;}
-        .palette-dot{width:40px;height:40px;border-radius:var(--r);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;}
-        .palette-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
-        .palette-desc{font-size:10px;color:var(--text-subtle);}
-        .preview-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-top:20px;}
-        .preview-title{font-size:11px;font-weight:700;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
-        .preview-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;flex:1;}
         .save-btn{width:100%;padding:13px;background:var(--brand);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font);margin-top:8px;}
         .save-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
         .save-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
         .success-toast{padding:12px 16px;background:var(--success-bg);border:1px solid var(--brand);border-radius:var(--r);font-size:13px;color:var(--brand);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .palette-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .palette-card{border:2px solid var(--border);border-radius:var(--r-md);padding:14px;cursor:pointer;transition:var(--transition);background:var(--surface-2);text-align:left;color:inherit;font:inherit;}
+        .palette-card:hover{border-color:var(--border-strong);transform:translateY(-1px);}
+        .palette-dot{width:40px;height:40px;border-radius:var(--r);margin-bottom:8px;display:flex;align-items:center;justify-content:center;}
+        .palette-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+        .palette-desc{font-size:10px;color:var(--text-subtle);}
         @media(max-width:768px){.palette-grid{grid-template-columns:repeat(2,1fr);} .st-row{grid-template-columns:1fr;}}
-      `}</style>
+      ` }} />
 
       {/* HEADER */}
       <div style={{marginBottom:24}}>
@@ -206,54 +223,74 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* LOGO */}
+          <div className="st-section">
+            <div className="st-section-title">Logo da loja</div>
+            <div className="st-section-sub">Aparece no menu lateral e nos recibos. PNG, JPG ou WEBP; reduzimos o tamanho automaticamente.</div>
+            <div style={{display:"flex",alignItems:"center",gap:14,marginTop:12,flexWrap:"wrap"}}>
+              <div style={{width:64,height:64,borderRadius:12,border:"1px dashed var(--border-strong)",background:"var(--surface-2)",display:"grid",placeItems:"center",overflow:"hidden",color:"var(--text-subtle)",fontSize:11}}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {logo ? <img src={logo} alt="Logo atual" style={{width:"100%",height:"100%",objectFit:"cover"}}/> : "Sem logo"}
+              </div>
+              <label className="vp-btn vp-btn-secondary vp-btn-sm" style={{cursor:"pointer"}}>
+                {logo ? "Trocar logo" : "Enviar logo"}
+                <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>{onLogoFile(e.target.files?.[0]); e.target.value=""}}/>
+              </label>
+              {logo && <button type="button" className="vp-btn vp-btn-ghost vp-btn-sm" onClick={()=>saveLogo("")}>Remover</button>}
+              {logoMsg && <span role="status" style={{fontSize:12,color:"var(--text-muted)"}}>{logoMsg}</span>}
+            </div>
+          </div>
+
           {/* PALETAS */}
           <div className="st-section">
-            <div className="st-section-title">Identidade visual</div>
-            <div className="st-section-sub">Escolha uma paleta — cada uma traz uma cor principal, profunda e um glow ambiental</div>
-
-            <div className="palette-grid">
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+              <div>
+                <div className="st-section-title">Cores da loja</div>
+                <div className="st-section-sub">Escolha a paleta do seu painel. A cor é aplicada na hora em todo o sistema.</div>
+              </div>
+              <button type="button" className="vp-btn vp-btn-secondary vp-btn-sm" disabled={palette==="emerald"} onClick={()=>applyPalette("emerald")}>Restaurar padrão</button>
+            </div>
+            <div className="palette-grid" role="radiogroup" aria-label="Paleta de cores">
               {PALETTES.map(p=>(
-                <div key={p.id} className={`palette-card${palette===p.id?" active":""}`}
+                <button type="button" key={p.id} role="radio" aria-checked={palette===p.id} className="palette-card"
                   style={{borderColor: palette===p.id ? p.color : undefined}}
                   onClick={()=>applyPalette(p.id)}>
                   <div className="palette-dot" style={{background:p.color}}>
-                    {palette===p.id && (
-                      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3}><path d="M20 6L9 17l-5-5"/></svg>
-                    )}
+                    {palette===p.id && <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3}><path d="M20 6L9 17l-5-5"/></svg>}
                   </div>
                   <div className="palette-name">{p.name}</div>
-                  <div style={{fontSize:10,color:"var(--text-subtle)",fontFamily:"var(--font-mono)",marginBottom:4}}>{p.color}</div>
                   <div className="palette-desc">{p.desc}</div>
-                  <PaletteBar color={p.color}/>
-                </div>
+                </button>
               ))}
             </div>
+          </div>
 
-            {/* PREVIEW */}
-            <div className="preview-box">
-              <div className="preview-title">Pré-visualização</div>
-              <div style={{background:"var(--bg-elevated)",border:"1px solid var(--border)",borderRadius:12,padding:16}}>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-                  <div style={{width:32,height:32,borderRadius:8,background:activePalette.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"white"}}>{initials}</div>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{name||"Minha Loja"}</div>
-                    <div style={{fontSize:10,color:"var(--text-subtle)"}}>Painel principal</div>
-                  </div>
-                </div>
-                <div style={{display:"flex",gap:10,marginBottom:12}}>
-                  <div className="preview-kpi">
-                    <div style={{fontSize:10,color:"var(--text-subtle)",marginBottom:6,textTransform:"uppercase",letterSpacing:".06em"}}>Meta mensal</div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:18,fontWeight:700,color:activePalette.color}}>R$ {goal||"0"}</div>
-                  </div>
-                  <div className="preview-kpi">
-                    <div style={{fontSize:10,color:"var(--text-subtle)",marginBottom:6,textTransform:"uppercase",letterSpacing:".06em"}}>Vendas hoje</div>
-                    <div style={{fontFamily:"var(--font-mono)",fontSize:18,fontWeight:700,color:"var(--text)"}}>R$ 0</div>
-                  </div>
-                </div>
-                <button style={{width:"100%",padding:"10px",background:activePalette.color,color:"white",border:"none",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"var(--font)"}}>
-                  + Nova venda
-                </button>
-                <div style={{fontSize:11,color:"var(--text-subtle)",textAlign:"center",marginTop:10}}>A cor é aplicada em todo o sistema da sua loja.</div>
+          {/* PIX */}
+          <div className="st-section">
+            <div className="st-section-title">Recebimento PIX</div>
+            <div className="st-section-sub">Usado para gerar o QR Code e o código copia e cola nos recibos e cobranças de fiado</div>
+
+            <div className="st-row">
+              <div className="st-field">
+                <label className="st-label" htmlFor="pix-type">Tipo de chave</label>
+                <select id="pix-type" className="st-input" value={pixKeyType} onChange={e=>setPixKeyType(e.target.value)}>
+                  {PIX_TYPES.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+              <div className="st-field">
+                <label className="st-label" htmlFor="pix-key">Chave PIX</label>
+                <input id="pix-key" className="st-input" value={pixKey} onChange={e=>setPixKey(e.target.value)} placeholder={PIX_PLACEHOLDER[pixKeyType]} aria-invalid={!!pixErr}/>
+                {pixErr && <span style={{fontSize:12,color:"var(--danger)"}}>{pixErr}</span>}
+              </div>
+            </div>
+            <div className="st-row">
+              <div className="st-field">
+                <label className="st-label" htmlFor="pix-name">Nome do recebedor</label>
+                <input id="pix-name" className="st-input" maxLength={25} value={pixName} onChange={e=>setPixName(e.target.value)} placeholder="Como aparece no app do banco"/>
+              </div>
+              <div className="st-field">
+                <label className="st-label" htmlFor="pix-city">Cidade</label>
+                <input id="pix-city" className="st-input" maxLength={15} value={pixCity} onChange={e=>setPixCity(e.target.value)} placeholder="São Paulo"/>
               </div>
             </div>
           </div>

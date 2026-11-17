@@ -13,5 +13,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // public/ assets (logo, login video) must load without a session
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|brand/).*)"],
 };

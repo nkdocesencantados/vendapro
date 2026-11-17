@@ -1,4 +1,5 @@
-﻿import { Injectable } from "@nestjs/common";
+﻿import { Injectable, BadRequestException } from "@nestjs/common";
+import { isISO8601 } from "class-validator";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between } from "typeorm";
 import { Sale, SaleStatus } from "../sales/sale.entity";
@@ -158,6 +159,23 @@ export class ReportsService {
       ? Math.round((cancelCount / (totalSales + cancelCount)) * 100) : 0;
 
     return { totalRevenue, totalSales, avgTicket, estimatedProfit, maxSale, minSale, dailyChart, paymentMethods, topProducts, slowProducts, sellerRanking, monthlyGoal, cancelRate, cancelCount, activeDays };
+  }
+
+  async commissions(storeId: string, from: string, to: string, sellerId?: string) {
+    if (!isISO8601(from) || !isISO8601(to)) throw new BadRequestException("from/to devem estar no formato YYYY-MM-DD");
+    const params: any[] = [storeId, from, to];
+    if (sellerId) params.push(sellerId);
+    const rows = await this.saleRepo.query(
+      `SELECT s."sellerId", u.name AS "sellerName", COUNT(*) AS sales, COALESCE(SUM(s.total), 0) AS total, COALESCE(SUM(s.commission), 0) AS commission
+       FROM sales s LEFT JOIN users u ON u.id::text = s."sellerId"
+       WHERE s."storeId" = $1 AND s.status = 'completed'
+         AND COALESCE(s."saleDate", s."createdAt") >= $2::date AND COALESCE(s."saleDate", s."createdAt") < $3::date + 1
+         ${sellerId ? 'AND s."sellerId" = $4' : ''}
+       GROUP BY s."sellerId", u.name
+       ORDER BY total DESC`,
+      params,
+    );
+    return rows.map((r: any) => ({ sellerId: r.sellerId, sellerName: r.sellerName, sales: Number(r.sales), total: Number(r.total), commission: Number(r.commission) }));
   }
 
   async search(storeId: string, q: string) {

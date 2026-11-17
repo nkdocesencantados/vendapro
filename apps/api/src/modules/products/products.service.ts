@@ -13,8 +13,8 @@ export class ProductsService {
     return this.repo.find({ where, order: { name: 'ASC' } });
   }
 
-  async findOne(id: string) {
-    const product = await this.repo.findOne({ where: { id } });
+  async findOne(id: string, storeId: string) {
+    const product = await this.repo.findOne({ where: { id, storeId } });
     if (!product) throw new NotFoundException('Produto nao encontrado');
     return product;
   }
@@ -24,22 +24,23 @@ export class ProductsService {
     return this.repo.save(product);
   }
 
-  async update(id: string, data: Partial<Product>) {
-    await this.findOne(id);
-    await this.repo.update(id, data);
-    return this.findOne(id);
+  async update(id: string, data: Partial<Product>, storeId: string) {
+    const { storeId: _s, id: _i, ...safe } = data as any; // não permite mover produto de loja
+    await this.findOne(id, storeId);
+    await this.repo.update({ id, storeId }, safe);
+    return this.findOne(id, storeId);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, storeId: string) {
+    await this.findOne(id, storeId);
     await this.repo.update(id, { status: ProductStatus.INACTIVE });
     return { message: 'Produto removido com sucesso' };
   }
 
-  async updateStock(id: string, quantity: number) {
-    const product = await this.findOne(id);
+  async updateStock(id: string, quantity: number, storeId: string) {
+    const product = await this.findOne(id, storeId);
     await this.repo.update(id, { stock: product.stock + quantity });
-    return this.findOne(id);
+    return this.findOne(id, storeId);
   }
 
   findLowStock(storeId: string) {

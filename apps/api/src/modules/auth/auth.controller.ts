@@ -9,7 +9,7 @@ import { LocalAuthGuard, JwtAuthGuard } from './guards/local-auth.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Throttle({ login: { limit: 5, ttl: 900000 } })
+  @Throttle({ default: { limit: 5, ttl: 900000 } })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req) {
