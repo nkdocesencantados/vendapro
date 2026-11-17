@@ -209,20 +209,21 @@ export default function ReportsPage() {
   return (
     <div style={{padding:"clamp(12px,3vw,28px)",maxWidth:1440,margin:"0 auto"}}>
       <style>{`
-        .r-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:var(--transition);}
+        .r-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:var(--r);font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:var(--transition);}
         .r-btn:hover{border-color:var(--border-strong);background:var(--surface-2);}
-        .r-btn-p{background:var(--brand);color:white;border-color:var(--brand);}
+        .r-btn-p{background:var(--brand);color:#05070A;border-color:var(--brand);box-shadow:0 0 22px color-mix(in srgb,var(--brand) 32%,transparent);}
         .r-btn-p:hover{filter:brightness(1.1);}
         .r-kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
-        .r-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden;transition:var(--transition);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--brand-glow) 8%,transparent),0 12px 28px -22px color-mix(in srgb,var(--brand) 50%,transparent);}
-        .r-kpi:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:var(--shadow-md);}
-        .r-kpi-l{font-size:11px;font-weight:600;color:var(--brand-glow);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;opacity:.7;}
+        .r-kpi{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),var(--surface);border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);padding:20px 22px;position:relative;overflow:hidden;transition:var(--transition);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
+        .r-kpi::before{content:"";position:absolute;left:22px;top:0;width:34px;height:2px;background:var(--brand);box-shadow:0 0 12px var(--brand);}
+        .r-kpi:hover{border-color:var(--border-strong);}
+        .r-kpi-l{font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
         .r-kpi-v{font-family:var(--font-mono);font-size:clamp(18px,2vw,26px);font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1;}
         .r-kpi-d{font-size:11px;margin-top:6px;}
         .r-kpi-d.up{color:var(--success);}
         .r-kpi-d.dn{color:var(--danger);}
         .r-kpi-d.ne{color:var(--text-subtle);}
-        .r-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--brand-glow) 8%,transparent),0 12px 28px -22px color-mix(in srgb,var(--brand) 50%,transparent);}
+        .r-card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),var(--surface);border:1px solid rgba(255,255,255,.09);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
         .r-card-h{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
         .r-card-t{font-size:13px;font-weight:600;color:var(--text);}
         .r-card-s{font-size:11px;color:var(--text-subtle);}
@@ -230,7 +231,7 @@ export default function ReportsPage() {
         .r-g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
         .r-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
         .r-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;}
-        .r-tab{padding:9px 16px;font-size:12px;color:var(--text-subtle);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap;transition:var(--transition);}
+        .r-tab{padding:11px 18px;font-size:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap;transition:var(--transition);}
         .r-tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
         .r-tab:hover{color:var(--text);}
         .r-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
@@ -266,7 +267,7 @@ export default function ReportsPage() {
       <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:12,marginBottom:16,flexWrap:"wrap"}}>
         <div>
           <h1 style={{margin:0,fontSize:"clamp(20px,3vw,28px)",fontWeight:700,letterSpacing:"-.03em",color:"var(--text)"}}>Relatórios</h1>
-          <div style={{color:"var(--text-subtle)",fontSize:13,marginTop:3}}>Análise completa do negócio</div>
+          <div style={{color:"var(--text-muted)",fontSize:12,marginTop:6,fontFamily:"var(--font-mono)",textTransform:"uppercase",letterSpacing:".06em"}}>{storeName} · análise completa do negócio</div>
         </div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           <button className="r-btn" onClick={()=>{
@@ -276,10 +277,13 @@ export default function ReportsPage() {
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a'); a.href=url; a.download=`relatorio-${from}-${to}.csv`; a.click()
             URL.revokeObjectURL(url)
-          }}>Excel</button>
+          }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+            Exportar Excel
+          </button>
           <button className="r-btn r-btn-p" onClick={()=>exportRepPDF(data,prevData,from,to,storeName,margin,data?.cancelRate||0,data?.sellerRanking||[])}>
             <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-            Exportar PDF completo
+            Exportar PDF
           </button>
         </div>
       </div>
@@ -302,13 +306,11 @@ export default function ReportsPage() {
           <div className={`r-kpi-d ${growthRev>=0?"up":"dn"}`}>
             {prevRev>0 ? `${growthRev>=0?'▲':'▼'} ${Math.abs(growthRev)}% vs anterior` : 'Sem comparativo'}
           </div>
-          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"var(--brand-glow)",filter:"blur(20px)",pointerEvents:"none"}}/>
         </div>
         <div className="r-kpi">
           <div className="r-kpi-l">Lucro estimado</div>
           <div className="r-kpi-v">{BRL(profit)}</div>
           <div className="r-kpi-d up">{margin}% margem</div>
-          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"var(--brand-glow)",filter:"blur(20px)",pointerEvents:"none"}}/>
         </div>
         <div className="r-kpi">
           <div className="r-kpi-l">Ticket médio</div>
@@ -316,7 +318,6 @@ export default function ReportsPage() {
           <div className={`r-kpi-d ${growthTicket>=0?"up":"dn"}`}>
             {prevTicket>0 ? `${growthTicket>=0?'▲':'▼'} ${Math.abs(growthTicket)}% vs anterior` : 'Sem comparativo'}
           </div>
-          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"var(--brand-glow)",filter:"blur(20px)",pointerEvents:"none"}}/>
         </div>
         <div className="r-kpi">
           <div className="r-kpi-l">Total vendas</div>
@@ -324,7 +325,6 @@ export default function ReportsPage() {
           <div className={`r-kpi-d ${growthSales>=0?"up":"dn"}`}>
             {prevSales>0 ? `${growthSales>=0?'▲':'▼'} ${Math.abs(growthSales)}% vs anterior` : 'Sem comparativo'}
           </div>
-          <div style={{position:"absolute",bottom:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"var(--brand-glow)",filter:"blur(20px)",pointerEvents:"none"}}/>
         </div>
       </div>
 
