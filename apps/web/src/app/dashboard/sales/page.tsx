@@ -546,15 +546,15 @@ export default function SalesPage() {
 
               </div>
 
-              <div style={{background:"var(--surface-2)",borderRadius:10,padding:10}}>
+              <div style={{background:"var(--surface-2)",borderRadius:10,padding:10}} data-tour="sale-items">
 
-                <div aria-hidden style={{display:"grid",gridTemplateColumns:"2fr 70px 110px 30px",gap:6,marginBottom:4,fontSize:11,fontWeight:600,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".04em"}}>
+                <div aria-hidden style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:4,fontSize:11,fontWeight:600,color:"var(--text-subtle)",textTransform:"uppercase",letterSpacing:".04em"}}>
                   <span>Produto</span><span style={{textAlign:"center"}}>Quantidade</span><span>Preço unit. (R$)</span><span/>
                 </div>
 
                 {form.items.map((item:any,i:number)=>(
 
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 70px 110px 30px",gap:6,marginBottom:6}}>
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"minmax(0,2fr) 96px 112px 30px",gap:6,marginBottom:6}}>
 
                     {item.isManual ? (
 
