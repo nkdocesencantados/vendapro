@@ -13,10 +13,11 @@ export class StoresService {
 
   async findOne(id: string) {
     const r = await this.repo.query(
-      `SELECT id, name, "primaryColor", phone, "monthlyGoal", address, COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette, "pixKey", "pixKeyType", "pixMerchantName", "pixCity", "logoUrl", settings FROM stores WHERE id = $1`, [id]
+      `SELECT id, name, "primaryColor", phone, "monthlyGoal", address, COALESCE("profitMargin", 26.30) as "profitMargin", COALESCE(margin, 26.30) as margin, plan, COALESCE(status, 'trial') as status, "createdAt", COALESCE(palette, 'emerald') as palette, "pixKey", "pixKeyType", "pixMerchantName", "pixCity", "logoUrl", settings::text AS settings FROM stores WHERE id = $1`, [id]
     );
     if (!r || r.length === 0) throw new NotFoundException('Loja nao encontrada');
     const store = r[0];
+    try { store.settings = store.settings ? JSON.parse(store.settings) : {}; } catch { store.settings = {}; }
     const TRIAL_DAYS = 7;
     const created = new Date(store.createdAt);
     const diffDays = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
@@ -50,10 +51,12 @@ export class StoresService {
       // abas que o lojista escolheu esconder do menu; dashboard e config nunca somem (senão não dá para reativar)
       const allowed = ['vendas', 'clientes', 'fiado', 'pix', 'estoque', 'caixa', 'recibos', 'relatórios', 'comissoes', 'equipe'];
       if (!Array.isArray(data.hiddenModules) || data.hiddenModules.some((m: any) => !allowed.includes(m))) throw new BadRequestException('hiddenModules invalido');
-      await this.repo.query(
-        `UPDATE stores SET settings = COALESCE(settings, '{}'::jsonb) || jsonb_build_object('hiddenModules', $1::jsonb) WHERE id = $2`,
-        [JSON.stringify([...new Set(data.hiddenModules)]), id],
-      );
+      // junta em JS e manda sem tipo: em produção a coluna pode ser json/text em vez de jsonb (banco montado à mão)
+      const [cur] = await this.repo.query(`SELECT settings::text AS s FROM stores WHERE id = $1`, [id]);
+      let settings: any = {};
+      try { settings = cur?.s ? JSON.parse(cur.s) : {}; } catch {}
+      settings.hiddenModules = [...new Set(data.hiddenModules)];
+      await this.repo.query(`UPDATE stores SET settings = $1 WHERE id = $2`, [JSON.stringify(settings), id]);
     }
     if ('logoUrl' in data) {
       const logo = data.logoUrl ? String(data.logoUrl) : null;

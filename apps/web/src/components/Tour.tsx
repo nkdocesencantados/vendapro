@@ -6,14 +6,23 @@ import { createPortal } from "react-dom"
 // Tour guiado: abre no primeiro acesso (vp-tour-done) e pelo evento "vp-tour-open" (botão ? do topo).
 // Cada passo pode abrir uma aba (page) e destacar um elemento dela (sel, n-ésimo com nth).
 // Sem sel, destaca o item da aba no menu. Abas fora do plano ou ocultas pelo lojista são puladas.
-type Step = { page?: string; sel?: string; nth?: number; title: string; text: string }
+// click: botão que o tour aperta sozinho para abrir uma janela (ex.: Nova venda) e mostrar os campos dela.
+type Step = { page?: string; sel?: string; nth?: number; click?: string; title: string; text: string }
 const C = ".vp-content "
+const BTN = C + ".vp-btn-primary"
 const STEPS: Step[] = [
-  { title: "Bem-vindo ao VendaPro", text: "Vamos passar por cada aba e mostrar onde fica cada coisa. Leva 2 minutos. Você pode pular e rever quando quiser pelo botão (?) no topo." },
+  { title: "Bem-vindo ao VendaPro", text: "Vamos passar por cada aba e abrir as telas para você ver como tudo funciona. Leva 2 minutos. Pode pular e rever quando quiser pelo botão (?) no topo." },
   { page: "/dashboard", sel: C + ".d-kpis", title: "Seu resumo do dia", text: "Aqui você vê quanto vendeu hoje, o faturamento do mês, o ticket médio, o fiado a receber e os produtos acabando." },
-  { page: "/dashboard/inventory", sel: C + ".vp-btn-primary", title: "Comece cadastrando seus produtos", text: "Em Estoque, clique em Novo produto e informe nome, preço de venda e a quantidade que você tem. O estoque baixa sozinho a cada venda." },
-  { page: "/dashboard/sales", sel: C + ".vp-btn-primary", title: "Registre uma venda", text: "Clique em Nova venda, escolha o cliente e a forma de pagamento. Em cada item: escolha o produto, a QUANTIDADE (quantas unidades) e confira o PREÇO UNITÁRIO (valor de uma unidade). O total é calculado na hora." },
-  { page: "/dashboard/customers", sel: C + ".vp-btn-primary", title: "Cadastre seus clientes", text: "Clique em Novo cliente e salve nome e WhatsApp. Assim você vende no fiado e cobra com um toque." },
+  { page: "/dashboard/inventory", sel: BTN, title: "Comece cadastrando seus produtos", text: "Em Estoque, o botão Novo produto abre o cadastro. Vamos abrir para você ver." },
+  { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-name)", title: "Nome do produto", text: "Escreva como você chama o produto na loja, ex.: \"Bolo de pote 250 ml\"." },
+  { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-price)", title: "Preço de venda", text: "Quanto o cliente paga por UMA unidade. Esse valor já entra sozinho quando você escolhe o produto na venda." },
+  { page: "/dashboard/inventory", click: BTN, sel: ".vp-field:has(#inv-stock)", title: "Quantidade em estoque", text: "Quantas unidades você tem hoje. A cada venda o estoque diminui sozinho, e o painel avisa quando está acabando." },
+  { page: "/dashboard/sales", sel: BTN, title: "Registre uma venda", text: "Toda venda começa no botão Nova venda. Vamos abrir para você ver cada campo." },
+  { page: "/dashboard/sales", click: BTN, sel: ".vp-modal-body > div:first-child", title: "Cliente e pagamento", text: "Digite o nome do cliente (ou escolha um cadastrado) e a forma de pagamento: PIX, dinheiro, cartão ou Fiado." },
+  { page: "/dashboard/sales", click: BTN, sel: '[data-tour="sale-items"]', title: "Produto, quantidade e preço", text: "Em cada linha: escolha o PRODUTO, depois a QUANTIDADE (quantas unidades) e confira o PREÇO UNITÁRIO (valor de uma unidade). Use + Item para vender mais de um produto." },
+  { page: "/dashboard/sales", click: BTN, sel: ".vp-modal-foot", title: "Total e finalizar", text: "O total é calculado na hora. Clique em Finalizar venda: ela entra no caixa, baixa o estoque e gera o recibo." },
+  { page: "/dashboard/customers", sel: BTN, title: "Cadastre seus clientes", text: "Com o cliente salvo você vende no fiado e cobra pelo WhatsApp com um toque." },
+  { page: "/dashboard/customers", click: BTN, sel: ".vp-field:has(#c-phone)", title: "WhatsApp do cliente", text: "Salve com DDD. É por ele que saem as cobranças do fiado e os recibos." },
   { page: "/dashboard/receivables", sel: C + ".vp-kpi-grid", title: "Fiado: quem está devendo", text: "Toda venda com pagamento Fiado aparece aqui, com vencimento. Veja o total em aberto e o atrasado, registre pagamentos e cobre pelo WhatsApp." },
   { page: "/dashboard/pix", sel: C + "section.vp-card", nth: 1, title: "Cadastre sua chave PIX uma vez", text: "Informe o tipo e a chave, o nome do recebedor e a cidade. Fica salvo para as próximas cobranças." },
   { page: "/dashboard/pix", sel: C + "section.vp-card", nth: 0, title: "Gere a cobrança", text: "Digite o valor e o WhatsApp do cliente. O QR Code aparece ao lado: envie, copie o código ou baixe a imagem." },
@@ -60,9 +69,16 @@ export default function Tour() {
       if (step.sel) return document.querySelectorAll(step.sel)[step.nth || 0] || null
       return navLink(step.page)
     }
-    let raf = 0, last = "", scrolled = false
+    let raf = 0, last = "", scrolled = false, acted = false
     const tick = () => {
-      const el = find()
+      let el = find()
+      // abre a janela do passo, ou fecha a que ficou aberta de um passo anterior
+      if (!acted && step?.page === pathname) {
+        const bg = document.querySelector<HTMLElement>(".vp-modal-bg")
+        if (step.click && !el) { const b = document.querySelector<HTMLElement>(step.click); if (b) { b.click(); acted = true } }
+        else if (!step.click && bg) { bg.click(); acted = true; el = null }
+        else if (el || !step.click) acted = true
+      }
       if (el && !scrolled) { el.scrollIntoView({ block: "center" }); scrolled = true }
       const r = el?.getBoundingClientRect()
       const ok = r && r.width > 0 && r.right > 0 && r.bottom > 0 && r.top < window.innerHeight
