@@ -1,6 +1,7 @@
 ﻿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 
@@ -96,7 +97,9 @@ async function runMigrations(dataSource: DataSource) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // atrás do proxy do Railway: sem isso req.ip é o do proxy e o rate limit do login vale para todos os clientes juntos
+  app.set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.enableCors({
