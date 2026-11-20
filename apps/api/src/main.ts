@@ -102,16 +102,21 @@ async function bootstrap() {
   app.set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  app.disable('x-powered-by');
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    // uma ou mais origens separadas por vírgula (ex.: com e sem www)
+    origin: (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map((o) => o.trim()),
     credentials: true,
   });
-  const config = new DocumentBuilder()
-    .setTitle('VendaPro API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+  // mapa completo da API não fica público em produção
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('VendaPro API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+  }
 
   // Roda migration antes de subir
   const dataSource = app.get(DataSource);
