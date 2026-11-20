@@ -51,32 +51,37 @@ export class SalesService {
 
   async create(data: any, storeId: string, sellerId: string) {
     const { items, ...saleData } = data;
-    if (!items || items.length === 0) throw new BadRequestException("A venda precisa ter ao menos um item");
+    if (!Array.isArray(items) || items.length === 0) throw new BadRequestException("A venda precisa ter ao menos um item");
 
+    // quantidade inteira > 0 (negativa aumentava o estoque); produto do catálogo usa o preço do banco, não o do cliente
+    const processedItems = [];
     for (const item of items) {
+      const quantity = Number(item.quantity ?? 1);
+      if (!Number.isInteger(quantity) || quantity <= 0) throw new BadRequestException("Quantidade deve ser um numero inteiro maior que zero");
+      let unitPrice = Number(item.unitPrice) || 0;
+      let productName = item.name || item.productName || "Item avulso";
       if (item.productId) {
+        if (!isUUID(String(item.productId))) throw new BadRequestException("productId invalido");
         const product = await this.productRepo.findOne({ where: { id: item.productId, storeId } });
         if (!product) throw new BadRequestException(`Produto nao encontrado: ${item.productId}`);
-        if (product.stock < item.quantity) throw new BadRequestException(`Estoque insuficiente para "${product.name}". Disponivel: ${product.stock}`);
-      }
+        if (product.stock < quantity) throw new BadRequestException(`Estoque insuficiente para "${product.name}". Disponivel: ${product.stock}`);
+        unitPrice = Number(product.price);
+        productName = product.name;
+      } else if (!Number.isFinite(unitPrice) || unitPrice < 0) throw new BadRequestException("Preco unitario invalido");
+      processedItems.push({ productId: item.productId || null, quantity, unitPrice, total: quantity * unitPrice, productName, isManual: !item.productId });
     }
-
-    const processedItems = items.map((item: any) => ({
-      ...item,
-      quantity: Number(item.quantity) || 1,
-      unitPrice: Number(item.unitPrice) || 0,
-      total: (Number(item.quantity) || 1) * (Number(item.unitPrice) || 0),
-      productName: item.name || item.productName || "Item avulso",
-      isManual: !item.productId,
-    }));
 
     const subtotal = processedItems.reduce((a: number, i: any) => a + i.total, 0);
     const discount = Math.min(Number(saleData.discount) || 0, subtotal); // desconto não pode ser maior que subtotal
     if (discount < 0) throw new BadRequestException('Desconto não pode ser negativo');
     const total = Math.max(subtotal - discount, 0); // total nunca negativo
-    const commission = total * ((Number(saleData.commissionRate) || 15) / 100);
+    // taxa vem do cadastro (vendedor, senão padrão da loja, senão 15%), nunca do body
+    const seller = await this.userRepo.findOne({ where: { id: sellerId, storeId } });
+    const [storeRow] = await this.saleRepo.query(`SELECT "defaultCommissionRate" AS rate FROM stores WHERE id = $1`, [storeId]);
+    const rate = Number(seller?.commissionRate) || Number(storeRow?.rate) || 15;
+    const commission = total * (rate / 100);
     const saleDate = saleData.saleDate ? new Date(saleData.saleDate) : new Date();
-    const { saleDate: _sd, createdAt: _ca, id: _id, paidAt: _pa, paidAmount: _pam, customerId, dueDate, ...cleanSaleData } = saleData;
+    const { saleDate: _sd, createdAt: _ca, id: _id, paidAt: _pa, paidAmount: _pam, commissionRate: _cr, customerId, dueDate, ...cleanSaleData } = saleData;
 
     const isFiado = saleData.paymentMethod === PaymentMethod.FIADO;
     if (isFiado && !customerId) throw new BadRequestException("Venda fiado exige um cliente (customerId)");

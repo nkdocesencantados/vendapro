@@ -556,9 +556,9 @@ export default function SalesPage() {
 
                     )}
 
-                    <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} aria-label="Quantidade" title="Quantidade de unidades" />
+                    <input className="vp-input" type="number" min="1" step="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} aria-label="Quantidade" title="Quantidade de unidades" />
 
-                    <input className="vp-input" type="number" min="0" step="0.01" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" aria-label="Preço unitário em reais" title="Preço de uma unidade, em reais" />
+                    <input className="vp-input" type="number" min="0" step="0.01" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} readOnly={!!item.productId} placeholder="0,00" aria-label="Preço unitário em reais" title={item.productId?"Preço do cadastro do produto (para baixar, use o desconto)":"Preço de uma unidade, em reais"} />
 
                     <button aria-label="Remover item" title="Remover item" onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>x</button>
 
