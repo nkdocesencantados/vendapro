@@ -2,9 +2,10 @@
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SalesService } from './sales.service';
 import { JwtAuthGuard } from '../auth/guards/local-auth.guard';
+import { RolesGuard, Roles } from '../../common/guards/roles.guard';
 @ApiTags('Sales')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('sales')
 export class SalesController {
   constructor(private service: SalesService) {}
@@ -26,6 +27,7 @@ export class SalesController {
     return this.service.create(body, req.user.storeId, req.user.id);
   }
   @Patch(':id/cancel')
+  @Roles('store_owner', 'manager')
   cancel(@Param("id") id: string, @Request() req) {
     return this.service.cancel(id, req.user.storeId);
   }

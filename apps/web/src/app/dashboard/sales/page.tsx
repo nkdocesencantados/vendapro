@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/contexts/auth.store"
 import { BRLpdf, exportReport, table } from "@/lib/pdf"
 import toast, { Toaster } from "react-hot-toast"
 
@@ -100,6 +101,7 @@ export default function SalesPage() {
   const [form, setForm] = useState<any>(emptyForm())
 
   const [cancelId, setCancelId] = useState<string|null>(null)
+  const isSeller = useAuthStore(st => st.user?.role === "seller") // servidor recusa cancelamento por vendedor
 
   const [primary, setPrimary] = useState("#1D9E75")
 
@@ -436,7 +438,7 @@ export default function SalesPage() {
 
                 </div>
 
-                {s.status!=="cancelled" && (
+                {s.status!=="cancelled" && !isSeller && (
 
                   <div className="sc-actions">
 

@@ -2,10 +2,11 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request, 
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/local-auth.guard';
+import { RolesGuard, Roles } from '../../common/guards/roles.guard';
 
 @ApiTags('Products')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private service: ProductsService) {}
@@ -26,17 +27,20 @@ export class ProductsController {
   }
 
   @Post()
+  @Roles('store_owner', 'manager')
   create(@Body() body: any, @Request() req) {
     const { id: _id, ...data } = body || {};
     return this.service.create({ ...data, storeId: req.user.storeId });
   }
 
   @Patch(':id')
+  @Roles('store_owner', 'manager')
   update(@Param("id") id: string, @Body() body: any, @Request() req) {
     return this.service.update(id, body, req.user.storeId);
   }
 
   @Delete(':id')
+  @Roles('store_owner', 'manager')
   remove(@Param("id") id: string, @Request() req) {
     return this.service.remove(id, req.user.storeId);
   }
