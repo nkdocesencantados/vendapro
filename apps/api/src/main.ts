@@ -1,6 +1,7 @@
 ﻿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
 
@@ -96,19 +97,26 @@ async function runMigrations(dataSource: DataSource) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // atrás do proxy do Railway: sem isso req.ip é o do proxy e o rate limit do login vale para todos os clientes juntos
+  app.set('trust proxy', 1);
   app.setGlobalPrefix('api/v1');
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  app.disable('x-powered-by');
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    // uma ou mais origens separadas por vírgula (ex.: com e sem www)
+    origin: (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map((o) => o.trim()),
     credentials: true,
   });
-  const config = new DocumentBuilder()
-    .setTitle('VendaPro API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+  // mapa completo da API não fica público em produção
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('VendaPro API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config));
+  }
 
   // Roda migration antes de subir
   const dataSource = app.get(DataSource);

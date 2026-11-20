@@ -29,6 +29,7 @@ export class UsersService {
   }
 
   async create(data: Partial<User>) {
+    if (!data.password || String(data.password).length < 6) throw new BadRequestException('Senha obrigatoria (minimo 6 caracteres)');
     const exists = await this.repo.findOne({ where: { email: data.email } });
     if (exists) throw new ConflictException('Email ja cadastrado');
     if (data.storeId && data.role === 'seller') {
@@ -43,7 +44,7 @@ export class UsersService {
     }
     // Usar query raw para evitar falha em colunas que podem não existir ainda no banco
     const id = require('crypto').randomUUID();
-    const hashedPw = await require('bcryptjs').hash(data.password || '123456', 12);
+    const hashedPw = await require('bcryptjs').hash(String(data.password), 12);
     await this.repo.query(
       `INSERT INTO users (id, name, email, password, role, status, "storeId", "createdAt", "updatedAt")
        VALUES ($1,$2,$3,$4,$5,'active',$6,NOW(),NOW())`,

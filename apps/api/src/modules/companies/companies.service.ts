@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@nestjs/common"
+﻿import { Injectable, BadRequestException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { Company } from "./company.entity"
@@ -17,6 +17,8 @@ export class CompaniesService {
   findAll() { return this.repo.find({ order:{ createdAt:"DESC" } }) }
 
   async create(data: any) {
+    // sem senha padrão: a que existia está no código e no histórico do git
+    if (!data.password || String(data.password).length < 6) throw new BadRequestException("Senha obrigatoria (minimo 6 caracteres)")
     const company = await this.repo.save(this.repo.create({
       name: data.name,
       email: data.email,
@@ -35,7 +37,7 @@ export class CompaniesService {
     )
     const storeId = storeData[0].id
 
-    const rawPassword = data.password || "VendaPro@2026!"
+    const rawPassword = String(data.password)
     const hashedPassword = await bcrypt.hash(rawPassword, 12)
     const user = this.userRepo.create({
       name: data.name,
@@ -59,6 +61,7 @@ export class CompaniesService {
   findOne(id: string) { return this.repo.findOne({ where:{ id } }) }
 
   async resetPassword(id: string, password: string) {
+    if (!password || String(password).length < 6) throw new BadRequestException("Senha obrigatoria (minimo 6 caracteres)")
     const stores = await this.repo.query(`SELECT id FROM stores WHERE "companyId" = $1`, [id])
     for (const store of stores) {
       const users = await this.userRepo.query(`SELECT id FROM users WHERE "storeId" = $1`, [store.id])

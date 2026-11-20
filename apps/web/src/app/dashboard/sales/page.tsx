@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/contexts/auth.store"
 import { BRLpdf, exportReport, table } from "@/lib/pdf"
 import toast, { Toaster } from "react-hot-toast"
 
@@ -100,6 +101,7 @@ export default function SalesPage() {
   const [form, setForm] = useState<any>(emptyForm())
 
   const [cancelId, setCancelId] = useState<string|null>(null)
+  const isSeller = useAuthStore(st => st.user?.role === "seller") // servidor recusa cancelamento por vendedor
 
   const [primary, setPrimary] = useState("#1D9E75")
 
@@ -436,7 +438,7 @@ export default function SalesPage() {
 
                 </div>
 
-                {s.status!=="cancelled" && (
+                {s.status!=="cancelled" && !isSeller && (
 
                   <div className="sc-actions">
 
@@ -556,9 +558,9 @@ export default function SalesPage() {
 
                     )}
 
-                    <input className="vp-input" type="number" min="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} aria-label="Quantidade" title="Quantidade de unidades" />
+                    <input className="vp-input" type="number" min="1" step="1" value={item.quantity} onChange={e=>updateItem(i,"quantity",e.target.value)} style={{textAlign:"center"}} aria-label="Quantidade" title="Quantidade de unidades" />
 
-                    <input className="vp-input" type="number" min="0" step="0.01" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} placeholder="0,00" aria-label="Preço unitário em reais" title="Preço de uma unidade, em reais" />
+                    <input className="vp-input" type="number" min="0" step="0.01" value={item.unitPrice} onChange={e=>updateItem(i,"unitPrice",e.target.value)} readOnly={!!item.productId} placeholder="0,00" aria-label="Preço unitário em reais" title={item.productId?"Preço do cadastro do produto (para baixar, use o desconto)":"Preço de uma unidade, em reais"} />
 
                     <button aria-label="Remover item" title="Remover item" onClick={()=>setForm({...form,items:form.items.filter((_:any,j:number)=>j!==i)})} style={{background:"var(--danger-bg)",color:"var(--danger)",border:"none",borderRadius:8,cursor:"pointer",fontWeight:700}}>x</button>
 

@@ -16,11 +16,21 @@ export class UsersController {
   }
 
   // sanitiza body vindo de usuário de loja: não pode trocar de loja nem virar super_admin
+  // só campos editáveis passam; dono atribui seller/manager, gerente só seller (sem isso gerente virava dono)
   private sanitize(req: any, body: any) {
     if (req.user.role === 'super_admin') return body;
-    const { storeId, id, ...rest } = body || {};
-    if (rest.role === 'super_admin') throw new ForbiddenException('Perfil nao permitido');
-    return rest;
+    const data: any = {};
+    for (const k of ['name', 'email', 'phone', 'password', 'role', 'status', 'commissionRate']) if (body?.[k] !== undefined) data[k] = body[k];
+    const grantable = req.user.role === 'store_owner' ? ['seller', 'manager'] : ['seller'];
+    if (data.role !== undefined && !grantable.includes(data.role)) throw new ForbiddenException('Perfil nao permitido');
+    return data;
+  }
+
+  // gerente não altera nem remove o dono da loja
+  private async assertCanManage(req: any, id: string) {
+    if (req.user.role !== 'manager') return;
+    const target = await this.service.findOne(id, this.scope(req));
+    if (target.role === 'store_owner') throw new ForbiddenException('Gerente nao pode alterar o proprietario');
   }
 
   @Get()
@@ -42,16 +52,19 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: any, @Request() req) {
+  async update(@Param('id') id: string, @Body() body: any, @Request() req) {
     if (req.user.role === 'seller' && id !== req.user.id) throw new ForbiddenException('Vendedor so pode alterar o proprio perfil');
-    const data = this.sanitize(req, body);
-    if (req.user.role === 'seller') { delete data.role; delete data.commissionRate; delete data.status; }
+    await this.assertCanManage(req, id);
+    const { role: _r, status: _s, commissionRate: _c, ...own } = body || {};
+    // ninguém da loja muda o próprio perfil/status/comissão (dono se rebaixando ficava sem dono; vendedor se dava comissão)
+    const data = this.sanitize(req, req.user.role !== 'super_admin' && id === req.user.id ? own : body);
     return this.service.update(id, data, this.scope(req));
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string, @Request() req) {
     if (req.user.role === 'seller') throw new ForbiddenException('Vendedor nao pode remover usuarios');
+    await this.assertCanManage(req, id);
     return this.service.remove(id, this.scope(req));
   }
 }
